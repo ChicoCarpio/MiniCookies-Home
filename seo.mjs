@@ -231,12 +231,14 @@ export function generarRobotsYSitemap(salida, rutas) {
   // "AI training" (2026-10-01) también le daba 403 a Googlebot, Bingbot y
   // Applebot, que alimentan IA además de la búsqueda. Estos nombres son solo
   // de entrenamiento; los buscadores y los lectores de IA siguen entrando.
+  // El código fuente (GitHub, no este sitio) sí se puede usar para entrenar:
+  // LICENSE.md, sección 14; esta reserva es sobre lo que sirve el sitio.
   const soloEntrenamiento = ['GPTBot', 'ClaudeBot', 'CCBot', 'Bytespider',
     'Google-Extended', 'Applebot-Extended', 'meta-externalagent'];
   writeFileSync(join(salida, 'robots.txt'),
     `# Mini Cookies — todo el sitio es público y se puede indexar.\n` +
     `User-agent: *\nAllow: /\n\n` +
-    `# No a usar el contenido para entrenar modelos de IA.\n` +
+    `# No a usar los textos, las guias, las imagenes ni los modelos del sitio para entrenar modelos de IA.\n` +
     soloEntrenamiento.map((ua) => `User-agent: ${ua}\n`).join('') +
     `Disallow: /\n\nSitemap: ${SITIO}/sitemap.xml\n`);
 

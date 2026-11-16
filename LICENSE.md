@@ -1,6 +1,7 @@
-# Licencia de Código Fuente de Mini Cookies (LCFM)
+# Licencia de Código Fuente y Modelos de Mini Cookies (LCFM)
 
-Versión 1.0, 2026
+Versión 1.1, 2026-11-15 (reemplaza a la versión 1.0, «Licencia de Código Fuente de Mini
+Cookies», de 2026-11-02)
 
 Copyright © 2026 Daniels Torres Solano. Todos los derechos reservados.
 
@@ -10,10 +11,15 @@ Sitio web: https://www.minicookies.net
 > **English summary (not legally binding; the Spanish text below prevails).**
 > This is a source-available license, not an open-source one. You may read, download and
 > study this code to learn how Mini Cookies works, change your own copy privately to
-> understand it, and use it to train or evaluate AI models. You may not copy substantial
+> understand it, and use the code (not the Models, guides or other texts) to train or
+> evaluate AI models. You may not copy substantial
 > parts of it, redistribute it, build modified versions for other products, or use it in
 > other products or services (free or paid, public or internal), without written permission
-> from the copyright holder. Using the tools on https://www.minicookies.net is free for everyone, including
+> from the copyright holder. Mini Cookies' own AI models (Custos, Librarius and Versus, the
+> "Models") may only be used through the tools on the site: you may not copy them for other
+> uses, redistribute, modify, retrain or use them to train other models (section 13). The site's
+> texts, guides, images and designs may not be used to train AI systems (section 14). Using the
+> tools on https://www.minicookies.net is free for everyone, including
 > commercial use. To ask for a reuse license, use https://www.minicookies.net/contacto.
 
 ---
@@ -34,7 +40,12 @@ de Costa Rica.
 Esta licencia se aplica a todo el contenido de este repositorio que es obra original del
 titular: el código fuente, su documentación técnica (que la Ley N.º 6683, artículo 4,
 inciso ñ, considera parte del programa de cómputo), los textos de las páginas y de las
-guías, y las imágenes y diseños propios.
+guías, y las imágenes y diseños propios, y los modelos de inteligencia artificial propios
+(Custos, Librarius, Versus y los que el titular publique después): los archivos de
+`assets/modelos/` y cualquier copia de ellos, con su arquitectura, sus pesos o parámetros,
+sus alfabetos y los datos de autor que llevan dentro.
+
+Estas condiciones son además condiciones de uso del repositorio y del sitio.
 
 No se aplica a los componentes de terceros (ver sección 8).
 
@@ -68,8 +79,8 @@ Cualquier persona puede:
   Reglamento a la Ley N.º 6683, Decreto Ejecutivo N.º 24611-J).
 - Usar el código para entrenar, ajustar o evaluar modelos de inteligencia artificial, e
   incluirlo con ese fin en conjuntos de datos de entrenamiento. Este permiso no se
-  extiende a los componentes de terceros (sección 8), que se rigen por sus propias
-  licencias.
+  extiende a los Modelos, a las guías ni a los demás textos (secciones 13 y 14), ni a los
+  componentes de terceros (sección 8), que se rigen por sus propias licencias.
 - Citar fragmentos breves en análisis, críticas, artículos o material educativo,
   indicando la fuente y el autor, en la medida que permite el artículo 70 de la
   Ley N.º 6683.
@@ -143,7 +154,8 @@ terceros que el repositorio incluye o que el sitio descarga al usarse, entre ell
 
 - Las librerías, motores, tipografías, diccionarios y datos de entrenamiento copiados en
   la carpeta `vendor/`.
-- Los modelos de inteligencia artificial que algunas herramientas descargan al usarse.
+- Los modelos de inteligencia artificial de terceros que algunas herramientas descargan al
+  usarse (no los Modelos propios de la sección 13).
 - Las definiciones de formas de la norma ECMA-376 (`vendor/ecma-376-geometrias/`).
 
 Cada uno se rige por su propia licencia o aviso de copyright: licencias abiertas como MIT,
@@ -160,7 +172,7 @@ sí. Esta licencia no pretende reclamar derechos exclusivos sobre ellos.
 ## 9. Incumplimiento
 
 Cualquier uso fuera de lo que permite esta licencia termina automáticamente los permisos
-de la sección 4 para quien lo cometa.
+de la sección 4 y de las secciones 13 y 14 para quien lo cometa.
 
 Ese uso, además, infringe los derechos del titular y da lugar a las acciones
 administrativas ante el Registro Nacional de Derechos de Autor y Derechos Conexos y a las
@@ -178,9 +190,9 @@ Derechos de Propiedad Intelectual (artículo 1). Entre ellas están:
 
 ## 10. Sin garantías
 
-El código fuente se proporciona TAL CUAL (AS IS), sin garantías expresas ni implícitas de
-ningún tipo, en la medida que lo permita la ley aplicable. El titular no responde por
-daños derivados del uso del código fuente.
+El código fuente y los Modelos se proporcionan TAL CUAL (AS IS), sin garantías expresas ni
+implícitas. En la medida que lo permita la ley aplicable, el titular no responde por los
+daños derivados de su uso; esto no excluye la responsabilidad por dolo.
 
 ## 11. Ley aplicable y jurisdicción
 
@@ -198,6 +210,66 @@ La protección de esta obra existe desde su creación, sin necesidad de registro
 Para pedir una licencia de reutilización o hacer consultas sobre esta licencia:
 https://www.minicookies.net/contacto
 
+## 13. Modelos de inteligencia artificial propios
+
+**13.1 Qué son.** Custos, Librarius y Versus (en adelante, «los Modelos») fueron diseñados y
+entrenados por el titular. El titular los protege como programas de cómputo y producciones
+intelectuales conforme a los artículos 1 y 4, inciso ñ, de la Ley N.º 6683. Además, las
+reglas de esta sección son condiciones de uso del sitio y de sus archivos, y se aplican
+aunque alguna parte de un Modelo no alcanzara protección de derecho de autor.
+
+**13.2 Uso permitido.** Cualquier persona puede usar los Modelos por medio de las
+herramientas de https://www.minicookies.net, también con fines comerciales. Para eso, y solo
+para eso, se autoriza la copia técnica que hace el navegador al descargar el archivo,
+guardarlo en su caché y cargarlo en memoria.
+
+**13.3 Usos que requieren autorización expresa y por escrito del titular.** Sin ella no se
+permite:
+
+a) Descargar, copiar o guardar los archivos de los Modelos para usarlos fuera de las
+herramientas del sitio.
+b) Redistribuirlos, publicarlos, alojarlos en otro servidor o repositorio, enlazarlos para
+que otro sitio o programa los cargue, venderlos, alquilarlos o sublicenciarlos.
+c) Integrarlos en otro producto, servicio, aplicación o sistema interno, gratuito o de pago.
+d) Modificarlos, convertirlos a otro formato, cuantizarlos, recortarlos, combinarlos con
+otros modelos, reentrenarlos o ajustarlos, o crear modelos derivados.
+e) Extraer sus pesos, su arquitectura o su alfabeto, o usar sus salidas de forma
+sistemática, para entrenar, ajustar o destilar otro modelo.
+f) Suprimir o alterar los datos de autor, copyright y licencia escritos dentro de cada
+archivo, que son información sobre la gestión de derechos (Ley N.º 8039, artículos 2 bis,
+inciso b, y 63).
+g) Presentarlos como propios o publicarlos con otro nombre.
+
+**13.4 Lo que se puede hacer sin pedir permiso.** Describir los Modelos, medir su calidad
+usando las herramientas del sitio y publicar esas mediciones indicando el nombre y la
+versión del Modelo.
+
+**13.5 Resultados.** El titular no reclama ningún derecho sobre lo que una persona obtiene
+con las herramientas (texto reconocido, documentos escaneados, imágenes recortadas):
+pertenece a quien lo generó, sin perjuicio de los derechos de terceros sobre el material
+procesado. El inciso e) de 13.3 solo impide usar esas salidas para construir otro modelo.
+
+**13.6 Datos de entrenamiento.** Los Modelos se entrenaron con los materiales que se
+indican dentro de cada archivo y en `creditos.html`. Esos materiales conservan sus
+licencias; esta licencia no reclama derechos sobre ellos.
+
+## 14. Uso de Mini Cookies para entrenar inteligencia artificial
+
+Salvo autorización expresa y por escrito del titular, no se permite reproducir, extraer ni
+usar los Modelos, los textos de las páginas y de las guías, las imágenes y los diseños de
+Mini Cookies para entrenar, ajustar, evaluar o mejorar sistemas de inteligencia artificial o
+de aprendizaje automático, ni incluirlos en conjuntos de datos con ese fin, de forma manual
+o automatizada (rastreo, extracción o minería de textos y datos). Como excepción, el titular
+permite usar el código fuente (no los Modelos, las guías ni los demás textos) para entrenar
+o evaluar modelos de inteligencia artificial. Este permiso no se extiende a los componentes
+de terceros. La reserva de este párrafo sobre los Modelos y los textos se expresa también de
+forma legible por máquinas en el archivo `robots.txt` del sitio. No impide que los
+buscadores indexen el sitio ni que una persona use un asistente de inteligencia artificial
+para consultar o resumir una página para su propio uso.
+
+Los usos hechos conforme a la versión 1.0 de esta licencia mientras estuvo vigente no se ven
+afectados.
+
 ---
 
-Fin de la Licencia de Código Fuente de Mini Cookies (LCFM) 1.0
+Fin de la Licencia de Código Fuente y Modelos de Mini Cookies (LCFM) 1.1

@@ -31,12 +31,12 @@ window.i18nPagina = {
     'b11': 'Cómo elegir la contraseña',
     'b12': 'Una frase de varias palabras, o una clave larga y aleatoria, resiste mejor que una palabra común con un número al final. El <a href="../herramientas/generador-contrasenas.html">Generador de contraseñas</a> del sitio trae 16 caracteres por omisión, con mayúsculas, minúsculas, números y símbolos. Usalo en lugar de inventar una, y guardala en el <a href="https://seguro.minicookies.net/herramientas/administrador-contrasenas">Administrador de contraseñas</a>, para no depender de la memoria.',
     'b13': 'No uses la del correo ni la de otro servicio, y mandala por otro medio que el PDF: un mensaje o una llamada, no el mismo correo.',
-    'b14': 'Cómo quitar la contraseña o las restricciones',
-    'b15': 'Conviene quitarla cuando el documento ya no tiene que estar cerrado, o cuando querés unirlo, dividirlo o comprimirlo. Esas herramientas no abren un PDF cifrado ni uno con restricciones. Para quitarla hace falta conocer la contraseña: <a href="../herramientas/desbloquear-pdf.html">Desbloquear PDF</a> no la adivina ni la rompe.',
+    'b14': 'Cómo quitar la contraseña de un PDF',
+    'b15': 'Conviene quitarla cuando el documento ya no tiene que estar cerrado, o cuando querés unirlo, dividirlo o comprimirlo. Esas herramientas no abren un PDF cifrado ni uno con restricciones. Para quitar la protección hace falta conocer la contraseña: <a href="../herramientas/desbloquear-pdf.html">Desbloquear PDF</a> no la adivina ni la rompe.',
     'b16-1': 'Arrastrá el PDF a la zona de carga. La tarjeta dice si pide contraseña, si se abre pero tiene restricciones o si no tiene protección.',
-    'b16-2': 'Si pide contraseña para abrirse, escribila en «Contraseña del PDF». Si solo tiene restricciones, dejá el campo vacío.',
+    'b16-2': 'Si pide contraseña para abrirse, escribila en «Contraseña del PDF». Si no la pide, dejá el campo vacío y marcá la declaración de que el PDF es tuyo o de que tenés permiso de quien lo creó.',
     'b16-3': 'Pulsá «Desbloquear PDF» y bajá el archivo con «Descargar PDF sin contraseña».',
-    'b17': 'Si la contraseña no es la correcta, el aviso dice «La contraseña no es correcta» y te pide revisar mayúsculas, minúsculas y espacios: son los errores más comunes. Con un PDF que solo tiene restricciones, la contraseña que escribas no importa, porque si la que pusiste no sirve, la herramienta prueba sin clave.',
+    'b17': 'Si la contraseña no es la correcta, el aviso dice «La contraseña no es correcta» y te pide revisar mayúsculas, minúsculas y espacios: son los errores más comunes.',
     'b18': 'La copia que se descarga no tiene cifrado: se abre sin pedir nada y se puede imprimir o copiar. Usala con documentos tuyos o con permiso de quien los creó.',
     'b19': 'Preguntas frecuentes',
     'b20': '<strong>¿Qué pasa si olvido la contraseña?</strong> No hay forma de recuperar el contenido. El cifrado AES-256 no se puede saltear, y ninguna de las dos herramientas puede adivinar la clave.',
@@ -69,12 +69,12 @@ window.i18nPagina = {
     'b11': 'How to choose the password',
     'b12': 'A phrase of several words, or a long random key, holds up better than a common word with a number at the end. The site’s <a href="../herramientas/generador-contrasenas.html">Password generator</a> makes 16 characters by default, with uppercase, lowercase, numbers and symbols. Use it instead of making one up, and keep it in the <a href="https://seguro.minicookies.net/en/herramientas/administrador-contrasenas">Password manager</a> so you don’t depend on memory.',
     'b13': 'Don’t use the one from your email or from another service, and send it another way than the PDF: a message or a phone call, not the same email.',
-    'b14': 'How to remove the password or restrictions',
+    'b14': 'How to remove the password from a PDF',
     'b15': 'It makes sense to remove the password when the document no longer needs to be closed, or when you want to merge, split or compress it. Those tools can’t open an encrypted PDF or one with restrictions. To remove the protection you need to know the password: <a href="../herramientas/desbloquear-pdf.html">Unlock PDF</a> doesn’t guess it or crack it.',
     'b16-1': 'Drag the PDF onto the upload area. The card tells you whether it asks for a password, opens but has restrictions, or has no protection.',
-    'b16-2': 'If it asks for a password to open, type it in “PDF password”. If it only has restrictions, leave the field empty.',
+    'b16-2': 'If it asks for a password to open, type it in “PDF password”. If it doesn’t, leave the field empty and tick the declaration that the PDF is yours or that you have its creator’s permission.',
     'b16-3': 'Press “Unlock PDF” and download the file with “Download PDF without password”.',
-    'b17': 'If the password is not correct, the notice says “The password is not correct” and asks you to check upper and lower case and spaces: those are the most common mistakes. With a PDF that only has restrictions, the password you type doesn’t matter: if the one you entered doesn’t work, the tool tries without one.',
+    'b17': 'If the password is not correct, the notice says “The password is not correct” and asks you to check upper and lower case and spaces: those are the most common mistakes.',
     'b18': 'The copy you download has no encryption: it opens without asking for anything, and it can be printed or copied. Use it on documents that are yours or with the permission of whoever made them.',
     'b19': 'Frequently asked questions',
     'b20': '<strong>What if I forget the password?</strong> There is no way to recover the content. AES-256 encryption can’t be bypassed, and neither tool can guess the key.',
@@ -127,14 +127,14 @@ window.i18nPagina = {
     <h2 data-i18n="b11">Cómo elegir la contraseña</h2>
     <p data-i18n-html="b12">Una frase de varias palabras, o una clave larga y aleatoria, resiste mejor que una palabra común con un número al final. El <a href="../herramientas/generador-contrasenas.html">Generador de contraseñas</a> del sitio trae 16 caracteres por omisión, con mayúsculas, minúsculas, números y símbolos. Usalo en lugar de inventar una, y guardala en el <a href="https://seguro.minicookies.net/herramientas/administrador-contrasenas">Administrador de contraseñas</a>, para no depender de la memoria.</p>
     <p data-i18n-html="b13">No uses la del correo ni la de otro servicio, y mandala por otro medio que el PDF: un mensaje o una llamada, no el mismo correo.</p>
-    <h2 data-i18n="b14">Cómo quitar la contraseña o las restricciones</h2>
-    <p data-i18n-html="b15">Conviene quitarla cuando el documento ya no tiene que estar cerrado, o cuando querés unirlo, dividirlo o comprimirlo. Esas herramientas no abren un PDF cifrado ni uno con restricciones. Para quitarla hace falta conocer la contraseña: <a href="../herramientas/desbloquear-pdf.html">Desbloquear PDF</a> no la adivina ni la rompe.</p>
+    <h2 data-i18n="b14">Cómo quitar la contraseña de un PDF</h2>
+    <p data-i18n-html="b15">Conviene quitarla cuando el documento ya no tiene que estar cerrado, o cuando querés unirlo, dividirlo o comprimirlo. Esas herramientas no abren un PDF cifrado ni uno con restricciones. Para quitar la protección hace falta conocer la contraseña: <a href="../herramientas/desbloquear-pdf.html">Desbloquear PDF</a> no la adivina ni la rompe.</p>
     <ol>
       <li data-i18n-html="b16-1">Arrastrá el PDF a la zona de carga. La tarjeta dice si pide contraseña, si se abre pero tiene restricciones o si no tiene protección.</li>
-      <li data-i18n-html="b16-2">Si pide contraseña para abrirse, escribila en «Contraseña del PDF». Si solo tiene restricciones, dejá el campo vacío.</li>
+      <li data-i18n-html="b16-2">Si pide contraseña para abrirse, escribila en «Contraseña del PDF». Si no la pide, dejá el campo vacío y marcá la declaración de que el PDF es tuyo o de que tenés permiso de quien lo creó.</li>
       <li data-i18n-html="b16-3">Pulsá «Desbloquear PDF» y bajá el archivo con «Descargar PDF sin contraseña».</li>
     </ol>
-    <p data-i18n-html="b17">Si la contraseña no es la correcta, el aviso dice «La contraseña no es correcta» y te pide revisar mayúsculas, minúsculas y espacios: son los errores más comunes. Con un PDF que solo tiene restricciones, la contraseña que escribas no importa, porque si la que pusiste no sirve, la herramienta prueba sin clave.</p>
+    <p data-i18n-html="b17">Si la contraseña no es la correcta, el aviso dice «La contraseña no es correcta» y te pide revisar mayúsculas, minúsculas y espacios: son los errores más comunes.</p>
     <p data-i18n-html="b18">La copia que se descarga no tiene cifrado: se abre sin pedir nada y se puede imprimir o copiar. Usala con documentos tuyos o con permiso de quien los creó.</p>
     <h2 data-i18n="b19">Preguntas frecuentes</h2>
     <p data-i18n-html="b20"><strong>¿Qué pasa si olvido la contraseña?</strong> No hay forma de recuperar el contenido. El cifrado AES-256 no se puede saltear, y ninguna de las dos herramientas puede adivinar la clave.</p>

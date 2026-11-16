@@ -8,11 +8,14 @@
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <script>
 window.i18nPagina = {
   es: {
     'archivo-documento-con-metadatos-pdf': 'documento-con-metadatos.pdf',
+    'aviso-autor': 'El nombre del autor y el aviso de copyright pueden estar protegidos: conservalos salvo que el archivo sea tuyo.',
+    'ayuda-autor': 'Usalo con tus propios archivos. Quitar o cambiar el nombre del autor o el aviso de copyright de una obra ajena, sin permiso, es ilegal.',
     'titulo-pagina': 'Editar metadatos de un PDF gratis — Mini Cookies',
     'meta-descripcion': 'Editá el título, autor, asunto y palabras clave de un PDF, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Editar metadatos de un PDF',
@@ -35,7 +38,7 @@ window.i18nPagina = {
     'guia-paso-2': 'Cuando aparezcan los campos, revisá los valores actuales y editá «Título», «Autor», «Asunto» y «Palabras clave (separadas por coma)».',
     'guia-paso-3': 'Tocá «Guardar y descargar».',
     'guia-paso-4': 'Cuando aparezca «Listo», tocá «Descargar PDF».',
-    'guia-consejo-1': 'Para quitar un dato, dejá su campo vacío antes de guardar. Es útil, por ejemplo, para borrar el nombre del autor antes de compartir un archivo.',
+    'guia-consejo-1': 'Para quitar un dato, dejá su campo vacío antes de guardar. Es útil, por ejemplo, para que un documento tuyo no lleve tu nombre o el de tu computadora al compartirlo.',
     'guia-consejo-2': 'La herramienta no modifica los campos «Creador» y «Productor» (el programa con que se hizo el PDF).',
     'guia-consejo-3': 'La fecha de modificación del documento se actualiza al guardar.',
     'guia-consejo-4': 'El archivo descargado conserva el nombre del original con la extensión .pdf.',
@@ -50,6 +53,8 @@ window.i18nPagina = {
   },
   en: {
     'archivo-documento-con-metadatos-pdf': 'document-with-metadata.pdf',
+    'aviso-autor': 'The author’s name and the copyright notice may be protected: keep them unless the file is yours.',
+    'ayuda-autor': 'Use it on your own files. Removing or changing the author’s name or the copyright notice of someone else’s work without permission is illegal.',
     'titulo-pagina': 'Edit PDF Metadata Free — Mini Cookies',
     'meta-descripcion': 'Edit the title, author, subject and keywords of a PDF, free and without uploading your file anywhere.',
     'h1': 'Edit PDF metadata',
@@ -72,7 +77,7 @@ window.i18nPagina = {
     'guia-paso-2': 'When the fields appear, check the current values and edit “Title”, “Author”, “Subject” and “Keywords (comma-separated)”.',
     'guia-paso-3': 'Tap “Save and download”.',
     'guia-paso-4': 'When “Done” appears, tap “Download PDF”.',
-    'guia-consejo-1': 'To remove a piece of data, leave its field empty before saving. It’s useful, for example, to erase the author’s name before sharing a file.',
+    'guia-consejo-1': 'To remove a piece of data, leave its field empty before saving. It’s useful, for example, so that a document of yours doesn’t carry your name or your computer’s name when you share it.',
     'guia-consejo-2': 'The tool doesn’t modify the “Creator” and “Producer” fields (the program the PDF was made with).',
     'guia-consejo-3': 'The document’s modification date is updated when you save.',
     'guia-consejo-4': 'The downloaded file keeps the original’s name with the .pdf extension.',
@@ -102,6 +107,12 @@ window.i18nPagina = {
 <main>
   <h1 data-i18n="h1">Editar metadatos de un PDF</h1>
   <p data-i18n="intro">Elegí un PDF y editá su título, autor, asunto y palabras clave (los datos que se ven en "Propiedades del documento", no el contenido visible).</p>
+  <p class="texto-actualizacion"><span data-i18n="aviso-autor">El nombre del autor y el aviso de copyright pueden estar protegidos: conservalos salvo que el archivo sea tuyo.</span>
+    <span class="ayuda-tip">
+      <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+      <span class="ayuda-burbuja" data-i18n="ayuda-autor">Usalo con tus propios archivos. Quitar o cambiar el nombre del autor o el aviso de copyright de una obra ajena, sin permiso, es ilegal.</span>
+    </span>
+  </p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
@@ -150,7 +161,7 @@ window.i18nPagina = {
     </ol>
     <h3 data-i18n="guia-consejos">Consejos</h3>
     <ul>
-      <li data-i18n="guia-consejo-1">Para quitar un dato, dejá su campo vacío antes de guardar. Es útil, por ejemplo, para borrar el nombre del autor antes de compartir un archivo.</li>
+      <li data-i18n="guia-consejo-1">Para quitar un dato, dejá su campo vacío antes de guardar. Es útil, por ejemplo, para que un documento tuyo no lleve tu nombre o el de tu computadora al compartirlo.</li>
       <li data-i18n="guia-consejo-2">La herramienta no modifica los campos «Creador» y «Productor» (el programa con que se hizo el PDF).</li>
       <li data-i18n="guia-consejo-3">La fecha de modificación del documento se actualiza al guardar.</li>
       <li data-i18n="guia-consejo-4">El archivo descargado conserva el nombre del original con la extensión .pdf.</li>
@@ -248,6 +259,7 @@ botonGuardar.addEventListener('click', async () => {
   }
 });
 </script>
+<script src="../assets/js/ayuda-tip.js"></script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
 <script src="../assets/js/idioma.js"></script>
