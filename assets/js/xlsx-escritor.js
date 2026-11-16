@@ -26,6 +26,8 @@
   const MAX_FILA = 1048576, MAX_COL = 16384, MAX_TEXTO = 32767, MAX_CAMBIOS = 5000000;
 
   class ErrorEscritor extends Error {}
+  // Un error de errorMC (mensajes-error.js) que sigue siendo ErrorEscritor: .codigo es el del catálogo.
+  const comoEscritor = (e) => Object.setPrototypeOf(e, ErrorEscritor.prototype);
 
   const colANumero = (s) => LibroXlsx.colANumero(s);
   const numeroACol = (n) => LibroXlsx.numeroACol(n);
@@ -47,7 +49,7 @@
       return `<c r="${ref}"${s} t="e"><v>${valor.error}</v></c>`;
     }
     const t = String(valor);
-    if (t.length > MAX_TEXTO) throw new ErrorEscritor('texto de más de ' + MAX_TEXTO + ' caracteres en ' + ref);
+    if (t.length > MAX_TEXTO) throw comoEscritor(errorMC('xlsx-texto-largo', { max: MAX_TEXTO, ref }, 'texto de más de {max} caracteres en {ref}'));
     return `<c r="${ref}"${s} t="inlineStr"><is><t xml:space="preserve">${escTexto(t)}</t></is></c>`;
   }
 
@@ -472,18 +474,18 @@
     if (Array.isArray(hojas)) {
       let est = 0;
       for (const h of hojas) for (const fila of (h && h.filas) || []) { if (!Array.isArray(fila)) continue; est += fila.length * 48; for (const v of fila) if (typeof v === 'string') est += v.length * 2; }
-      if (est > MAX_CARACTERES) throw new ErrorEscritor('el libro es demasiado grande para armarlo en memoria');
+      if (est > MAX_CARACTERES) throw comoEscritor(errorMC('xlsx-libro-grande-memoria', {}, 'el libro es demasiado grande para armarlo en memoria'));
     }
     try { return await crearLibroInterno(hojas, opciones); } catch (e) {
-      if (e instanceof RangeError) throw new ErrorEscritor('el libro es demasiado grande para armarlo en memoria');
+      if (e instanceof RangeError) throw comoEscritor(errorMC('xlsx-libro-grande-memoria', {}, 'el libro es demasiado grande para armarlo en memoria'));
       throw e;
     }
   }
 
   async function crearLibroInterno(hojas, opciones) {
     opciones = opciones || {};
-    if (!Array.isArray(hojas) || !hojas.length) throw new ErrorEscritor('un libro necesita al menos una hoja');
-    if (hojas.length > 1000) throw new ErrorEscritor('demasiadas hojas');   // Excel abre 1000 sin repararlo (medido 2026-10-15); no tiene un tope propio
+    if (!Array.isArray(hojas) || !hojas.length) throw comoEscritor(errorMC('xlsx-libro-sin-hojas', {}, 'un libro necesita al menos una hoja'));
+    if (hojas.length > 1000) throw comoEscritor(errorMC('xlsx-demasiadas-hojas', {}, 'demasiadas hojas'));   // Excel abre 1000 sin repararlo (medido 2026-10-15); no tiene un tope propio
     const zip = new ZipPropio();
     const usados = new Set(), nombres = [];
     const textos = [], indiceTexto = new Map();
@@ -511,7 +513,7 @@
       const nombre = nombreHoja(h.nombre, usados);
       nombres.push(nombre);
       const filas = h.filas || [];
-      if (filas.length > MAX_FILA) throw new ErrorEscritor('demasiadas filas');
+      if (filas.length > MAX_FILA) throw comoEscritor(errorMC('xlsx-demasiadas-filas', {}, 'demasiadas filas'));
       let maxCol = 0;
       const filasXml = [];   // [fila, xml]
       const filasOcultas = new Set((Array.isArray(h.filasOcultas) ? h.filasOcultas : []).filter((f) => Number.isInteger(f) && f >= 0 && f < MAX_FILA));
@@ -522,7 +524,7 @@
       const altoFila = (f) => (altosFila.has(f) ? ` ht="${altosFila.get(f)}" customHeight="1"` : '');
       filas.forEach((fila, f) => {
         if (!Array.isArray(fila) || !fila.length) return;
-        if (fila.length > MAX_COL) throw new ErrorEscritor('demasiadas columnas');
+        if (fila.length > MAX_COL) throw comoEscritor(errorMC('xlsx-demasiadas-columnas', {}, 'demasiadas columnas'));
         const celdas = [];
         fila.forEach((v, c) => {
           if (v === null || v === undefined || v === '') return;
@@ -547,7 +549,7 @@
             if (typeof x === 'number') { celdas.push(celdaXml(ref, est, x)); return; }
             if (norm && est) {   // un texto, un lógico, un error o una celda vacía con estilo
               if (typeof x === 'string' && x !== '') {
-                if (x.length > MAX_TEXTO) throw new ErrorEscritor('texto de más de ' + MAX_TEXTO + ' caracteres en ' + ref);
+                if (x.length > MAX_TEXTO) throw comoEscritor(errorMC('xlsx-texto-largo', { max: MAX_TEXTO, ref }, 'texto de más de {max} caracteres en {ref}'));
                 celdas.push(`<c r="${ref}" s="${est}" t="s"><v>${idTexto(x)}</v></c>`);
               } else celdas.push(celdaXml(ref, est, x === '' || x === undefined ? null : x));
               return;
@@ -557,7 +559,7 @@
           }
           if (v instanceof Date) { if (Number.isNaN(v.getTime())) return; const s = serialDeFecha(v, opciones.fechasUtc); celdas.push(celdaXml(ref, Number.isInteger(s) ? ESTILO.fecha : ESTILO.fechaHora, s)); return; }
           if (typeof v === 'string') {
-            if (v.length > MAX_TEXTO) throw new ErrorEscritor('texto de más de ' + MAX_TEXTO + ' caracteres en ' + ref);
+            if (v.length > MAX_TEXTO) throw comoEscritor(errorMC('xlsx-texto-largo', { max: MAX_TEXTO, ref }, 'texto de más de {max} caracteres en {ref}'));
             const est = cab ? (opciones.ajustarTexto ? ESTILO.negritaAjustar : ESTILO.negrita) : (opciones.ajustarTexto && /\n/.test(v) ? ESTILO.ajustar : 0);
             celdas.push(`<c r="${ref}"${est ? ` s="${est}"` : ''} t="s"><v>${idTexto(v)}</v></c>`);
             return;

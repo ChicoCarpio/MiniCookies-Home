@@ -107,7 +107,7 @@
       this.imagenesLeidas = 0;
       this.unidades = 0;
       let cfb;
-      try { cfb = CfbPropio.leer(bytes, { danado: (d) => marcarDanado(errorMC('ppt-cfb-danado', { detalle: d }, 'El archivo está dañado y no se puede leer ({detalle}).')) }); } catch (e) { throw e.danado ? e : marcarDanado(errorMC('ppt-danado', {}, 'El archivo está dañado y no se puede leer.')); }
+      try { cfb = CfbPropio.leer(bytes, { danado: (d, c) => marcarDanado(errorMC('ppt-cfb-danado', { detalle: d, detalleCodigo: c }, 'El archivo está dañado y no se puede leer ({detalle}).')) }); } catch (e) { throw e.danado ? e : marcarDanado(errorMC('ppt-danado', {}, 'El archivo está dañado y no se puede leer.')); }
       this.cfb = cfb;
       const flujo = (n) => { const e = cfb.entradas.find((x) => x.nombre === n && x.tipo === 2); return e ? cfb.flujo(e) : null; };
       this.pd = flujo('PowerPoint Document');

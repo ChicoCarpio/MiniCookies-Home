@@ -68,7 +68,7 @@
     opciones = opciones || {};
     const conFormulas = opciones.formulas !== false;
     const origen = await detectar(bytes);
-    if (!origen) throw new Error('el archivo no es una hoja de cálculo que se pueda leer');
+    if (!origen) throw errorMC('excel-no-legible', {}, 'el archivo no es una hoja de cálculo que se pueda leer');
     if (destino !== 'xlsx' && destino !== 'xls' && destino !== 'ods') throw new Error('formato de destino desconocido: ' + destino);
     const libro = await leerContrato(bytes, origen, conFormulas);   // antes que la comprobación de formato: un archivo con contraseña tiene que decir eso
     if (origen === destino) { const e = new Error('el archivo ya está en ese formato'); e.codigo = 'mismo-formato'; throw e; }

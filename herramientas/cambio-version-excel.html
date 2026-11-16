@@ -370,7 +370,7 @@ botonConvertir.addEventListener('click', async () => {
     else if (resultados[0] && !resultados[0].ok) LoteArchivos.pintarResumen(resumenLote, resultados, t);
     pintarAvisos(avisos);
   } catch (error) {
-    alert(t('error-convertir') + ': ' + error.message);
+    alert(t('error-convertir') + ': ' + detalleError(error));
   } finally {
     botonConvertir.disabled = archivosActuales.length === 0;
     botonConvertir.textContent = t('boton-convertir');

@@ -32,7 +32,7 @@
         const salida = await convertir(archivo);
         resultados.push({ archivo, ok: true, nombre: nombreUnico(salida.nombre, usados), blob: salida.blob, extras: salida.extras || [] });
       } catch (error) {
-        resultados.push({ archivo, ok: false, error: error.message || String(error) });
+        resultados.push({ archivo, ok: false, error: (typeof detalleError === 'function' ? detalleError(error) : error.message) || String(error) });
       }
     }
     return resultados;

@@ -210,7 +210,7 @@
 
     abrir(bytes) {
       let cfb;
-      try { cfb = CfbPropio.leer(bytes, { danado: (d) => marcarDanado(errorMC('doc-cfb-danado', { detalle: d }, 'El archivo está dañado y no se puede abrir ({detalle}).')) }); } catch (e) {
+      try { cfb = CfbPropio.leer(bytes, { danado: (d, c) => marcarDanado(errorMC('doc-cfb-danado', { detalle: d, detalleCodigo: c }, 'El archivo está dañado y no se puede abrir ({detalle}).')) }); } catch (e) {
         if (e && e.danado) throw e;
         throw marcarDanado(errorMC('doc-no-valido', {}, 'El archivo no es un documento de Word 97-2003 válido.'));
       }

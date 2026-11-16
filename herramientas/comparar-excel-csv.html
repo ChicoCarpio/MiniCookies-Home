@@ -292,7 +292,7 @@ function configurarZona(idZona, idEntrada, idLista, onElegido) {
     try {
       onElegido(await leerFilas(archivo));
     } catch (error) {
-      alert(t('error-leer') + ': ' + error.message);
+      alert(t('error-leer') + ': ' + detalleError(error));
     }
   }
 

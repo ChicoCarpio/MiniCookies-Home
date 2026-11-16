@@ -226,7 +226,7 @@
     const idioma = opciones.idiomaComplemento === 'en' ? 'en' : 'es';
     const avisosMapa = new Map();
     const avisar = (tipo, ejemplo) => { const a = avisosMapa.get(tipo); if (a) a.cantidad++; else avisosMapa.set(tipo, { tipo, cantidad: 1, ...(ejemplo ? { ejemplo } : {}) }); };
-    if (!Array.isArray(hojasEntrada) || !hojasEntrada.length) throw new Error('el libro necesita al menos una hoja');
+    if (!Array.isArray(hojasEntrada) || !hojasEntrada.length) throw errorMC('excel-libro-sin-hojas', {}, 'el libro necesita al menos una hoja');
     if (hojasEntrada.length > MAX_HOJAS) { avisar('hojas'); hojasEntrada = hojasEntrada.slice(0, MAX_HOJAS); }
 
     const usados = new Set();

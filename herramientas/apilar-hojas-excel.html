@@ -290,7 +290,7 @@ async function cargarLibro(archivo) {
     hojas = [];
     for (const h of libro.hojas) hojas.push(await libro.cargar(h.indice));
   } catch (error) {
-    if (miNumero === numeroDeCarga) alert(t('error-leer') + ': ' + error.message);
+    if (miNumero === numeroDeCarga) alert(t('error-leer') + ': ' + detalleError(error));
     return;
   }
   if (miNumero !== numeroDeCarga) return;
@@ -346,7 +346,7 @@ botonCombinar.addEventListener('click', async () => {
     avisoEncabezado.hidden = distintas.length === 0;
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-combinar') + ': ' + error.message);
+    alert(t('error-combinar') + ': ' + detalleError(error));
   }
 });
 </script>

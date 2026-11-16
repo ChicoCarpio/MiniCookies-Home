@@ -19,8 +19,11 @@
 (function (g) {
   'use strict';
 
-  function rellenar(texto, datos) {
+  // dic (opcional): el diccionario del idioma. Si datos trae «<clave>Codigo» (p. ej. detalleCodigo: 'cfb-corto') y dic tiene 'error-<ese código>', el hueco {clave} sale con ese texto.
+  function rellenar(texto, datos, dic) {
     return String(texto).replace(/\{(\w+)\}/g, function (todo, clave) {
+      var aparte = dic && datos && datos[clave + 'Codigo'] && dic['error-' + datos[clave + 'Codigo']];
+      if (aparte) return aparte;
       return datos && datos[clave] !== undefined && datos[clave] !== null ? String(datos[clave]) : todo;
     });
   }
@@ -134,6 +137,24 @@
       'error-presentacion-imagen-formato': 'formato de imagen no admitido (PNG, JPEG o GIF)',
       'error-presentacion-sin-diseno': 'la diapositiva no tiene diseño',
       'error-presentacion-una-minima': 'una presentación necesita al menos una diapositiva',
+      // Excel y hojas de cálculo (xlsx-escritor.js, formatos-antiguos.js, cfb-propio.js, motor-hojas.js…)
+      'error-excel-no-legible': 'el archivo no es una hoja de cálculo que se pueda leer',
+      'error-excel-libro-sin-hojas': 'el libro necesita al menos una hoja',
+      'error-excel-preparar-impresion': 'No se pudo preparar el libro para imprimir.',
+      'error-excel-no-carga': 'No se pudo cargar {archivo}',
+      'error-xlsx-libro-sin-hojas': 'un libro necesita al menos una hoja',
+      'error-xlsx-demasiadas-hojas': 'demasiadas hojas',
+      'error-xlsx-demasiadas-filas': 'demasiadas filas',
+      'error-xlsx-demasiadas-columnas': 'demasiadas columnas',
+      'error-xlsx-texto-largo': 'texto de más de {max} caracteres en {ref}',
+      'error-xlsx-libro-grande-memoria': 'el libro es demasiado grande para armarlo en memoria',
+      'error-cfb-corto': 'contenedor muy corto',
+      'error-cfb-tamano-sector': 'tamaño de sector',
+      'error-cfb-sector-fuera': 'sector fuera del archivo',
+      'error-cfb-fat-grande': 'FAT más grande que el archivo',
+      'error-cfb-cadena-sectores': 'cadena de sectores',
+      'error-cfb-minisector': 'minisector',
+      'error-cfb-demasiado-grande': 'CFB: archivo demasiado grande',
     },
     en: {
       'error-lut-dominio': 'Invalid DOMAIN on line {linea}',
@@ -160,7 +181,7 @@
       'error-word-no-es-docx': 'The file is not a Word document (.docx).',
       'error-word-no-legible': 'the file is not a Word document that can be read (.docx, .doc or .odt)',
       'error-word-lector-no-carga': 'Could not load the reader for this type of document ({archivo}). Check your connection and try again.',
-      'error-doc-cfb-danado': 'The file is damaged and cannot be opened.',
+      'error-doc-cfb-danado': 'The file is damaged and cannot be opened ({detalle}).',
       'error-doc-no-valido': 'The file is not a valid Word 97-2003 document.',
       'error-doc-cifrado': 'The document is password-protected. Remove the password in Word and try again.',
       'error-doc-no-es-doc': 'The file is not a Word document (.doc).',
@@ -184,7 +205,7 @@
       'error-odt-demasiado-grande-guardar': 'The document is too large to save as .odt.',
       'error-rtf-demasiado-grande-guardar': 'The document is too large to save as .rtf.',
       // PowerPoint, OpenDocument presentation and the Presentaciones editor
-      'error-ppt-cfb-danado': 'The file is damaged and cannot be read.',
+      'error-ppt-cfb-danado': 'The file is damaged and cannot be read ({detalle}).',
       'error-ppt-danado': 'The file is damaged and cannot be read.',
       'error-ppt-cifrado': 'The presentation is password-protected. Remove the password in PowerPoint and try again.',
       'error-ppt-no-valido': 'This file is not a PowerPoint 97-2003 presentation.',
@@ -234,6 +255,24 @@
       'error-presentacion-imagen-formato': 'image format not supported (PNG, JPEG or GIF)',
       'error-presentacion-sin-diseno': 'the slide has no layout',
       'error-presentacion-una-minima': 'a presentation needs at least one slide',
+      // Excel y hojas de cálculo (xlsx-escritor.js, formatos-antiguos.js, cfb-propio.js, motor-hojas.js…)
+      'error-excel-no-legible': 'the file is not a spreadsheet that can be read',
+      'error-excel-libro-sin-hojas': 'the workbook needs at least one sheet',
+      'error-excel-preparar-impresion': 'Could not prepare the workbook for printing.',
+      'error-excel-no-carga': 'Could not load {archivo}',
+      'error-xlsx-libro-sin-hojas': 'a workbook needs at least one sheet',
+      'error-xlsx-demasiadas-hojas': 'too many sheets',
+      'error-xlsx-demasiadas-filas': 'too many rows',
+      'error-xlsx-demasiadas-columnas': 'too many columns',
+      'error-xlsx-texto-largo': 'text longer than {max} characters in {ref}',
+      'error-xlsx-libro-grande-memoria': 'the workbook is too large to build in memory',
+      'error-cfb-corto': 'container too short',
+      'error-cfb-tamano-sector': 'sector size',
+      'error-cfb-sector-fuera': 'sector outside the file',
+      'error-cfb-fat-grande': 'FAT larger than the file',
+      'error-cfb-cadena-sectores': 'sector chain',
+      'error-cfb-minisector': 'mini-sector',
+      'error-cfb-demasiado-grande': 'CFB: the file is too large',
     },
   };
   g.errorMC = errorMC;
