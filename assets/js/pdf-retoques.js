@@ -129,7 +129,7 @@
 
   // createImageBitmap (no <img>): da los mismos píxeles en la página y en los hilos de Flujos (flujos-hilo.js).
   async function decodificarImagenJpeg(bytes) {
-    try { return await createImageBitmap(new Blob([bytes], { type: 'image/jpeg' })); } catch (e) { throw new Error('JPEG inválido'); }
+    try { return await createImageBitmap(new Blob([bytes], { type: 'image/jpeg' })); } catch (e) { throw errorMC('pdf-jpeg-invalido', {}, 'JPEG inválido'); }
   }
 
   // alAvanzar(n): se llama antes de procesar la foto n (1, 2, …); alGuardar(): antes de guardar el PDF.

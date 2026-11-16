@@ -101,7 +101,7 @@
     },
     epub: {
       extensiones: ['epub'],
-      preparar: () => cargarEnOrden([JSZIP(), propio('seguridad-html.js'), propio('epub.js'), propio('html-a-pdf.js')]),
+      preparar: () => cargarEnOrden([propio('mensajes-error.js'), JSZIP(), propio('seguridad-html.js'), propio('epub.js'), propio('html-a-pdf.js')]),
       convertir: (archivo, alAvanzar) => epubAPdf(archivo, (h, th) => alAvanzar((h + 1) / th)),
     },
     markdown: {

@@ -155,6 +155,14 @@
       'error-cfb-cadena-sectores': 'cadena de sectores',
       'error-cfb-minisector': 'minisector',
       'error-cfb-demasiado-grande': 'CFB: archivo demasiado grande',
+      // El resto de los motores: carga de piezas, PDF, EPUB, paquetes de oficina y QR
+      'error-carga-no-cargo': 'No cargó {archivo}',
+      'error-carga-no-se-pudo': 'No se pudo cargar {archivo}',
+      'error-pdf-fontkit-no-carga': 'No se pudo cargar fontkit.',
+      'error-pdf-jpeg-invalido': 'JPEG inválido',
+      'error-epub-sin-contenido-armar': 'No hay contenido para armar el EPUB.',
+      'error-oficina-sin-content-types': 'el paquete no tiene [Content_Types].xml',
+      'error-qr-demasiado-largo': 'Los datos son demasiado largos para un código QR.',
     },
     en: {
       'error-lut-dominio': 'Invalid DOMAIN on line {linea}',
@@ -273,6 +281,14 @@
       'error-cfb-cadena-sectores': 'sector chain',
       'error-cfb-minisector': 'mini-sector',
       'error-cfb-demasiado-grande': 'CFB: the file is too large',
+      // El resto de los motores: carga de piezas, PDF, EPUB, paquetes de oficina y QR
+      'error-carga-no-cargo': 'Could not load {archivo}',
+      'error-carga-no-se-pudo': 'Could not load {archivo}',
+      'error-pdf-fontkit-no-carga': 'Could not load fontkit.',
+      'error-pdf-jpeg-invalido': 'Invalid JPEG image',
+      'error-epub-sin-contenido-armar': 'There is no content to build the EPUB.',
+      'error-oficina-sin-content-types': 'the package has no [Content_Types].xml',
+      'error-qr-demasiado-largo': 'The data is too long for a QR code.',
     },
   };
   g.errorMC = errorMC;

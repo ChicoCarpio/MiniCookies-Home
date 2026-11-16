@@ -94,7 +94,7 @@
     poner(4, 4); // modo byte
     poner(bytes.length, v < 10 ? 8 : 16);
     for (const x of bytes) poner(x, 8);
-    if (bits.length > cap) throw new Error('Too long data');
+    if (bits.length > cap) throw errorMC('qr-demasiado-largo', {}, 'Los datos son demasiado largos para un código QR.');
     if (bits.length + 4 <= cap) poner(0, 4);
     while (bits.length % 8) bits.push(0);
     const palabras = [];
@@ -306,7 +306,7 @@
     for (; v <= 40; v++) {
       if (4 + (v < 10 ? 8 : 16) + bytes.length * 8 <= capacidadDatos(v, nivel) * 8) break;
     }
-    if (v > 40) throw new Error('Too long data');
+    if (v > 40) throw errorMC('qr-demasiado-largo', {}, 'Los datos son demasiado largos para un código QR.');
     const datos = intercalar(armarDatos(bytes, v, nivel), v, nivel);
     let mejor = 0, menor = 0;
     for (let k = 0; k < 8; k++) {

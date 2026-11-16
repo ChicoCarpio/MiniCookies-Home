@@ -69,7 +69,7 @@ export function revisarMensajesError(raiz) {
   const necesitan = new Set([...conErrorMC].map((f) => f.split('/').pop()).concat('flujos.js'));
   for (const carpeta of ['herramientas', '.']) {
     for (const archivo of readdirSync(join(raiz, carpeta)).filter((f) => f.endsWith('.html'))) {
-      const orden = [...readFileSync(join(raiz, carpeta, archivo), 'utf8').matchAll(/<script[^>]*\bsrc="[^"]*?([\w.-]+\.js)"/g)].map((m) => m[1]);
+      const orden = [...readFileSync(join(raiz, carpeta, archivo), 'utf8').matchAll(/<script[^>]*\bsrc="[^"]*?([\w.-]+\.js)(?:\?[^"]*)?"/g)].map((m) => m[1]);
       const catalogoEn = orden.indexOf('mensajes-error.js');
       for (const s of orden) {
         if (necesitan.has(s) && !(catalogoEn >= 0 && catalogoEn < orden.indexOf(s))) problemas.push(`${carpeta}/${archivo}: ${s} lanza errores con código y necesita cargar antes mensajes-error.js`);

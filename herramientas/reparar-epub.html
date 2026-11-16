@@ -192,6 +192,7 @@ window.i18nPagina = {
 
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/epub.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
@@ -293,17 +294,17 @@ botonReparar.addEventListener('click', async () => {
         // contenido: se rearma un libro nuevo con él.
         const { titulo, autor, idioma, identificador, capitulos } = await leerEpub(archivoActual);
         const blob = await construirEpub({ titulo: titulo || nombreLibro, autor, idioma: idioma || undefined, identificador: identificador || undefined, capitulos });
-        mostrar(blob, t('mensaje-nivel2').replace('{detalle}', errorNivel1.message));
+        mostrar(blob, t('mensaje-nivel2').replace('{detalle}', detalleError(errorNivel1)));
       } catch (errorNivel2) {
         // Nivel 3: ignorar el paquete (container.xml/OPF) y rescatar capítulos
         // buscando archivos de contenido directo dentro del .zip.
         const capitulos = await rescatarCapitulosSinPaquete(archivoActual);
         const blob = await construirEpub({ titulo: nombreLibro, autor: '', capitulos });
-        mostrar(blob, t('mensaje-nivel3').replace('{detalle}', errorNivel2.message).replace('{n}', capitulos.length));
+        mostrar(blob, t('mensaje-nivel3').replace('{detalle}', detalleError(errorNivel2)).replace('{n}', capitulos.length));
       }
     }
   } catch (error) {
-    alert(t('error-reparar') + ': ' + error.message);
+    alert(t('error-reparar') + ': ' + detalleError(error));
   } finally {
     botonReparar.disabled = false;
     botonReparar.textContent = t('boton-reparar');

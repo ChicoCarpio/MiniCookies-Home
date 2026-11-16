@@ -58,7 +58,7 @@ function htmlAXhtmlEpub(html) {
 // libro original cuando se lo modifica (ISBN, uuid...), para que un lector o
 // una tienda lo siga reconociendo como el mismo libro; si falta, se genera uno.
 async function construirEpub({ titulo, autor, idioma = 'es', identificador, capitulos }) {
-  if (!capitulos || capitulos.length === 0) throw new Error('No hay contenido para armar el EPUB.');
+  if (!capitulos || capitulos.length === 0) throw errorMC('epub-sin-contenido-armar', {}, 'No hay contenido para armar el EPUB.');
 
   const zip = new ZipPropio();
   const uuid = identificador || generarUuidEpub();

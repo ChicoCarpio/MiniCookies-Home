@@ -622,7 +622,7 @@
     if (!cargados.has(src)) cargados.set(src, new Promise((ok, mal) => {
       const s = document.createElement('script');
       s.src = src; s.onload = ok;
-      s.onerror = () => { cargados.delete(src); mal(new Error('No cargó ' + src)); };
+      s.onerror = () => { cargados.delete(src); mal(errorMC('carga-no-cargo', { archivo: src }, 'No cargó {archivo}')); };
       document.head.appendChild(s);
     }));
     return cargados.get(src);
