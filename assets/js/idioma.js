@@ -249,7 +249,7 @@ window.i18nComun = {
     }
     var mensaje = (error && error.message) || String(error);
     if (/encrypted|no password given|incorrect password/i.test(mensaje)) return t('pdf-protegido');   // pdf-lib y PDF.js
-    if (/no pdf header found|invalid pdf structure|failed to parse pdf document|the pdf file is empty|reading 'pages'/i.test(mensaje)) return t('pdf-danado');
+    if (/no pdf header found|invalid pdf structure|failed to parse pdf document|the pdf file is empty/i.test(mensaje) || /reading 'Pages'/.test(mensaje)) return t('pdf-danado');
     if (/source image could not be decoded|source image cannot be decoded/i.test(mensaje)) return t('imagen-ilegible');
     return mensaje;
   };
