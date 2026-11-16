@@ -210,7 +210,7 @@ function generar() {
     const nombreFormato = opcion ? opcion.textContent.split(' (')[0].trim() : error.formato;
     mensajeError.textContent = '❌ ' + (error.name === 'EntradaNoValida'
       ? t('error-entrada').replace('{formato}', () => nombreFormato).replace('{texto}', () => error.entrada)
-      : error.message);
+      : detalleError(error));
     mensajeError.style.display = 'block';
   }
 }

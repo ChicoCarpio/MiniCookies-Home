@@ -2046,7 +2046,7 @@ function pedirObjeto(fuente, o) {
       reiniciarComposicion();
       actualizarControlesSeleccion();
     })
-    .catch((error) => mostrarEstadoSujeto(t('sujeto-error') + (error && error.message ? error.message : error)))
+    .catch((error) => mostrarEstadoSujeto(t('sujeto-error') + (detalleError(error))))
     .finally(() => { estado.pedidos.delete(clave); trabajo.terminar(); });
 }
 
@@ -2071,7 +2071,7 @@ function pedirSujeto(fuente) {
       reiniciarComposicion();
       actualizarControlesSeleccion();
     })
-    .catch((error) => mostrarEstadoSujeto(t('sujeto-error') + (error && error.message ? error.message : error)))
+    .catch((error) => mostrarEstadoSujeto(t('sujeto-error') + (detalleError(error))))
     .finally(() => {
       if (url) URL.revokeObjectURL(url);
       trabajo.terminar();
@@ -5153,7 +5153,7 @@ entradaProyecto.addEventListener('change', async (e) => {
   const texto = await archivo.text();
   let proyecto;
   try { proyecto = JSON.parse(texto); } catch (error) {
-    alert(t('error-proyecto') + error.message);
+    alert(t('error-proyecto') + detalleError(error));
     return;
   }
 

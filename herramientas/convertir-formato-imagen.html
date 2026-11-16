@@ -290,7 +290,7 @@ botonConvertir.addEventListener('click', async () => {
     enlaceDescarga.download = `${t('archivo-imagen-convertida')}.${extension}`;
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-convertir') + error.message);
+    alert(t('error-convertir') + detalleError(error));
   } finally {
     botonConvertir.disabled = false;
     botonConvertir.textContent = t('boton-convertir');

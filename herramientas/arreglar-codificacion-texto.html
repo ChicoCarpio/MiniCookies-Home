@@ -290,7 +290,7 @@ botonArreglar.addEventListener('click', async () => {
       : `${archivoActual.name}${t('sufijo-corregido')}.txt`;
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-procesar') + ': ' + error.message);
+    alert(t('error-procesar') + ': ' + detalleError(error));
   } finally {
     botonArreglar.disabled = false;
     botonArreglar.textContent = t('boton-arreglar');

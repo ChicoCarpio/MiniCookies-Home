@@ -212,7 +212,7 @@ botonAplicar.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-generar') + ': ' + error.message);
+    alert(t('error-generar') + ': ' + detalleError(error));
   } finally {
     botonAplicar.disabled = false;
     botonAplicar.textContent = t('boton-aplicar');

@@ -270,7 +270,7 @@ botonDividir.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blobZip);
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-dividir') + ': ' + error.message);
+    alert(t('error-dividir') + ': ' + detalleError(error));
   } finally {
     botonDividir.disabled = false;
     botonDividir.textContent = t('boton-dividir');

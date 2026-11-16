@@ -436,7 +436,7 @@ botonRedimensionar.addEventListener('click', async () => {
     enlaceDescarga.download = `${t('archivo-imagen-redimensionada')}.${EXTENSION_FORMATO[blob.type] || 'png'}`;
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-redimensionar') + error.message);
+    alert(t('error-redimensionar') + detalleError(error));
   } finally {
     botonRedimensionar.disabled = false;
     botonRedimensionar.textContent = t('boton-redimensionar');

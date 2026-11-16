@@ -210,7 +210,7 @@ function procesar(indentacion) {
       posicion = lineaColumnaAPosicion(entrada.value, parseInt(porLineaColumna[1], 10), parseInt(porLineaColumna[2], 10));
     }
 
-    let mensaje = '❌ ' + error.message;
+    let mensaje = '❌ ' + detalleError(error);
     if (posicion !== null && posicion >= 0 && posicion <= entrada.value.length) {
       const { linea, columna } = posicionALineaColumna(entrada.value, posicion);
       mensaje += t('error-ubicacion').replace('{linea}', linea).replace('{columna}', columna);

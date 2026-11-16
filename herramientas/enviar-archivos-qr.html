@@ -488,7 +488,7 @@ async function iniciarCamara(video, alTexto) {
     await lector.decodeFromVideoDevice(null, video, (r) => { if (r) alTexto(r.getText()); });
   } catch (e) {
     detenerCamara();
-    mostrarMensaje(t('error-camara') + e.message);
+    mostrarMensaje(t('error-camara') + detalleError(e));
   }
 }
 
