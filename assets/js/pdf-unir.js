@@ -29,5 +29,17 @@
     return pdfFinal.save();
   }
 
-  window.PdfUnir = { agregarPdf, unir };
+  // ¿Tiene cifrado (contraseña para abrir o solo de permisos)? pdf-lib no puede copiar sus páginas; quien llama avisa al
+  // agregar el archivo y no recién al unir. Si el PDF ni se puede leer, devuelve false y el error sale después, como antes.
+  async function estaCifrado(bytesOArchivo) {
+    if (typeof PDFLib === 'undefined') throw new Error('PDFLib no está cargado');
+    try {
+      const doc = await PDFLib.PDFDocument.load(await aBytes(bytesOArchivo), { ignoreEncryption: true, updateMetadata: false });
+      return doc.isEncrypted;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  window.PdfUnir = { agregarPdf, unir, estaCifrado };
 })();

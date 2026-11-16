@@ -10,9 +10,11 @@
 // Dos decisiones para que la salida siga siendo la que daba la librería:
 //  - La penalización de máscara es la de qrcode.js (no la de la tabla de la
 //    norma), así que se elige la misma máscara que antes.
-//  - Si el texto trae caracteres fuera de ASCII se antepone la marca EF BB BF
-//    (BOM de UTF-8), igual que hacía la librería: ayuda a los lectores que
-//    suponen Latin-1 a reconocer el UTF-8. Se puede apagar con { bom: false }.
+//  - La librería anteponía la marca EF BB BF (BOM de UTF-8) si el texto traía
+//    algo fuera de ASCII. Desde 2026-11-16 ya no, por defecto: varios lectores
+//    la dejaban dentro del texto («ï»¿» o un carácter invisible al principio,
+//    que rompe un enlace o una red Wi-Fi), y los lectores actuales reconocen
+//    el UTF-8 sin ella. Se puede pedir con { bom: true }.
 //
 // API: QRPropio.crear(texto, { nivel: 'L'|'M'|'Q'|'H', version: mínima, bom })
 //      devuelve { version, tamano, mascara, esOscuro(fila, col) } o lanza
@@ -298,7 +300,7 @@
     // hasOwn y no "in": '__proto__' y 'constructor' están "en" cualquier objeto.
     if (!Object.hasOwn(BITS_NIVEL, nivel)) throw new Error('Nivel de corrección desconocido: ' + nivel);
     if (op.version !== undefined && !(Number.isInteger(op.version) && op.version >= 1)) throw new Error('Versión desconocida: ' + op.version);
-    const bytes = aBytes(String(texto), op.bom !== false);
+    const bytes = aBytes(String(texto), op.bom === true);
     // Versión más chica donde caben el encabezado y los bytes.
     let v = Math.max(1, op.version || 1);
     for (; v <= 40; v++) {

@@ -503,14 +503,17 @@ function hijosDirectosEpub(nodo, nombreLocal) {
 async function etiquetasDeIndiceEpub(paquete) {
   const etiquetas = new Map();
   const { nav, ncx } = rutasIndicesEpub(paquete);
-  const docNav = nav && await documentoDePaqueteEpub(paquete, nav);
+  // Un índice ilegible no impide leer el libro: los títulos salen después del propio capítulo (h1 o <title>).
+  // Antes un toc.ncx o nav roto hacía fallar todo y «Reparar EPUB» rearmaba el libro perdiendo su diseño.
+  const leer = async (ruta) => { try { return ruta && await documentoDePaqueteEpub(paquete, ruta); } catch { return null; } };
+  const docNav = await leer(nav);
   if (docNav) {
     for (const a of navTocEpub(docNav)?.getElementsByTagNameNS('*', 'a') || []) {
       const ruta = rutaDesdeHrefEpub(carpetaDeRutaEpub(nav), a.getAttribute('href') || '');
       if (ruta && !etiquetas.has(ruta) && a.textContent.trim()) etiquetas.set(ruta, a.textContent.trim().replace(/\s+/g, ' '));
     }
   }
-  const docNcx = ncx && await documentoDePaqueteEpub(paquete, ncx);
+  const docNcx = await leer(ncx);
   if (docNcx) {
     for (const punto of docNcx.getElementsByTagNameNS('*', 'navPoint')) {
       const contenido = hijosDirectosEpub(punto, 'content')[0];
