@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Esquinas mal detectadas en el escáner: cómo encuentra Custos la hoja y qué hacer — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Cómo encuentra Custos las esquinas de una hoja u objeto rectangular, cuándo entra el motor clásico, qué pasa sin hoja y cómo sacar fotos que se detecten bien.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Esquinas mal detectadas en el escáner: cómo encuentra Custos la hoja y qué hacer — Mini Cookies',
+    'meta-descripcion': 'Cómo encuentra Custos las esquinas de una hoja u objeto rectangular, cuándo entra el motor clásico, qué pasa sin hoja y cómo sacar fotos que se detecten bien.',
+    'h1': 'Esquinas mal detectadas en el escáner: cómo encuentra Custos la hoja y qué hacer',
+    'b1': 'Sacaste la foto de un recibo y el marco verde quedó sobre la mesa, o la hoja salió con una esquina cortada. El <a href="../herramientas/escanear-documento.html">Escáner de documentos</a> busca las cuatro esquinas antes de enderezar la página. Si se equivoca en ese paso, todo lo que sigue sale torcido o recortado.',
+    'b2': 'Custos es el modelo que hace esa búsqueda. Corre en tu navegador y no tiene botón propio: el escáner lo usa solo. Cuando no está cargado o no está seguro, el escáner recurre a su motor clásico, que no usa IA. Esta guía explica cómo se combinan y qué hacer cuando ninguno acierta.',
+    'b3': 'Cómo se combinan los dos motores',
+    'b4': 'Al tomar una foto, el motor clásico responde enseguida. Si Custos ya está cargado, tarda unas pocas centésimas de segundo, y el escáner la espera hasta 3 segundos. Lo que se muestra después depende de lo que encontró cada uno:',
+    'b5-c1': 'Lo que encuentran',
+    'b5-c2': 'Lo que usa el escáner',
+    'b5-f1c1': 'Custos y el motor clásico coinciden',
+    'b5-f1c2': 'El promedio de los dos',
+    'b5-f2c1': 'Solo Custos encuentra una hoja',
+    'b5-f2c2': 'La propuesta de Custos',
+    'b5-f3c1': 'Solo el motor clásico encuentra una hoja',
+    'b5-f3c2': 'La propuesta del motor clásico',
+    'b5-f4c1': 'Ninguno encuentra una hoja',
+    'b5-f4c2': 'La foto entera, con un aviso',
+    'b6': '«Coinciden» quiere decir que los dos cuadriláteros se superponen en al menos el 90 %, medido como área en común sobre área total. Si Custos tarda más de 3 segundos, queda lo del motor clásico. Y si ya moviste una esquina a mano, el escáner no la reemplaza.',
+    'b7': 'En la cámara, Custos busca primero, y si duda, lo hace el motor clásico.',
+    'b8': 'Qué tipo de objetos reconoce',
+    'b9': 'Custos también se entrenó con objetos rectangulares: pizarras, pantallas, pósters, rótulos, proyecciones y cuadros sin marco.',
+    'b10': 'Con documentos, en 196 fotos que no se usaron para entrenar, la coincidencia media con el recorte correcto fue de 0,908, y el 81 % quedó en 0,90 o más. Con objetos, en 186 fotos de objetos rectangulares, la media fue de 0,855, y el 69 % quedó en 0,90 o más. La versión anterior daba 0,762 con objetos. La coincidencia va de 0 a 1, donde 1 es un recorte perfecto.',
+    'b11': 'Cuando no hay hoja',
+    'b12': 'Custos tiene su propio «no hay hoja». En fotos sin papel, como una mesa o una pared, reconoce que no hay hoja en el 96,8 % de los casos. El precio es que pierde el 3,5 % de las fotos con un documento real, y en esas el recorte solía salir mal de todos modos.',
+    'b13': 'Cuando nadie encuentra una hoja, el escáner muestra la foto entera y el aviso «No se encontró el borde de la hoja: se usa la foto entera. Si hace falta, arrastrá las esquinas.» Si la foto entera es lo que querés, tocá «Usar toda la foto». Si no, arrastrá las cuatro esquinas hasta los vértices del papel.',
+    'b14': 'Para una buena foto',
+    'b15-1': 'Poné la hoja sobre una superficie de otro color. Una hoja blanca sobre una mesa oscura es lo más fácil de detectar.',
+    'b15-2': 'Usá luz pareja, y que tu propia sombra no caiga sobre el papel.',
+    'b15-3': 'Sacá la foto de frente, o lo más cerca posible. Una foto muy en diagonal deforma el rectángulo y hace más dudosa la detección.',
+    'b15-4': 'Dejá la hoja entera en el cuadro. Si se sale, el marco llega hasta el borde de la foto, y la página sale recortada.',
+    'b15-5': 'Esperá a que aparezca el marco verde antes de capturar. Aparece cuando la detección se repite de un cuadro al siguiente.',
+    'b16': 'Límites',
+    'b17-1': 'Custos busca rectángulos. Un objeto redondo o de forma irregular no es lo que sabe encontrar.',
+    'b17-2': 'Si hay dos hojas, o un rectángulo más grande detrás (una mesa, una pantalla), puede elegir el equivocado. «Probar otra hoja» aparece cuando hay más de una opción, pero esas opciones salen del motor clásico y no siempre incluyen la correcta. Si no está, arrastrá las esquinas.',
+    'b17-3': 'Si el papel y la superficie son del mismo color, el borde casi no se ve, y ninguno de los dos motores acierta con seguridad.',
+    'b17-4': 'La primera vez, el navegador descarga el modelo (unos 3,9 MB) y el motor que lo ejecuta. Hasta que terminan, el escáner usa el motor clásico.',
+    'b18': 'Preguntas frecuentes',
+    'b19': '<strong>¿Custos guarda mis fotos o las envía a algún lado?</strong> No. Corre en tu navegador, y la foto no sale del equipo.',
+    'b20': '<strong>¿Puedo usar Custos sin el escáner?</strong> No. No hay una herramienta propia de Custos: funciona solo dentro del <a href="../herramientas/escanear-documento.html">Escáner de documentos</a>.',
+    'b21': '<strong>¿Qué hago si el marco verde no aparece?</strong> Mantené la cámara quieta unos segundos, porque el marco solo aparece cuando la detección se repite. Si no aparece, revisá la luz y el fondo de la hoja, como en los consejos de arriba.',
+    'b22': 'Resumen',
+    'b23': 'Custos busca las esquinas de hojas y de objetos rectangulares dentro del escáner. Si no está seguro, el motor clásico toma la búsqueda, y si ninguno encuentra una hoja, queda la foto entera para arrastrar las esquinas a mano. Para que acierte, poné la hoja sobre una superficie que contraste, con luz pareja y entera en el cuadro.',
+    'rel1': 'Escáner de documentos',
+    'rel2': 'OCR de PDF e imágenes escaneadas',
+    'rel3': 'Recortar imagen'
+  },
+  en: {
+    'titulo-pagina': 'Corners detected wrongly in the scanner: how Custos finds the sheet and what to do — Mini Cookies',
+    'meta-descripcion': 'How Custos finds the corners of a sheet or rectangular object, when the classic engine takes over, what happens with no sheet and how to take better photos.',
+    'h1': 'Corners detected wrongly in the scanner: how Custos finds the sheet and what to do',
+    'b1': 'You took a photo of a receipt and the green frame landed on the table, or the sheet came out with one corner cut off. The <a href="../herramientas/escanear-documento.html">Document scanner</a> looks for the four corners before it straightens the page. If it gets that step wrong, everything after it comes out skewed or cropped.',
+    'b2': 'Custos is the model that does that search. It runs in your browser and has no button of its own: the scanner uses it automatically. When it isn\'t loaded or isn\'t sure, the scanner falls back to its classic engine, which doesn\'t use AI. This guide explains how the two are combined and what to do when neither gets it right.',
+    'b3': 'How the two engines are combined',
+    'b4': 'When you take a photo, the classic engine answers straight away. If Custos is already loaded, it takes a few hundredths of a second, and the scanner waits up to 3 seconds for it. What is shown afterwards depends on what each one found:',
+    'b5-c1': 'What they find',
+    'b5-c2': 'What the scanner uses',
+    'b5-f1c1': 'Custos and the classic engine agree',
+    'b5-f1c2': 'The average of the two',
+    'b5-f2c1': 'Only Custos finds a sheet',
+    'b5-f2c2': 'Custos\'s proposal',
+    'b5-f3c1': 'Only the classic engine finds a sheet',
+    'b5-f3c2': 'The classic engine\'s proposal',
+    'b5-f4c1': 'Neither finds a sheet',
+    'b5-f4c2': 'The whole photo, with a notice',
+    'b6': '“Agree” means the two quadrilaterals overlap by at least 90 %, measured as the shared area over the total area. If Custos takes longer than 3 seconds, the classic engine\'s result stays. And if you have already moved a corner by hand, the scanner doesn\'t replace it.',
+    'b7': 'On the camera, Custos searches first, and if it isn\'t sure, the classic engine does the search.',
+    'b8': 'What kind of objects it recognizes',
+    'b9': 'Custos was also trained on rectangular objects: whiteboards, screens, posters, signs, projections and paintings without a frame.',
+    'b10': 'With documents, on 196 photos that were not used for training, the average overlap with the correct crop was 0.908, and 81 % came out at 0.90 or more. With objects, on 186 photos of rectangular objects, the average was 0.855, and 69 % came out at 0.90 or more. The previous version scored 0.762 on objects. Overlap goes from 0 to 1, where 1 is a perfect crop.',
+    'b11': 'When there is no sheet',
+    'b12': 'Custos has its own “no sheet” decision. On photos with no paper, such as a table or a wall, it correctly says there is no sheet in 96.8 % of cases. The cost is that it misses 3.5 % of photos with a real document, and on those the crop tended to come out wrong anyway.',
+    'b13': 'When nobody finds a sheet, the scanner shows the whole photo with the notice “The edge of the page was not found: the whole photo is used. Drag the corners if needed.” If the whole photo is what you want, tap “Use the whole photo”. If not, drag the four corners to the corners of the paper.',
+    'b14': 'For a good photo',
+    'b15-1': 'Put the sheet on a surface of another colour. A white sheet on a dark table is the easiest case to detect.',
+    'b15-2': 'Use even light, and keep your own shadow off the paper.',
+    'b15-3': 'Take the photo straight on, or as close to that as you can. A photo taken at a sharp angle distorts the rectangle and makes detection less certain.',
+    'b15-4': 'Keep the whole sheet inside the frame. If it runs off the edge, the frame goes to the edge of the photo, and the page comes out cropped.',
+    'b15-5': 'Wait for the green frame to appear before capturing. It appears when detection repeats from one frame to the next.',
+    'b16': 'Limits',
+    'b17-1': 'Custos looks for rectangles. A round object, or one with an irregular shape, is not what it is trained to find.',
+    'b17-2': 'If there are two sheets, or a bigger rectangle behind the sheet (a table, a screen), it may pick the wrong one. “Try another page” appears when there is more than one option, but those options come from the classic engine and don\'t always include the right one. If it isn\'t there, drag the corners.',
+    'b17-3': 'If the paper and the surface are the same colour, the edge is hardly visible, and neither engine gets it right with confidence.',
+    'b17-4': 'The first time, the browser downloads the model (about 3.9 MB) and the engine that runs it. Until both are ready, the scanner uses the classic engine.',
+    'b18': 'Frequently asked questions',
+    'b19': '<strong>Does Custos keep my photos or send them anywhere?</strong> No. It runs in your browser, and the photo does not leave your device.',
+    'b20': '<strong>Can I use Custos without the scanner?</strong> No. There is no separate Custos tool: it only works inside the <a href="../herramientas/escanear-documento.html">Document scanner</a>.',
+    'b21': '<strong>What do I do if the green frame doesn\'t appear?</strong> Keep the camera still for a few seconds, because the frame only appears when detection repeats. If it still doesn\'t appear, check the light and the background of the sheet, as in the tips above.',
+    'b22': 'Summary',
+    'b23': 'Custos finds the corners of sheets and rectangular objects inside the scanner. If it isn\'t sure, the classic engine does the search, and if neither finds a sheet, the whole photo stays for you to drag the corners by hand. To get a good result, put the sheet on a contrasting surface, with even light and the whole sheet inside the frame.',
+    'rel1': 'Document scanner',
+    'rel2': 'OCR for scanned PDFs and images',
+    'rel3': 'Crop an image'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Esquinas mal detectadas en el escáner: cómo encuentra Custos la hoja y qué hacer</h1>
+    <p data-i18n-html="b1">Sacaste la foto de un recibo y el marco verde quedó sobre la mesa, o la hoja salió con una esquina cortada. El <a href="../herramientas/escanear-documento.html">Escáner de documentos</a> busca las cuatro esquinas antes de enderezar la página. Si se equivoca en ese paso, todo lo que sigue sale torcido o recortado.</p>
+    <p data-i18n-html="b2">Custos es el modelo que hace esa búsqueda. Corre en tu navegador y no tiene botón propio: el escáner lo usa solo. Cuando no está cargado o no está seguro, el escáner recurre a su motor clásico, que no usa IA. Esta guía explica cómo se combinan y qué hacer cuando ninguno acierta.</p>
+    <h2 data-i18n="b3">Cómo se combinan los dos motores</h2>
+    <p data-i18n-html="b4">Al tomar una foto, el motor clásico responde enseguida. Si Custos ya está cargado, tarda unas pocas centésimas de segundo, y el escáner la espera hasta 3 segundos. Lo que se muestra después depende de lo que encontró cada uno:</p>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b5-c1">Lo que encuentran</th><th data-i18n-html="b5-c2">Lo que usa el escáner</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b5-f1c1">Custos y el motor clásico coinciden</td><td data-i18n-html="b5-f1c2">El promedio de los dos</td></tr>
+        <tr><td data-i18n-html="b5-f2c1">Solo Custos encuentra una hoja</td><td data-i18n-html="b5-f2c2">La propuesta de Custos</td></tr>
+        <tr><td data-i18n-html="b5-f3c1">Solo el motor clásico encuentra una hoja</td><td data-i18n-html="b5-f3c2">La propuesta del motor clásico</td></tr>
+        <tr><td data-i18n-html="b5-f4c1">Ninguno encuentra una hoja</td><td data-i18n-html="b5-f4c2">La foto entera, con un aviso</td></tr>
+      </tbody>
+    </table></div>
+    <p data-i18n-html="b6">«Coinciden» quiere decir que los dos cuadriláteros se superponen en al menos el 90 %, medido como área en común sobre área total. Si Custos tarda más de 3 segundos, queda lo del motor clásico. Y si ya moviste una esquina a mano, el escáner no la reemplaza.</p>
+    <p data-i18n-html="b7">En la cámara, Custos busca primero, y si duda, lo hace el motor clásico.</p>
+    <h2 data-i18n="b8">Qué tipo de objetos reconoce</h2>
+    <p data-i18n-html="b9">Custos también se entrenó con objetos rectangulares: pizarras, pantallas, pósters, rótulos, proyecciones y cuadros sin marco.</p>
+    <p data-i18n-html="b10">Con documentos, en 196 fotos que no se usaron para entrenar, la coincidencia media con el recorte correcto fue de 0,908, y el 81 % quedó en 0,90 o más. Con objetos, en 186 fotos de objetos rectangulares, la media fue de 0,855, y el 69 % quedó en 0,90 o más. La versión anterior daba 0,762 con objetos. La coincidencia va de 0 a 1, donde 1 es un recorte perfecto.</p>
+    <h2 data-i18n="b11">Cuando no hay hoja</h2>
+    <p data-i18n-html="b12">Custos tiene su propio «no hay hoja». En fotos sin papel, como una mesa o una pared, reconoce que no hay hoja en el 96,8 % de los casos. El precio es que pierde el 3,5 % de las fotos con un documento real, y en esas el recorte solía salir mal de todos modos.</p>
+    <p data-i18n-html="b13">Cuando nadie encuentra una hoja, el escáner muestra la foto entera y el aviso «No se encontró el borde de la hoja: se usa la foto entera. Si hace falta, arrastrá las esquinas.» Si la foto entera es lo que querés, tocá «Usar toda la foto». Si no, arrastrá las cuatro esquinas hasta los vértices del papel.</p>
+    <h2 data-i18n="b14">Para una buena foto</h2>
+    <ul>
+      <li data-i18n-html="b15-1">Poné la hoja sobre una superficie de otro color. Una hoja blanca sobre una mesa oscura es lo más fácil de detectar.</li>
+      <li data-i18n-html="b15-2">Usá luz pareja, y que tu propia sombra no caiga sobre el papel.</li>
+      <li data-i18n-html="b15-3">Sacá la foto de frente, o lo más cerca posible. Una foto muy en diagonal deforma el rectángulo y hace más dudosa la detección.</li>
+      <li data-i18n-html="b15-4">Dejá la hoja entera en el cuadro. Si se sale, el marco llega hasta el borde de la foto, y la página sale recortada.</li>
+      <li data-i18n-html="b15-5">Esperá a que aparezca el marco verde antes de capturar. Aparece cuando la detección se repite de un cuadro al siguiente.</li>
+    </ul>
+    <h2 data-i18n="b16">Límites</h2>
+    <ul>
+      <li data-i18n-html="b17-1">Custos busca rectángulos. Un objeto redondo o de forma irregular no es lo que sabe encontrar.</li>
+      <li data-i18n-html="b17-2">Si hay dos hojas, o un rectángulo más grande detrás (una mesa, una pantalla), puede elegir el equivocado. «Probar otra hoja» aparece cuando hay más de una opción, pero esas opciones salen del motor clásico y no siempre incluyen la correcta. Si no está, arrastrá las esquinas.</li>
+      <li data-i18n-html="b17-3">Si el papel y la superficie son del mismo color, el borde casi no se ve, y ninguno de los dos motores acierta con seguridad.</li>
+      <li data-i18n-html="b17-4">La primera vez, el navegador descarga el modelo (unos 3,9 MB) y el motor que lo ejecuta. Hasta que terminan, el escáner usa el motor clásico.</li>
+    </ul>
+    <h2 data-i18n="b18">Preguntas frecuentes</h2>
+    <p data-i18n-html="b19"><strong>¿Custos guarda mis fotos o las envía a algún lado?</strong> No. Corre en tu navegador, y la foto no sale del equipo.</p>
+    <p data-i18n-html="b20"><strong>¿Puedo usar Custos sin el escáner?</strong> No. No hay una herramienta propia de Custos: funciona solo dentro del <a href="../herramientas/escanear-documento.html">Escáner de documentos</a>.</p>
+    <p data-i18n-html="b21"><strong>¿Qué hago si el marco verde no aparece?</strong> Mantené la cámara quieta unos segundos, porque el marco solo aparece cuando la detección se repite. Si no aparece, revisá la luz y el fondo de la hoja, como en los consejos de arriba.</p>
+    <h2 data-i18n="b22">Resumen</h2>
+    <p data-i18n-html="b23">Custos busca las esquinas de hojas y de objetos rectangulares dentro del escáner. Si no está seguro, el motor clásico toma la búsqueda, y si ninguno encuentra una hoja, queda la foto entera para arrastrar las esquinas a mano. Para que acierte, poné la hoja sobre una superficie que contraste, con luz pareja y entera en el cuadro.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/escanear-documento.html" data-i18n="rel1">Escáner de documentos</a></li>
+      <li><a href="../herramientas/ocr-pdf.html" data-i18n="rel2">OCR de PDF e imágenes escaneadas</a></li>
+      <li><a href="../herramientas/recortar-imagen.html" data-i18n="rel3">Recortar imagen</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

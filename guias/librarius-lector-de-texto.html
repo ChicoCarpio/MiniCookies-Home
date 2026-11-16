@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Librarius: cómo lee el OCR cada línea de una página y cómo elegir los idiomas — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Cómo lee Librarius una página, qué familias de idiomas tiene, cómo se mezclan y qué límites tiene el texto que sale en el PDF y en el .txt.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Librarius: cómo lee el OCR cada línea de una página y cómo elegir los idiomas — Mini Cookies',
+    'meta-descripcion': 'Cómo lee Librarius una página, qué familias de idiomas tiene, cómo se mezclan y qué límites tiene el texto que sale en el PDF y en el .txt.',
+    'h1': 'Librarius: cómo lee el OCR cada línea de una página y cómo elegir los idiomas',
+    'b1': 'Pasaste un escaneo por el OCR y salió «1O.000» donde decía «10.000», o una línea en ruso se llenó de letras que no son rusas. La causa suele estar en dos cosas que sí podés controlar: los idiomas que marcaste y la calidad de la foto. Para saber cuál falló en <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a>, conviene entender cómo lee Librarius una página.',
+    'b2': 'Cómo lee una página',
+    'b3': 'Librarius no lee la página de una vez. Antes, Versus recorre la página para encontrar cada línea, y después el lector pasa cada línea por separado. El orden es este:',
+    'b4-1': 'Versus marca dónde está cada línea y hacia qué lado apunta. Si la página está de costado, la gira y vuelve a buscar las líneas. Si está de cabeza, lee las más largas al derecho y al revés, y se queda con el sentido que da lecturas más seguras.',
+    'b4-2': 'Cada línea se corta siguiendo su propio ángulo, así que una línea torcida queda derecha antes de leerla.',
+    'b4-3': 'Si la línea es letra clara sobre fondo oscuro, como un recuadro o una franja, se invierte sola. El resto de la página no cambia.',
+    'b4-4': 'La línea se lleva a 24 píxeles de alto (32 en Librarius Phone O V1), y el lector la convierte en texto.',
+    'b4-5': 'Las líneas se ordenan por columnas, después por bloques y al final por filas. Por eso el .txt sigue el orden en que se lee la página, no el orden en que Versus encontró las líneas.',
+    'b5': 'Si falta una línea entera, lo más probable es que Versus no la haya encontrado. Hay una guía sobre el detector de líneas que explica qué lo hace fallar.',
+    'b6': 'Qué idiomas lee',
+    'b7': 'La herramienta tiene 32 idiomas, agrupados en cuatro familias de escritura. Cada familia tiene su modelo. Los tres modelos extra también leen las letras de los seis idiomas principales, pero solo Librarius Phone V3 lee los signos nuevos.',
+    'b8-c1': 'Familia',
+    'b8-c2': 'Idiomas',
+    'b8-c3': 'Modelo',
+    'b8-f1c1': 'Latinos principales',
+    'b8-f1c2': 'Español, inglés, portugués, francés, alemán e italiano',
+    'b8-f1c3': 'Librarius Phone V3',
+    'b8-f2c1': 'Otros latinos',
+    'b8-f2c2': 'Neerlandés, sueco, danés, noruego, finés, polaco, checo, eslovaco, húngaro, rumano, turco, catalán, croata, esloveno, lituano, letón y estonio',
+    'b8-f2c3': 'Librarius Phone E V1',
+    'b8-f3c1': 'Cirílicos',
+    'b8-f3c2': 'Ruso, ucraniano, bielorruso, búlgaro, serbio y macedonio',
+    'b8-f3c3': 'Librarius Phone C V1',
+    'b8-f4c1': 'Orientales',
+    'b8-f4c2': 'Chino simplificado, japonés y coreano',
+    'b8-f4c3': 'Librarius Phone O V1',
+    'b9': 'Marcá solo lo que aparece en el documento. Cada familia que marcás suma un modelo a la lectura, y la primera vez que se usa, el navegador lo descarga.',
+    'b10': 'Mezclar idiomas',
+    'b11': 'Si el documento mezcla familias, marcá todas. Con español y ruso, por ejemplo, la página se lee con los dos modelos, y en cada línea queda la lectura que el modelo tuvo más segura. Si uno de los seis principales se mezcla con otra familia, también lee Librarius Phone V3, que es el único con los signos nuevos.',
+    'b12': 'Cuantas más familias marques, más tarda la lectura, porque cada modelo recorre la página entera.',
+    'b13': 'En Flujos, el módulo de OCR tiene un menú «Idioma del texto» con opciones fijas: un solo idioma, o español e inglés juntos. Para un documento mixto, usá <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a>.',
+    'b14': 'Qué sale en el PDF y en el .txt',
+    'b15': 'El PDF conserva la imagen de cada página y pone encima un texto invisible, palabra por palabra. Las cajas de las palabras son aproximadas, porque se reparten según la cantidad de letras de cada línea. Sirven para buscar y copiar, pero la selección con el mouse puede quedar un poco corrida.',
+    'b16': 'Hay dos casos con límites. El chino, el japonés y el coreano salen en el .txt, pero no en el PDF, porque el sitio no tiene una fuente que los dibuje. Y los signos que la fuente no tiene, como ✗ o ☐, quedan en el .txt y se omiten de la capa del PDF.',
+    'b17': 'Cómo mejorar el resultado',
+    'b18': 'La casilla «Enderezar automáticamente páginas/fotos torcidas (recomendado)» endereza toda la página antes de leerla, y también cambia la imagen que queda en el PDF. Librarius corta cada línea según su ángulo, así que la casilla no es lo único que compensa una inclinación.',
+    'b19-1': 'Marcá los idiomas del documento y no más. Cada familia de más es otra lectura completa de la página.',
+    'b19-2': 'Si la foto tiene menos de 1800 píxeles de ancho, la herramienta la agranda antes de leerla. Agrandar no agrega detalle: una letra borrosa sigue borrosa.',
+    'b19-3': 'Escaneá a 200 o 300 ppp y con el texto derecho, como indica la herramienta.',
+    'b20': 'Qué tan bien lee',
+    'b21': 'Medimos la tasa de error por caracteres (cuanto menor, mejor) sobre páginas escaneadas reales, de otras fuentes, que no se usaron para entrenar. La versión anterior, Librarius Phone V2, tuvo 4,26 % de error en 300 páginas. Tesseract, un motor de código abierto que sirvió de referencia, tuvo 8,11 % en esas mismas páginas. Phone V3 mejora a esa versión en todas las pruebas.',
+    'b22': 'Por familia, Librarius Phone O V1 dio 4,82 % contra 7,16 % de Tesseract, en 42 páginas. Phone C V1 dio 8,44 % contra 11,16 %, en 111 páginas. Phone E V1 quedó casi empatado: 6,62 % contra 6,87 % en 402 páginas, con ventaja en checo, rumano, catalán y polaco, y desventaja en sueco, noruego, estonio y neerlandés. Las 42 páginas del grupo oriental son pocas: tomalo como una señal, no como una garantía.',
+    'b23': 'Límites',
+    'b24-1': 'Solo lee texto impreso. La letra a mano no se reconoce de forma confiable.',
+    'b24-2': 'Phone E V1, C V1 y O V1 no conocen los signos nuevos, como ₡, las casillas ☐ ☑ ☒, las viñetas o las fracciones. Esos los lee solo Phone V3.',
+    'b24-3': 'En algunas líneas escritas solo en mayúsculas, el modelo confunde mayúsculas y minúsculas.',
+    'b24-4': 'Sueco, noruego, estonio y neerlandés salen peor en las pruebas.',
+    'b24-5': 'Las páginas se leen de a una, así que un documento largo tarda.',
+    'b25': 'Preguntas frecuentes',
+    'b26': '<strong>¿Por qué una línea sale con letras de otro alfabeto?</strong> Una causa es que el idioma de esa línea no esté marcado. Sin su modelo, la línea se lee con las letras que sí conoce el modelo elegido, y sale algo que se les parece. Marcá la familia y volvé a correr el OCR.',
+    'b27': '<strong>¿Puedo leer un idioma que no está en la lista?</strong> No. La herramienta solo lee los 32 idiomas de la lista.',
+    'b28': '<strong>¿Cuánto tarda una página?</strong> Depende de la página y de cuántas familias marques. Se leen de a una, y la primera vez el navegador tiene que descargar cada modelo.',
+    'b29': 'Resumen',
+    'b30': 'Librarius lee cada línea que Versus encuentra, con el modelo de la familia de su idioma. Marcá solo los idiomas que aparecen, dejá la casilla de enderezado si sacaste fotos y revisá cifras y nombres. Si falta una línea entera, lo más probable es que Versus no la haya encontrado.',
+    'rel1': 'OCR de PDF e imágenes escaneadas',
+    'rel2': 'Flujos: encadená herramientas',
+    'rel3': 'PDF ↔ Texto',
+    'rel4': 'Escáner de documentos'
+  },
+  en: {
+    'titulo-pagina': 'Librarius: how OCR reads each line of a page and how to pick the languages — Mini Cookies',
+    'meta-descripcion': 'How Librarius reads a page, which language families it covers, how they mix and what limits the text in the PDF and the .txt has.',
+    'h1': 'Librarius: how OCR reads each line of a page and how to pick the languages',
+    'b1': 'You ran a scan through OCR and got “1O.000” where it said “10.000”, or a line in Russian filled up with letters that aren\'t Russian. The cause is usually one of two things you can control: the languages you ticked and the quality of the photo. To work out which one failed in <a href="../herramientas/ocr-pdf.html">OCR for scanned PDFs and images</a>, it helps to know how Librarius reads a page.',
+    'b2': 'How it reads a page',
+    'b3': 'Librarius doesn\'t read the whole page at once. First Versus goes over the page to find each line, and then the reader passes each line through on its own. The order is this:',
+    'b4-1': 'Versus marks where each line is and which way it points. If the page is sideways, it turns the page and looks for the lines again. If the page is upside down, it reads the longest lines both ways and keeps the direction that gives the more reliable readings.',
+    'b4-2': 'Each line is cut along its own angle, so a tilted line comes out straight before it is read.',
+    'b4-3': 'If the line is light text on a dark background, such as a box or a band, it is inverted automatically. The rest of the page doesn\'t change.',
+    'b4-4': 'The line is scaled to 24 pixels high (32 in Librarius Phone O V1), and the reader turns it into text.',
+    'b4-5': 'The lines are ordered by columns, then by blocks and finally by rows. That is why the .txt follows the order in which the page is read, not the order in which Versus found the lines.',
+    'b5': 'If a whole line is missing, Versus most likely didn\'t find it. There is a guide on the line detector that explains what makes it fail.',
+    'b6': 'Which languages it reads',
+    'b7': 'The tool has 32 languages, grouped into four writing families. Each family has its own model. The three extra models also read the letters of the six main languages, but only Librarius Phone V3 reads the new signs.',
+    'b8-c1': 'Family',
+    'b8-c2': 'Languages',
+    'b8-c3': 'Model',
+    'b8-f1c1': 'Main Latin',
+    'b8-f1c2': 'Spanish, English, Portuguese, French, German and Italian',
+    'b8-f1c3': 'Librarius Phone V3',
+    'b8-f2c1': 'Other Latin',
+    'b8-f2c2': 'Dutch, Swedish, Danish, Norwegian, Finnish, Polish, Czech, Slovak, Hungarian, Romanian, Turkish, Catalan, Croatian, Slovenian, Lithuanian, Latvian and Estonian',
+    'b8-f2c3': 'Librarius Phone E V1',
+    'b8-f3c1': 'Cyrillic',
+    'b8-f3c2': 'Russian, Ukrainian, Belarusian, Bulgarian, Serbian and Macedonian',
+    'b8-f3c3': 'Librarius Phone C V1',
+    'b8-f4c1': 'East Asian',
+    'b8-f4c2': 'Simplified Chinese, Japanese and Korean',
+    'b8-f4c3': 'Librarius Phone O V1',
+    'b9': 'Tick only what appears in the document. Each family you tick adds a model to the reading, and the first time it is used, the browser downloads it.',
+    'b10': 'Mixing languages',
+    'b11': 'If the document mixes families, tick all of them. With Spanish and Russian, for example, the page is read with both models, and each line keeps the reading that its model was most sure of. If one of the six main languages is mixed with another family, Librarius Phone V3 also reads, because it is the only one with the new signs.',
+    'b12': 'The more families you tick, the longer the reading takes, because each model goes over the whole page.',
+    'b13': 'In Flows, the OCR module has a “Text language” menu with fixed options: one language, or Spanish and English together. For a mixed document, use <a href="../herramientas/ocr-pdf.html">OCR for scanned PDFs and images</a>.',
+    'b14': 'What comes out in the PDF and the .txt',
+    'b15': 'The PDF keeps the image of each page and puts an invisible text layer on top, word by word. The word boxes are approximate, because they are spread according to the number of letters in each line. They are good for searching and copying, but a selection made with the mouse can be slightly off.',
+    'b16': 'Two cases have limits. Chinese, Japanese and Korean appear in the .txt but not in the PDF, because the site has no font that draws them. And signs that the font doesn\'t have, such as ✗ or ☐, stay in the .txt and are left out of the PDF text layer.',
+    'b17': 'How to get a better result',
+    'b18': 'The “Automatically straighten tilted pages/photos (recommended)” box straightens the whole page before reading it, and it also changes the image that ends up in the PDF. Librarius cuts each line along its own angle, so the box is not the only thing that corrects a tilt.',
+    'b19-1': 'Tick the languages in the document and no more. Each extra family is another full reading of the page.',
+    'b19-2': 'If the photo is less than 1800 pixels wide, the tool enlarges it before reading. Enlarging adds no detail: a blurry letter stays blurry.',
+    'b19-3': 'Scan at 200 or 300 dpi with the text upright, as the tool suggests.',
+    'b20': 'How well it reads',
+    'b21': 'We measured the character error rate (lower is better) on real scanned pages from other sources that were not used for training. The previous version, Librarius Phone V2, had 4.26 % error on 300 pages. Tesseract, an open-source engine used as a reference, had 8.11 % on those same pages. Phone V3 improves on that version in every test.',
+    'b22': 'By family, Librarius Phone O V1 scored 4.82 % against 7.16 % for Tesseract, on 42 pages. Phone C V1 scored 8.44 % against 11.16 %, on 111 pages. Phone E V1 is nearly tied: 6.62 % against 6.87 % on 402 pages, with an edge in Czech, Romanian, Catalan and Polish, and a disadvantage in Swedish, Norwegian, Estonian and Dutch. 42 pages for the East Asian group is a small sample: take it as a signal, not a guarantee.',
+    'b23': 'Limits',
+    'b24-1': 'It only reads printed text. Handwriting is not recognized reliably.',
+    'b24-2': 'Phone E V1, C V1 and O V1 don\'t know the new signs, such as ₡, the checkboxes ☐ ☑ ☒, bullets or fractions. Only Phone V3 reads those.',
+    'b24-3': 'In some lines written only in capitals, the model confuses upper and lower case.',
+    'b24-4': 'Swedish, Norwegian, Estonian and Dutch do worse in the tests.',
+    'b24-5': 'Pages are read one at a time, so a long document takes a while.',
+    'b25': 'Frequently asked questions',
+    'b26': '<strong>Why does a line come out with letters from another alphabet?</strong> One cause is that the language of that line wasn\'t ticked. Without its model, the line is read with the letters the chosen model does know, and what comes out looks like them. Tick the family and run OCR again.',
+    'b27': '<strong>Can I read a language that isn\'t on the list?</strong> No. The tool only reads the 32 languages in the list.',
+    'b28': '<strong>How long does a page take?</strong> It depends on the page and on how many families you tick. Pages are read one at a time, and the first time the browser has to download each model.',
+    'b29': 'Summary',
+    'b30': 'Librarius reads each line that Versus finds, with the model for that line\'s language family. Tick only the languages that appear, keep the straightening box on if you took photos, and check numbers and names. If a whole line is missing, Versus most likely didn\'t find it.',
+    'rel1': 'OCR for scanned PDFs and images',
+    'rel2': 'Flows: chain tools together',
+    'rel3': 'PDF ↔ Text',
+    'rel4': 'Document scanner'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Librarius: cómo lee el OCR cada línea de una página y cómo elegir los idiomas</h1>
+    <p data-i18n-html="b1">Pasaste un escaneo por el OCR y salió «1O.000» donde decía «10.000», o una línea en ruso se llenó de letras que no son rusas. La causa suele estar en dos cosas que sí podés controlar: los idiomas que marcaste y la calidad de la foto. Para saber cuál falló en <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a>, conviene entender cómo lee Librarius una página.</p>
+    <h2 data-i18n="b2">Cómo lee una página</h2>
+    <p data-i18n-html="b3">Librarius no lee la página de una vez. Antes, Versus recorre la página para encontrar cada línea, y después el lector pasa cada línea por separado. El orden es este:</p>
+    <ol>
+      <li data-i18n-html="b4-1">Versus marca dónde está cada línea y hacia qué lado apunta. Si la página está de costado, la gira y vuelve a buscar las líneas. Si está de cabeza, lee las más largas al derecho y al revés, y se queda con el sentido que da lecturas más seguras.</li>
+      <li data-i18n-html="b4-2">Cada línea se corta siguiendo su propio ángulo, así que una línea torcida queda derecha antes de leerla.</li>
+      <li data-i18n-html="b4-3">Si la línea es letra clara sobre fondo oscuro, como un recuadro o una franja, se invierte sola. El resto de la página no cambia.</li>
+      <li data-i18n-html="b4-4">La línea se lleva a 24 píxeles de alto (32 en Librarius Phone O V1), y el lector la convierte en texto.</li>
+      <li data-i18n-html="b4-5">Las líneas se ordenan por columnas, después por bloques y al final por filas. Por eso el .txt sigue el orden en que se lee la página, no el orden en que Versus encontró las líneas.</li>
+    </ol>
+    <p data-i18n-html="b5">Si falta una línea entera, lo más probable es que Versus no la haya encontrado. Hay una guía sobre el detector de líneas que explica qué lo hace fallar.</p>
+    <h2 data-i18n="b6">Qué idiomas lee</h2>
+    <p data-i18n-html="b7">La herramienta tiene 32 idiomas, agrupados en cuatro familias de escritura. Cada familia tiene su modelo. Los tres modelos extra también leen las letras de los seis idiomas principales, pero solo Librarius Phone V3 lee los signos nuevos.</p>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b8-c1">Familia</th><th data-i18n-html="b8-c2">Idiomas</th><th data-i18n-html="b8-c3">Modelo</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b8-f1c1">Latinos principales</td><td data-i18n-html="b8-f1c2">Español, inglés, portugués, francés, alemán e italiano</td><td data-i18n-html="b8-f1c3">Librarius Phone V3</td></tr>
+        <tr><td data-i18n-html="b8-f2c1">Otros latinos</td><td data-i18n-html="b8-f2c2">Neerlandés, sueco, danés, noruego, finés, polaco, checo, eslovaco, húngaro, rumano, turco, catalán, croata, esloveno, lituano, letón y estonio</td><td data-i18n-html="b8-f2c3">Librarius Phone E V1</td></tr>
+        <tr><td data-i18n-html="b8-f3c1">Cirílicos</td><td data-i18n-html="b8-f3c2">Ruso, ucraniano, bielorruso, búlgaro, serbio y macedonio</td><td data-i18n-html="b8-f3c3">Librarius Phone C V1</td></tr>
+        <tr><td data-i18n-html="b8-f4c1">Orientales</td><td data-i18n-html="b8-f4c2">Chino simplificado, japonés y coreano</td><td data-i18n-html="b8-f4c3">Librarius Phone O V1</td></tr>
+      </tbody>
+    </table></div>
+    <p data-i18n-html="b9">Marcá solo lo que aparece en el documento. Cada familia que marcás suma un modelo a la lectura, y la primera vez que se usa, el navegador lo descarga.</p>
+    <h2 data-i18n="b10">Mezclar idiomas</h2>
+    <p data-i18n-html="b11">Si el documento mezcla familias, marcá todas. Con español y ruso, por ejemplo, la página se lee con los dos modelos, y en cada línea queda la lectura que el modelo tuvo más segura. Si uno de los seis principales se mezcla con otra familia, también lee Librarius Phone V3, que es el único con los signos nuevos.</p>
+    <p data-i18n-html="b12">Cuantas más familias marques, más tarda la lectura, porque cada modelo recorre la página entera.</p>
+    <p data-i18n-html="b13">En Flujos, el módulo de OCR tiene un menú «Idioma del texto» con opciones fijas: un solo idioma, o español e inglés juntos. Para un documento mixto, usá <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a>.</p>
+    <h2 data-i18n="b14">Qué sale en el PDF y en el .txt</h2>
+    <p data-i18n-html="b15">El PDF conserva la imagen de cada página y pone encima un texto invisible, palabra por palabra. Las cajas de las palabras son aproximadas, porque se reparten según la cantidad de letras de cada línea. Sirven para buscar y copiar, pero la selección con el mouse puede quedar un poco corrida.</p>
+    <p data-i18n-html="b16">Hay dos casos con límites. El chino, el japonés y el coreano salen en el .txt, pero no en el PDF, porque el sitio no tiene una fuente que los dibuje. Y los signos que la fuente no tiene, como ✗ o ☐, quedan en el .txt y se omiten de la capa del PDF.</p>
+    <h2 data-i18n="b17">Cómo mejorar el resultado</h2>
+    <p data-i18n-html="b18">La casilla «Enderezar automáticamente páginas/fotos torcidas (recomendado)» endereza toda la página antes de leerla, y también cambia la imagen que queda en el PDF. Librarius corta cada línea según su ángulo, así que la casilla no es lo único que compensa una inclinación.</p>
+    <ul>
+      <li data-i18n-html="b19-1">Marcá los idiomas del documento y no más. Cada familia de más es otra lectura completa de la página.</li>
+      <li data-i18n-html="b19-2">Si la foto tiene menos de 1800 píxeles de ancho, la herramienta la agranda antes de leerla. Agrandar no agrega detalle: una letra borrosa sigue borrosa.</li>
+      <li data-i18n-html="b19-3">Escaneá a 200 o 300 ppp y con el texto derecho, como indica la herramienta.</li>
+    </ul>
+    <h2 data-i18n="b20">Qué tan bien lee</h2>
+    <p data-i18n-html="b21">Medimos la tasa de error por caracteres (cuanto menor, mejor) sobre páginas escaneadas reales, de otras fuentes, que no se usaron para entrenar. La versión anterior, Librarius Phone V2, tuvo 4,26 % de error en 300 páginas. Tesseract, un motor de código abierto que sirvió de referencia, tuvo 8,11 % en esas mismas páginas. Phone V3 mejora a esa versión en todas las pruebas.</p>
+    <p data-i18n-html="b22">Por familia, Librarius Phone O V1 dio 4,82 % contra 7,16 % de Tesseract, en 42 páginas. Phone C V1 dio 8,44 % contra 11,16 %, en 111 páginas. Phone E V1 quedó casi empatado: 6,62 % contra 6,87 % en 402 páginas, con ventaja en checo, rumano, catalán y polaco, y desventaja en sueco, noruego, estonio y neerlandés. Las 42 páginas del grupo oriental son pocas: tomalo como una señal, no como una garantía.</p>
+    <h2 data-i18n="b23">Límites</h2>
+    <ul>
+      <li data-i18n-html="b24-1">Solo lee texto impreso. La letra a mano no se reconoce de forma confiable.</li>
+      <li data-i18n-html="b24-2">Phone E V1, C V1 y O V1 no conocen los signos nuevos, como ₡, las casillas ☐ ☑ ☒, las viñetas o las fracciones. Esos los lee solo Phone V3.</li>
+      <li data-i18n-html="b24-3">En algunas líneas escritas solo en mayúsculas, el modelo confunde mayúsculas y minúsculas.</li>
+      <li data-i18n-html="b24-4">Sueco, noruego, estonio y neerlandés salen peor en las pruebas.</li>
+      <li data-i18n-html="b24-5">Las páginas se leen de a una, así que un documento largo tarda.</li>
+    </ul>
+    <h2 data-i18n="b25">Preguntas frecuentes</h2>
+    <p data-i18n-html="b26"><strong>¿Por qué una línea sale con letras de otro alfabeto?</strong> Una causa es que el idioma de esa línea no esté marcado. Sin su modelo, la línea se lee con las letras que sí conoce el modelo elegido, y sale algo que se les parece. Marcá la familia y volvé a correr el OCR.</p>
+    <p data-i18n-html="b27"><strong>¿Puedo leer un idioma que no está en la lista?</strong> No. La herramienta solo lee los 32 idiomas de la lista.</p>
+    <p data-i18n-html="b28"><strong>¿Cuánto tarda una página?</strong> Depende de la página y de cuántas familias marques. Se leen de a una, y la primera vez el navegador tiene que descargar cada modelo.</p>
+    <h2 data-i18n="b29">Resumen</h2>
+    <p data-i18n-html="b30">Librarius lee cada línea que Versus encuentra, con el modelo de la familia de su idioma. Marcá solo los idiomas que aparecen, dejá la casilla de enderezado si sacaste fotos y revisá cifras y nombres. Si falta una línea entera, lo más probable es que Versus no la haya encontrado.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/ocr-pdf.html" data-i18n="rel1">OCR de PDF e imágenes escaneadas</a></li>
+      <li><a href="../herramientas/flujos.html" data-i18n="rel2">Flujos: encadená herramientas</a></li>
+      <li><a href="../herramientas/pdf-texto.html" data-i18n="rel3">PDF ↔ Texto</a></li>
+      <li><a href="../herramientas/escanear-documento.html" data-i18n="rel4">Escáner de documentos</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>
