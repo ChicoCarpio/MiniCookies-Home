@@ -48,8 +48,12 @@ const MINIMO_PARA_AVISO = 1500;
 // la UE (Privacy & messaging usa esta misma etiqueta, no un script aparte).
 // El ID sale de package.json para no repetirlo en 119 archivos.
 const ADSENSE = JSON.parse(readFileSync(join(RAIZ, 'package.json'), 'utf8')).config.adsense;
+// Antes de la etiqueta, la pausa de los pedidos de anuncios y el aviso propio de consentimiento para quien no está en
+// Europa (consentimiento-anuncios.js; Google solo pregunta en Europa y en algunos estados de EE. UU.). Revisión legal 2026-11-15.
 const ETIQUETA_ADSENSE = ADSENSE
-  ? `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE}" crossorigin="anonymous"></script>`
+  ? `<script>(window.adsbygoogle=window.adsbygoogle||[]).pauseAdRequests=1;</script>\n`
+    + `<script defer src="/assets/js/consentimiento-anuncios.js"></script>\n`
+    + `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE}" crossorigin="anonymous"></script>`
   : '';
 
 // Unidad de anuncio manual (AdSense > Anuncios > Por unidad de anuncio): su

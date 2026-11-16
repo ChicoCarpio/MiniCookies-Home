@@ -1102,3 +1102,20 @@ textarea {
 .botones-historial button:hover:not(:disabled) { border-color: var(--azul); }
 .botones-historial button:disabled { opacity: 0.35; cursor: default; }
 .botones-historial button.activo { border-color: var(--azul); background: var(--activo-fondo); }
+
+/* Aviso de consentimiento de anuncios fuera de Europa (consentimiento-anuncios.js, 2026-11-15). Imita el aviso europeo de
+   Google (tarjeta crema, logo, título marrón, botón claro y botón oscuro), más chico. Colores fijos: el logo trae fondo crema,
+   así que la tarjeta queda clara también en modo oscuro, como la de Google. */
+.aviso-anuncios-fondo { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(0, 0, 0, 0.35); }
+.aviso-anuncios { width: 100%; max-width: 400px; max-height: calc(100vh - 32px); overflow-y: auto; box-sizing: border-box; padding: 18px 20px 16px; border-radius: 12px; background: #f5f0e4; color: #3a3226; border: 1px solid #e3d9c2; box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28); text-align: center; font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+.aviso-anuncios-logo { display: block; height: 40px; width: auto; margin: 0 auto 8px; }
+.aviso-anuncios h2 { margin: 0 0 10px; font-size: 1.05rem; line-height: 1.35; color: #5a2a17; font-weight: 700; }
+.aviso-anuncios p { margin: 0 0 14px; font-size: 0.85rem; line-height: 1.45; text-align: left; }
+.aviso-anuncios p a { color: #5a2a17; }
+.aviso-anuncios-botones { display: flex; gap: 10px; border-top: 1px solid #e3d9c2; padding-top: 14px; }
+.aviso-anuncios-botones button { flex: 1; padding: 9px 12px; border: none; border-radius: 999px; font-size: 0.92rem; font-weight: 600; cursor: pointer; }
+.aviso-anuncios-no { background: #efb978; color: #3a2015; }
+.aviso-anuncios-no:hover { background: #e7a459; }
+.aviso-anuncios-si { background: #5a2a17; color: #fff; }
+.aviso-anuncios-si:hover { background: #45200f; }
+.aviso-anuncios-botones button:focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; }
