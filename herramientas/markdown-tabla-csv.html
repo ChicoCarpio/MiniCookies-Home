@@ -28,6 +28,7 @@ window.i18nPagina = {
     'boton-copiado': '¡Copiado!',
     'enlace-descargar': 'Descargar',
     'error-tabla-invalida': 'No se encontró una tabla Markdown válida (necesita encabezado + línea separadora).',
+    'aviso-varias-tablas': 'Pegaste {n} tablas: se convirtió solo la primera (un CSV tiene una sola tabla). Para las demás, pegalas de a una.',
     'error-csv-vacio': 'El CSV está vacío.',
     'error-convertir': 'No se pudo convertir',
     'guia-titulo': 'Cómo convertir una tabla Markdown a CSV (y al revés)',
@@ -64,6 +65,7 @@ window.i18nPagina = {
     'boton-copiado': 'Copied!',
     'enlace-descargar': 'Download',
     'error-tabla-invalida': 'No valid Markdown table was found (it needs a header row + separator line).',
+    'aviso-varias-tablas': 'You pasted {n} tables: only the first one was converted (a CSV holds a single table). Paste the others one at a time.',
     'error-csv-vacio': 'The CSV is empty.',
     'error-convertir': 'Couldn’t convert',
     'guia-titulo': 'How to convert a Markdown table to CSV (and back)',
@@ -126,6 +128,7 @@ window.i18nPagina = {
       <button class="boton" id="botonCopiar" type="button" style="background:#64748b;" data-i18n="boton-copiar">Copiar resultado</button>
       <a class="boton" id="enlaceDescarga" data-i18n="enlace-descargar">Descargar</a>
     </div>
+    <p class="nota-suave" id="avisoTablas" hidden></p>
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
@@ -217,8 +220,19 @@ function igualarColumnas(filas) {
   return filas.map(f => f.concat(Array(columnas - f.length).fill('')));
 }
 
+// Las tablas pegadas: grupos de renglones seguidos que empiezan con «|». Un CSV tiene una sola tabla, así que se
+// convierte la primera (antes el encabezado y el «| --- |» de la segunda salían como filas de datos).
+function tablasMarkdown(texto) {
+  const tablas = [];
+  let actual = null;
+  for (const linea of texto.split('\n').map(l => l.trim())) {
+    if (linea.startsWith('|')) { if (!actual) tablas.push(actual = []); actual.push(linea); } else actual = null;
+  }
+  return tablas;
+}
+
 function parsearTablaMarkdown(texto) {
-  const lineas = texto.split('\n').map(l => l.trim()).filter(l => l.startsWith('|'));
+  const lineas = tablasMarkdown(texto)[0] || [];
   if (lineas.length < 2) throw new Error(t('error-tabla-invalida'));
 
   // "\|" es una barra dentro de la celda, no un borde; "<br>" es un salto de
@@ -311,9 +325,16 @@ document.querySelectorAll('input[name="direccion"]').forEach(radio => {
 });
 
 botonConvertir.addEventListener('click', () => {
+  const avisoTablas = document.getElementById('avisoTablas');
+  avisoTablas.hidden = true;
   try {
     if (direccionActual() === 'md-a-csv') {
       const filas = parsearTablaMarkdown(entrada.value);
+      const cuantas = tablasMarkdown(entrada.value).filter((tb) => tb.length >= 2).length;
+      if (cuantas > 1) {
+        avisoTablas.textContent = t('aviso-varias-tablas').replace('{n}', cuantas);
+        avisoTablas.hidden = false;
+      }
       salida.value = filasACsv(filas);
       const blob = new Blob([salida.value], { type: 'text/csv;charset=utf-8' });
       enlaceDescarga.href = URL.createObjectURL(blob);
