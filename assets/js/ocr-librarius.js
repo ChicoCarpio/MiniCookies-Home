@@ -1,11 +1,11 @@
 /*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
-// Librarius (Beta): el lector de texto con IA propia de Mini Cookies (Librarius Phone V1, E V1, C V1 u O V1 + Versus Phone V1), como motor
+// Librarius (Beta): el lector de texto con IA propia de Mini Cookies (Librarius Phone V2, Phone E V1, Phone C V1 o Phone O V1, con Versus Phone V2), como motor
 // alternativo a Tesseract para ocr.js. Corre en hilos de trabajo (Web Workers) con onnxruntime-web: el documento no sale del equipo.
 //
-//   OcrLibrarius.soportaIdiomas(['spa', 'eng'])   -> boolean (los seis primeros con, a lo sumo, UNA familia: EE1, EC1 o EO1)
+//   OcrLibrarius.soportaIdiomas(['spa', 'eng'])   -> boolean (los seis primeros con, a lo sumo, UNA familia: Phone E V1, Phone C V1 o Phone O V1)
 //   const motor = await OcrLibrarius.crear(['spa', 'swe'])   -> { leerPagina(canvas), cerrar() }   (rechaza si el navegador no puede)
-//        Con chino, japonés o coreano usa Librarius O V1; con cirílico, Librarius C V1; con algún idioma de IDIOMAS_EE1,
-//        Librarius E V1 (23 idiomas); con solo los seis de Librarius Phone V1, ese. Cada modelo trae el alfabeto de los seis primeros.
+//        Con chino, japonés o coreano usa Librarius Phone O V1; con cirílico, Librarius Phone C V1; con algún idioma de IDIOMAS_PHONE_E_V1,
+//        Librarius Phone E V1 (23 idiomas); con solo los seis de Librarius Phone V2, ese. Cada modelo trae el alfabeto de los seis primeros.
 //   const r = await motor.leerPagina(canvas)      -> { texto, palabras: [{ texto, x, y, ancho, alto, angulo }] }
 //        x, y: esquina inferior izquierda de la palabra sobre la línea base, en píxeles del canvas (y hacia abajo);
 //        ancho/alto en píxeles; angulo: grados antihorarios (para dibujar texto invisible inclinado en el PDF).
@@ -14,23 +14,23 @@
 (function () {
   'use strict';
   const IDIOMAS = new Set(['spa', 'eng', 'por', 'fra', 'deu', 'ita']);
-  // Librarius E V1 (EE1) lee estos 17 además de los seis anteriores (códigos de Tesseract).
-  const IDIOMAS_EE1 = new Set(['nld', 'swe', 'dan', 'nor', 'fin', 'pol', 'ces', 'slk', 'hun', 'ron', 'tur', 'cat', 'hrv', 'slv', 'lit', 'lav', 'est']);
-  // Librarius O V1 (EO1) lee chino simplificado, japonés y coreano, y también el alfabeto latino de los seis primeros (no los acentos de EE1).
+  // Librarius Phone E V1 lee estos 17 además de los seis anteriores (códigos de Tesseract).
+  const IDIOMAS_PHONE_E_V1 = new Set(['nld', 'swe', 'dan', 'nor', 'fin', 'pol', 'ces', 'slk', 'hun', 'ron', 'tur', 'cat', 'hrv', 'slv', 'lit', 'lav', 'est']);
+  // Librarius Phone O V1 lee chino simplificado, japonés y coreano, y también el alfabeto latino de los seis primeros (no los acentos de Phone E V1).
   // Entrada de 32 px de alto (los demás, 24).
-  const IDIOMAS_EO1 = new Set(['chi_sim', 'jpn', 'kor']);
-  // Librarius C V1 (EC1) lee ruso (también con la ortografía anterior a 1918), ucraniano, bielorruso, búlgaro, serbio y macedonio.
-  const IDIOMAS_EC1 = new Set(['rus', 'ukr', 'bel', 'bul', 'srp', 'mkd']);
-  const FAMILIAS = [['eo1', IDIOMAS_EO1], ['ec1', IDIOMAS_EC1], ['ee1', IDIOMAS_EE1]];
+  const IDIOMAS_PHONE_O_V1 = new Set(['chi_sim', 'jpn', 'kor']);
+  // Librarius Phone C V1 lee ruso (también con la ortografía anterior a 1918), ucraniano, bielorruso, búlgaro, serbio y macedonio.
+  const IDIOMAS_PHONE_C_V1 = new Set(['rus', 'ukr', 'bel', 'bul', 'srp', 'mkd']);
+  // Cada clave es el nombre público del modelo (los archivos de assets/modelos/ se llaman igual): nunca el código interno del entrenamiento.
+  const FAMILIAS = [['phone-o-v1', IDIOMAS_PHONE_O_V1], ['phone-c-v1', IDIOMAS_PHONE_C_V1], ['phone-e-v1', IDIOMAS_PHONE_E_V1]];
   const familiasDe = (idiomas) => FAMILIAS.filter(([, s]) => (idiomas || []).some((i) => s.has(i))).map(([c]) => c);
-  const modeloPara = (idiomas) => familiasDe(idiomas)[0] || 'e4';
+  const modeloPara = (idiomas) => familiasDe(idiomas)[0] || 'phone-v2';
   const MODELOS = {
-    e4: { lector: 'librarius-phone-v1-int8.onnx', alfabeto: 'librarius-alfabeto.json', alto: 24 },
-    ee1: { lector: 'librarius-ee1-int8.onnx', alfabeto: 'librarius-alfabeto-ee1.json', alto: 24 },
-    ec1: { lector: 'librarius-ec1-int8.onnx', alfabeto: 'librarius-alfabeto-ec1.json', alto: 24 },
-    eo1: { lector: 'librarius-eo1-int8.onnx', alfabeto: 'librarius-alfabeto-eo1.json', alto: 32 },
+    'phone-v2': { lector: 'librarius-phone-v2-int8.onnx', alfabeto: 'librarius-alfabeto.json', alto: 24 },
+    'phone-e-v1': { lector: 'librarius-phone-e-v1-int8.onnx', alfabeto: 'librarius-alfabeto-phone-e-v1.json', alto: 24 },
+    'phone-c-v1': { lector: 'librarius-phone-c-v1-int8.onnx', alfabeto: 'librarius-alfabeto-phone-c-v1.json', alto: 24 },
+    'phone-o-v1': { lector: 'librarius-phone-o-v1-int8.onnx', alfabeto: 'librarius-alfabeto-phone-o-v1.json', alto: 32 },
   };
-  const UMBRAL_FONDO_OSCURO = 110;   // mediana del gris por debajo de esto = fondo oscuro, se invierte antes de leer
   const LADO_MAXIMO = 3200;   // lado largo máximo de la página que se le pasa a Librarius (más no aporta: las líneas se reescalan a 24 o 32 px)
 
   // Los seis primeros idiomas se mezclan con cualquiera (todos los modelos traen su alfabeto); dos familias a la vez (p. ej. ruso y
@@ -44,7 +44,7 @@
   const absoluta = (ruta) => new URL(ruta, location.href).href;
   // Versión en la dirección de los scripts: el sitio deja que el navegador los guarde horas, y una copia vieja
   // mezclada con una nueva rompe la lectura. Subirla cuando cambie librarius-pagina.js o librarius-pagina-hilos.js.
-  const V = '?v=6';
+  const V = '?v=7';
 
   function cargarScript(src) {
     return new Promise((ok, mal) => {
@@ -55,7 +55,7 @@
     });
   }
 
-  const promesasCarga = {}, motores = {};      // por modelo ('e4' o 'ee1')
+  const promesasCarga = {}, motores = {};      // por modelo ('phone-v2', 'phone-e-v1', 'phone-c-v1' u 'phone-o-v1')
   // Las páginas pasan de a una por el único lector: su detector guarda la página que está leyendo, y Flujos pide varias a la vez.
   let fila = Promise.resolve();
 
@@ -71,7 +71,7 @@
         rutaOrt: absoluta(rutaVendor('onnxruntime-web/1.20.1/')),
         rutaPagina: BASE + 'librarius-pagina.js' + V,
         rutaHilo: BASE + 'librarius-hilo.js',
-        modeloVersus: BASE + '../modelos/versus-phone-v1.onnx' + V,
+        modeloVersus: BASE + '../modelos/versus-phone-v2.onnx' + V,
         modeloLibrarius: BASE + '../modelos/' + MODELOS[clave].lector + V,
         alfabeto,
         opciones: { alto: MODELOS[clave].alto },
@@ -92,13 +92,9 @@
       x.imageSmoothingQuality = 'high';
       x.drawImage(canvas, 0, 0, w, h);
       const d = x.getImageData(0, 0, w, h).data, g = new Uint8Array(w * h);
-      const hist = new Uint32Array(256);
-      for (let i = 0, j = 0; j < g.length; i += 4, j++) hist[g[j] = (d[i] * 77 + d[i + 1] * 150 + d[i + 2] * 29) >> 8]++;
-      // Versus y Librarius aprendieron con letra oscura sobre fondo claro: con fondo oscuro (capturas en modo oscuro,
-      // carteles) casi no encuentran líneas. Si la mediana de la página es oscura, se invierte el gris.
-      let acumulado = 0, mediana = 0;
-      while (mediana < 255 && (acumulado += hist[mediana]) < g.length / 2) mediana++;
-      if (mediana < UMBRAL_FONDO_OSCURO) for (let j = 0; j < g.length; j++) g[j] = 255 - g[j];
+      for (let i = 0, j = 0; j < g.length; i += 4, j++) g[j] = (d[i] * 77 + d[i + 1] * 150 + d[i + 2] * 29) >> 8;
+      // Ya no se invierte la página entera cuando es oscura: Versus Phone V2 encuentra las líneas con cualquier polaridad y cada línea de letra clara
+      // sobre fondo oscuro se invierte sola al recortarla (letraClaraLinea en librarius-pagina.js), así también se leen las páginas con fondos mezclados.
       return { gris: g, w, h, factor: f };
     }
 

@@ -266,6 +266,21 @@
     return orden.slice(0, mitad).concat(otras.slice(0, mitad));
   }
 
+  // ¿Esta línea tiene letra CLARA sobre fondo oscuro? (un cartel, una franja o un recuadro oscuro dentro de una página clara). El reconocedor
+  // aprendió con letra oscura sobre fondo claro: estas líneas se invierten una por una, y así una página con fondos mezclados se lee bien
+  // aunque la página entera no sea oscura. El fondo es la mediana del borde del recorte (siempre es margen) y la letra, lo que se aparta
+  // de él: si hay más píxeles claros que oscuros alrededor de ese fondo, la letra es clara. Con la mediana de TODO el recorte una
+  // línea de letra muy negra (un título) se tomaría por fondo.
+  function letraClaraLinea(px, ancho, alto) {
+    const borde = [];
+    for (let x = 0; x < ancho; x++) borde.push(px[x], px[ancho + x], px[(alto - 2) * ancho + x], px[(alto - 1) * ancho + x]);
+    for (let y = 2; y < alto - 2; y++) borde.push(px[y * ancho], px[y * ancho + 1], px[y * ancho + ancho - 2], px[y * ancho + ancho - 1]);
+    const fondo = mediana(borde);
+    let claros = 0, oscuros = 0;
+    for (let i = 0; i < px.length; i++) { if (px[i] > fondo + 30) claros++; else if (px[i] < fondo - 30) oscuros++; }
+    return claros > oscuros;
+  }
+
   // ctx: { alto, alturaRel, rellenoRel }  ->  { px: Uint8Array(alto * ancho), ancho }
   function recortarLinea(ctx, gris, w, h, linea, invertir, relleno) {
     const { alto, alturaRel, rellenoRel } = ctx;
@@ -292,7 +307,9 @@
       }
     }
     const nw = Math.max(8, redondearPar(W * alto / H));
-    return { px: redimensionar(a, W, H, nw, alto, H <= alto), ancho: nw };
+    const px = redimensionar(a, W, H, nw, alto, H <= alto);
+    if (letraClaraLinea(px, nw, alto)) for (let i = 0; i < px.length; i++) px[i] = 255 - px[i];
+    return { px, ancho: nw };
   }
 
   // ctx: { ort, librarius, alfabeto, alto }; r = { px, ancho }  ->  { texto, seguridad }

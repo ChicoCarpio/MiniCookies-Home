@@ -338,7 +338,7 @@ window.i18nPagina = {
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../vendor/tesseract.js/7.0.0/dist/tesseract.min.js?v=2"></script>
-<script src="../assets/js/ocr-librarius.js?v=7"></script>
+<script src="../assets/js/ocr-librarius.js?v=8"></script>
 <script src="../assets/js/ocr.js"></script>
 <script src="../assets/js/reordenar-tactil.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
@@ -414,7 +414,7 @@ function idiomasElegidos() {
   return [...document.querySelectorAll('#listaIdiomas input:checked')].map(c => c.value);
 }
 
-// Librarius (Beta) lee una sola familia de idiomas a la vez (EE1, cirílicos o CJK): con una mezcla se vuelve a Tesseract y se avisa.
+// Librarius (Beta) lee una sola familia de idiomas a la vez (Librarius Phone E V1, Phone C V1 o Phone O V1): con una mezcla se vuelve a Tesseract y se avisa.
 function actualizarMotor() {
   const posible = OcrLibrarius.soportaIdiomas(idiomasElegidos());
   const radioLibrarius = document.querySelector('input[name="motorOcr"][value="librarius"]');
