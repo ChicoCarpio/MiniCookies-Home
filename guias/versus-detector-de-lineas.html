@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Por qué el OCR se saltea líneas: cómo encuentra Versus el texto de una página — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Cómo encuentra Versus las líneas de texto de una página, qué hace con páginas giradas, de cabeza o con fondos oscuros, y qué hacer cuando falta una línea.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Por qué el OCR se saltea líneas: cómo encuentra Versus el texto de una página — Mini Cookies',
+    'meta-descripcion': 'Cómo encuentra Versus las líneas de texto de una página, qué hace con páginas giradas, de cabeza o con fondos oscuros, y qué hacer cuando falta una línea.',
+    'h1': 'Por qué el OCR se saltea líneas: cómo encuentra Versus el texto de una página',
+    'b1': 'El OCR no empieza por las letras. Primero necesita saber dónde está cada línea y hacia qué lado apunta. Si esa parte se equivoca, el texto sale con líneas que faltan, un párrafo partido en dos o una página entera leída de cabeza.',
+    'b2': 'Versus es el modelo que hace ese paso. No tiene pantalla propia: corre dentro de <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a> y en los módulos de OCR de Flujos, antes que el lector. Esta guía explica qué hace y qué puede salir mal.',
+    'b3': 'Qué devuelve Versus',
+    'b4': 'Versus mira la página reducida, con 1024 píxeles como máximo en su lado largo, y marca los puntos que son tinta de texto. Cada mancha de tinta se convierte en una línea, con su centro, su largo, su alto y su ángulo. Los trozos de un mismo renglón, separados por un hueco chico, se vuelven a unir.',
+    'b5': 'Versus se entrenó con páginas a varias escalas, rotadas 90, 180 y 270 grados, con inclinaciones de hasta 15 grados y con defectos de escáner simulados. En un 35 % de los ejemplos, además, se cambió la polaridad: la página entera era oscura, o tenía franjas, recuadros o columnas oscuras dentro de una página clara.',
+    'b6': 'Páginas giradas y de cabeza',
+    'b7': 'Si la página está de costado, Versus lo nota por la dirección de sus líneas. Librarius la gira y vuelve a buscar las líneas, así que una hoja escaneada en horizontal se lee sin que la tengas que girar antes.',
+    'b8': 'De cabeza, con 180 grados, la dirección de las líneas no alcanza para decidir. El lector mira varias de las líneas más largas, las lee al derecho y al revés, y se queda con el sentido que da lecturas más seguras. Con muy pocas líneas hay poco para votar, y puede equivocarse.',
+    'b9': 'Si hay un trozo torcido, cada línea se corta según su ángulo, y Versus está entrenado con inclinaciones de hasta 15 grados. La casilla «Enderezar automáticamente páginas/fotos torcidas (recomendado)», de <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a>, corrige la página entera antes de leerla. Su efecto más visible es la imagen que queda en el PDF.',
+    'b10': 'Títulos y letras grandes',
+    'b11': 'Versus ve bien las letras de tamaño normal. Un título muy grande puede quedar fuera de la primera búsqueda, así que la página se busca de nuevo en copias más chicas. Si en esa copia aparece una lectura más segura que lo ya encontrado, y no choca con líneas normales bien leídas, el título la reemplaza.',
+    'b12': 'Fondos oscuros, bandas y columnas',
+    'b13': 'Una página clara con una franja oscura, un recuadro o una columna de letra clara se leía peor cuando la página entera se trataba como un solo bloque. Ahora cada línea se revisa por separado: si la letra es clara sobre fondo oscuro, esa línea se invierte antes de leerla, y el resto de la página no se toca. En pruebas con páginas así, la tasa de error bajó de unos 23 a 59 % a unos 13 a 17 %.',
+    'b14': 'Qué significa para el texto',
+    'b15': 'El detector decide qué se lee y en qué orden. Si una línea no aparece, falta en el texto, sin ningún aviso. Un renglón puede salir cortado en dos, y dos renglones muy juntos pueden pegarse en uno con la lectura mezclada. El orden del .txt sigue la lectura de la página: primero las columnas, después los bloques y al final las filas.',
+    'b16': 'Cómo ayudar al detector',
+    'b17-1': 'Fotografiá o escaneá con el texto derecho y de frente. Una foto muy de costado deforma las líneas.',
+    'b17-2': 'Si el texto es muy chico en una página grande, puede no verse, porque la página se reduce antes de buscar las líneas. Recortá esa zona con <a href="../herramientas/recortar-imagen.html">Recortar imagen</a> y pasala al OCR como imagen suelta.',
+    'b17-3': 'Si una página PDF sale de cabeza, girala con <a href="../herramientas/rotar-pdf.html">Rotar PDF</a> antes de correr el OCR.',
+    'b18': 'Preguntas frecuentes',
+    'b19': '<strong>¿Puedo ver las líneas que encontró Versus?</strong> No. La herramienta no dibuja las líneas detectadas. Lo que ves es el resultado: si falta una línea en el .txt, ahí está la señal.',
+    'b20': '<strong>¿Por qué una página de cabeza sale bien y otra no?</strong> La decisión depende de las líneas más largas de cada página. Con pocas líneas, o con líneas muy cortas, la votación tiene poco que mirar y puede equivocarse. Girá esa página con <a href="../herramientas/rotar-pdf.html">Rotar PDF</a> y volvé a correr el OCR.',
+    'b21': 'Resumen',
+    'b22': 'Versus encuentra cada línea, su ángulo y su sentido antes de que Librarius la lea. Cuando falta una línea o sale de cabeza, el fallo está en ese paso. Usá una página derecha, con letra de tamaño normal, y recortá o girá la zona problemática antes de volver a correr el OCR.',
+    'rel1': 'OCR de PDF e imágenes escaneadas',
+    'rel2': 'Escáner de documentos',
+    'rel3': 'Rotar PDF',
+    'rel4': 'Recortar imagen'
+  },
+  en: {
+    'titulo-pagina': 'Why OCR skips lines: how Versus finds the text on a page — Mini Cookies',
+    'meta-descripcion': 'How Versus finds the text lines on a page, what it does with pages turned, upside down or on dark backgrounds, and what to do when a line is missing.',
+    'h1': 'Why OCR skips lines: how Versus finds the text on a page',
+    'b1': 'OCR doesn\'t start with the letters. First it needs to know where each line is and which way it points. If that step goes wrong, the text comes out with missing lines, a paragraph split in two or a whole page read upside down.',
+    'b2': 'Versus is the model that does that step. It has no screen of its own: it runs inside <a href="../herramientas/ocr-pdf.html">OCR for scanned PDFs and images</a> and in the OCR modules of Flows, before the reader. This guide explains what it does and what can go wrong.',
+    'b3': 'What Versus returns',
+    'b4': 'Versus looks at the page reduced to at most 1024 pixels on its long side, and marks the points that are text ink. Each patch of ink becomes a line, with its centre, length, height and angle. Pieces of the same line, separated by a small gap, are joined again.',
+    'b5': 'Versus was trained on pages at several scales, rotated 90, 180 and 270 degrees, with tilts of up to 15 degrees and with simulated scanner defects. In 35 % of the examples, the polarity was also changed: the whole page was dark, or it had dark bands, boxes or columns inside a light page.',
+    'b6': 'Turned and upside-down pages',
+    'b7': 'If the page is sideways, Versus notices it from the direction of its lines. Librarius turns the page and looks for the lines again, so a scanned sheet that is turned sideways is read without you having to turn it first.',
+    'b8': 'Upside down, at 180 degrees, the direction of the lines is not enough to decide. The reader looks at several of the longest lines, reads them both ways, and keeps the direction that gives more reliable readings. With very few lines there is little to vote with, and it can get it wrong.',
+    'b9': 'If there is a tilted part, each line is cut along its own angle, and Versus was trained with tilts of up to 15 degrees. The “Automatically straighten tilted pages/photos (recommended)” box in <a href="../herramientas/ocr-pdf.html">OCR for scanned PDFs and images</a> straightens the whole page before it is read. Its most visible effect is on the image that ends up in the PDF.',
+    'b10': 'Titles and large letters',
+    'b11': 'Versus reads normal-sized letters well. A very large title can fall outside the first search, so the page is searched again in smaller copies. If that copy gives a more reliable reading than what was already found, and it doesn\'t clash with normal lines that were read well, the title replaces it.',
+    'b12': 'Dark backgrounds, bands and columns',
+    'b13': 'A light page with a dark band, a box or a column of light text used to read worse when the whole page was handled as one block. Now each line is checked on its own: if the letters are light on a dark background, that line is inverted before it is read, and the rest of the page is left alone. In tests with pages like this, the error rate went down from about 23–59 % to about 13–17 %.',
+    'b14': 'What it means for the text',
+    'b15': 'The detector decides what gets read and in what order. If a line isn\'t found, it is missing from the text, with no warning. A line can come out split in two, and two lines that sit very close together can be merged into one with the reading mixed. The order of the .txt follows the reading order of the page: columns first, then blocks and finally rows.',
+    'b16': 'How to help the detector',
+    'b17-1': 'Photograph or scan with the text upright and facing you. A photo taken at a sharp angle distorts the lines.',
+    'b17-2': 'If the text is very small on a large page, it may not show up, because the page is reduced before the lines are searched. Crop that area with <a href="../herramientas/recortar-imagen.html">Crop an image</a> and send it to OCR as a separate image.',
+    'b17-3': 'If a PDF page comes out upside down, turn it with <a href="../herramientas/rotar-pdf.html">Rotate PDF</a> before running OCR.',
+    'b18': 'Frequently asked questions',
+    'b19': '<strong>Can I see the lines Versus found?</strong> No. The tool doesn\'t draw the detected lines. What you see is the result: if a line is missing from the .txt, that is the sign.',
+    'b20': '<strong>Why does an upside-down page come out right and another one doesn\'t?</strong> The decision depends on the longest lines on each page. With few lines, or with very short ones, the vote has little to go on and can get it wrong. Turn that page with <a href="../herramientas/rotar-pdf.html">Rotate PDF</a> and run OCR again.',
+    'b21': 'Summary',
+    'b22': 'Versus finds each line, its angle and its direction before Librarius reads it. When a line is missing or comes out upside down, the failure is in that step. Use a straight page with normal-sized text, and crop or turn the problem area before running OCR again.',
+    'rel1': 'OCR for scanned PDFs and images',
+    'rel2': 'Document scanner',
+    'rel3': 'Rotate PDF',
+    'rel4': 'Crop an image'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Por qué el OCR se saltea líneas: cómo encuentra Versus el texto de una página</h1>
+    <p data-i18n-html="b1">El OCR no empieza por las letras. Primero necesita saber dónde está cada línea y hacia qué lado apunta. Si esa parte se equivoca, el texto sale con líneas que faltan, un párrafo partido en dos o una página entera leída de cabeza.</p>
+    <p data-i18n-html="b2">Versus es el modelo que hace ese paso. No tiene pantalla propia: corre dentro de <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a> y en los módulos de OCR de Flujos, antes que el lector. Esta guía explica qué hace y qué puede salir mal.</p>
+    <h2 data-i18n="b3">Qué devuelve Versus</h2>
+    <p data-i18n-html="b4">Versus mira la página reducida, con 1024 píxeles como máximo en su lado largo, y marca los puntos que son tinta de texto. Cada mancha de tinta se convierte en una línea, con su centro, su largo, su alto y su ángulo. Los trozos de un mismo renglón, separados por un hueco chico, se vuelven a unir.</p>
+    <p data-i18n-html="b5">Versus se entrenó con páginas a varias escalas, rotadas 90, 180 y 270 grados, con inclinaciones de hasta 15 grados y con defectos de escáner simulados. En un 35 % de los ejemplos, además, se cambió la polaridad: la página entera era oscura, o tenía franjas, recuadros o columnas oscuras dentro de una página clara.</p>
+    <h2 data-i18n="b6">Páginas giradas y de cabeza</h2>
+    <p data-i18n-html="b7">Si la página está de costado, Versus lo nota por la dirección de sus líneas. Librarius la gira y vuelve a buscar las líneas, así que una hoja escaneada en horizontal se lee sin que la tengas que girar antes.</p>
+    <p data-i18n-html="b8">De cabeza, con 180 grados, la dirección de las líneas no alcanza para decidir. El lector mira varias de las líneas más largas, las lee al derecho y al revés, y se queda con el sentido que da lecturas más seguras. Con muy pocas líneas hay poco para votar, y puede equivocarse.</p>
+    <p data-i18n-html="b9">Si hay un trozo torcido, cada línea se corta según su ángulo, y Versus está entrenado con inclinaciones de hasta 15 grados. La casilla «Enderezar automáticamente páginas/fotos torcidas (recomendado)», de <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a>, corrige la página entera antes de leerla. Su efecto más visible es la imagen que queda en el PDF.</p>
+    <h2 data-i18n="b10">Títulos y letras grandes</h2>
+    <p data-i18n-html="b11">Versus ve bien las letras de tamaño normal. Un título muy grande puede quedar fuera de la primera búsqueda, así que la página se busca de nuevo en copias más chicas. Si en esa copia aparece una lectura más segura que lo ya encontrado, y no choca con líneas normales bien leídas, el título la reemplaza.</p>
+    <h2 data-i18n="b12">Fondos oscuros, bandas y columnas</h2>
+    <p data-i18n-html="b13">Una página clara con una franja oscura, un recuadro o una columna de letra clara se leía peor cuando la página entera se trataba como un solo bloque. Ahora cada línea se revisa por separado: si la letra es clara sobre fondo oscuro, esa línea se invierte antes de leerla, y el resto de la página no se toca. En pruebas con páginas así, la tasa de error bajó de unos 23 a 59 % a unos 13 a 17 %.</p>
+    <h2 data-i18n="b14">Qué significa para el texto</h2>
+    <p data-i18n-html="b15">El detector decide qué se lee y en qué orden. Si una línea no aparece, falta en el texto, sin ningún aviso. Un renglón puede salir cortado en dos, y dos renglones muy juntos pueden pegarse en uno con la lectura mezclada. El orden del .txt sigue la lectura de la página: primero las columnas, después los bloques y al final las filas.</p>
+    <h2 data-i18n="b16">Cómo ayudar al detector</h2>
+    <ul>
+      <li data-i18n-html="b17-1">Fotografiá o escaneá con el texto derecho y de frente. Una foto muy de costado deforma las líneas.</li>
+      <li data-i18n-html="b17-2">Si el texto es muy chico en una página grande, puede no verse, porque la página se reduce antes de buscar las líneas. Recortá esa zona con <a href="../herramientas/recortar-imagen.html">Recortar imagen</a> y pasala al OCR como imagen suelta.</li>
+      <li data-i18n-html="b17-3">Si una página PDF sale de cabeza, girala con <a href="../herramientas/rotar-pdf.html">Rotar PDF</a> antes de correr el OCR.</li>
+    </ul>
+    <h2 data-i18n="b18">Preguntas frecuentes</h2>
+    <p data-i18n-html="b19"><strong>¿Puedo ver las líneas que encontró Versus?</strong> No. La herramienta no dibuja las líneas detectadas. Lo que ves es el resultado: si falta una línea en el .txt, ahí está la señal.</p>
+    <p data-i18n-html="b20"><strong>¿Por qué una página de cabeza sale bien y otra no?</strong> La decisión depende de las líneas más largas de cada página. Con pocas líneas, o con líneas muy cortas, la votación tiene poco que mirar y puede equivocarse. Girá esa página con <a href="../herramientas/rotar-pdf.html">Rotar PDF</a> y volvé a correr el OCR.</p>
+    <h2 data-i18n="b21">Resumen</h2>
+    <p data-i18n-html="b22">Versus encuentra cada línea, su ángulo y su sentido antes de que Librarius la lea. Cuando falta una línea o sale de cabeza, el fallo está en ese paso. Usá una página derecha, con letra de tamaño normal, y recortá o girá la zona problemática antes de volver a correr el OCR.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/ocr-pdf.html" data-i18n="rel1">OCR de PDF e imágenes escaneadas</a></li>
+      <li><a href="../herramientas/escanear-documento.html" data-i18n="rel2">Escáner de documentos</a></li>
+      <li><a href="../herramientas/rotar-pdf.html" data-i18n="rel3">Rotar PDF</a></li>
+      <li><a href="../herramientas/recortar-imagen.html" data-i18n="rel4">Recortar imagen</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

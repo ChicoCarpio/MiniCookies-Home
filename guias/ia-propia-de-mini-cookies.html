@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Modelos de IA propios de Mini Cookies: qué hacen, dónde corren y qué licencia tienen — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Qué hacen Custos, Versus y Librarius, con qué datos se entrenaron, qué permite su licencia y dónde fallan. Corren en tu navegador.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Modelos de IA propios de Mini Cookies: qué hacen, dónde corren y qué licencia tienen — Mini Cookies',
+    'meta-descripcion': 'Qué hacen Custos, Versus y Librarius, con qué datos se entrenaron, qué permite su licencia y dónde fallan. Corren en tu navegador.',
+    'h1': 'Modelos de IA propios de Mini Cookies: qué hacen, dónde corren y qué licencia tienen',
+    'b1': 'Cuando el <a href="../herramientas/escanear-documento.html">Escáner de documentos</a> busca las esquinas de una hoja o el OCR lee un contrato escaneado, trabaja una red neuronal. Mini Cookies tiene tres: Custos, Versus y Librarius. Los diseñamos y los entrenamos nosotros, y ninguno parte de pesos de otra empresa. Corren en tu navegador, así que el documento no se sube para que lo lea el modelo.',
+    'b2': 'Qué hace cada modelo',
+    'b3-c1': 'Modelo',
+    'b3-c2': 'Qué hace',
+    'b3-c3': 'Dónde trabaja',
+    'b3-c4': 'Peso del archivo',
+    'b3-f1c1': 'Custos Phone V2',
+    'b3-f1c2': 'Encuentra las cuatro esquinas de una hoja o de un objeto rectangular en una foto',
+    'b3-f1c3': 'Escáner de documentos',
+    'b3-f1c4': 'Unos 3,9 MB',
+    'b3-f2c1': 'Versus Phone V2',
+    'b3-f2c2': 'Encuentra las líneas de texto de una página y su inclinación',
+    'b3-f2c3': 'OCR de PDF e imágenes escaneadas y el OCR de Flujos',
+    'b3-f2c4': 'Unos 2 MB',
+    'b3-f3c1': 'Librarius Phone V3',
+    'b3-f3c2': 'Lee las líneas de los seis idiomas principales, y también los signos nuevos',
+    'b3-f3c3': 'OCR de PDF e imágenes escaneadas y el OCR de Flujos',
+    'b3-f3c4': 'Unos 2,7 MB',
+    'b3-f4c1': 'Librarius Phone E V1, C V1 y O V1',
+    'b3-f4c2': 'Leen los otros grupos de idiomas: latinos, cirílicos y orientales',
+    'b3-f4c3': 'OCR de PDF e imágenes escaneadas y el OCR de Flujos',
+    'b3-f4c4': 'De 2,7 a unos 5 MB',
+    'b4': 'Versus y Librarius trabajan en pareja dentro de <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a>: Versus encuentra las líneas y Librarius lee cada una. Custos no tiene pantalla propia: el escáner lo usa solo.',
+    'b5': 'Cómo se entrenaron',
+    'b6': 'Versus, Custos, Librarius Phone V3 y Librarius Phone O V1 se entrenaron desde cero. Librarius Phone E V1 y Librarius Phone C V1 partieron de Librarius Phone V1, nuestro lector anterior, así que tampoco usan pesos de terceros.',
+    'b7': 'Los datos de entrenamiento son textos y páginas de libros y documentos de dominio público o con licencia abierta, como Project Gutenberg, Wikipedia y Wikisource, OpenStax o HAL. Las letras se dibujaron con tipografías de Google Fonts, y se usaron líneas reales cortadas de PDF de esos libros. Las fotos de documentos de Custos las tomó el autor, y las de objetos vienen de Wikimedia Commons y Open Images, con licencias libres.',
+    'b8': 'Ningún modelo contiene esos textos ni esas fotos. Lo que aprendieron son formas de letras y de hojas.',
+    'b9': 'Cada archivo de modelo lleva dentro su autor, el copyright, la licencia, la versión y la lista de datos de entrenamiento con sus atribuciones. La misma lista está en la página de Créditos.',
+    'b10': 'Qué permite la licencia',
+    'b11': 'Esto es la sección 13 de la Licencia de Código Fuente y Modelos de Mini Cookies, en corto:',
+    'b12-1': 'Podés usar los modelos por medio de las herramientas del sitio, también con fines comerciales.',
+    'b12-2': 'Lo que obtenés con ellos, como el texto reconocido o un recorte, pertenece a quien lo generó. El material original sigue siendo de quien lo tiene: un libro escaneado no pasa a ser tuyo por pasarlo por el OCR.',
+    'b12-3': 'Sin permiso escrito del titular, no podés copiar los archivos para usarlos fuera del sitio, meterlos en otro producto, modificarlos, reentrenarlos, ni usar sus resultados de forma sistemática para entrenar otro modelo. Tampoco podés quitar los datos de autor que llevan dentro.',
+    'b12-4': 'Podés describir los modelos y medir su calidad con las herramientas del sitio, y publicar esas mediciones con el nombre y la versión.',
+    'b13': 'Es un resumen. Lo que vale es el texto de la sección 13 y la sección «Modelos de inteligencia artificial propios» de los Términos de uso. La sección 14 agrega que los modelos, los textos de las guías y las imágenes del sitio no se pueden usar para entrenar otros sistemas de inteligencia artificial sin permiso escrito.',
+    'b14': 'Límites de los modelos',
+    'b15': 'Se equivocan, así que no conviene usar sus resultados sin mirarlos. Custos puede elegir un rectángulo que no es la hoja, Versus puede no ver una línea muy chica, y Librarius puede cambiar una letra por otra parecida, sobre todo en una foto borrosa. Librarius no lee la letra a mano de forma confiable.',
+    'b16': 'Revisá las cifras, los nombres y las fechas antes de usar un resultado, sobre todo en contratos, facturas o documentos médicos.',
+    'b17': 'La primera vez que se usa un modelo, el navegador lo descarga (de unos 2 a 5 MB) y lo guarda en su caché.',
+    'b18': 'Preguntas frecuentes',
+    'b19': '<strong>¿Mi documento sale de la computadora?</strong> No. Librarius y Versus corren en hilos de trabajo del navegador, y Custos en la propia página, con onnxruntime-web. Lo que se descarga son los archivos del modelo, no tus documentos.',
+    'b20': '<strong>¿Lo que procesás sirve para entrenar los modelos?</strong> No. Los modelos son archivos fijos que se descargan al navegador, y procesar un documento no los cambia.',
+    'b21': '<strong>¿Puedo usar los modelos en mi propio programa?</strong> No, sin permiso escrito del titular. Sí podés describirlos y medir su calidad, siempre con el nombre y la versión.',
+    'b22': '<strong>¿Qué tan bien leen?</strong> Medimos Librarius en páginas escaneadas reales que no se usaron para entrenar. Las cifras están en la guía sobre el lector Librarius.',
+    'b23': 'Resumen',
+    'b24': 'Custos, Versus y Librarius son modelos de Mini Cookies, entrenados sin pesos de terceros y ejecutados en tu navegador. Hacen funcionar el escáner y el OCR. La licencia te deja usarlos por medio de las herramientas, también con fines comerciales, pero no sacarlos del sitio ni entrenar otros modelos con ellos. Revisá siempre lo que devuelven.',
+    'rel1': 'OCR de PDF e imágenes escaneadas',
+    'rel2': 'Escáner de documentos',
+    'rel3': 'Flujos: encadená herramientas'
+  },
+  en: {
+    'titulo-pagina': 'Mini Cookies\' own AI models: what they do, where they run and what license they have — Mini Cookies',
+    'meta-descripcion': 'What Custos, Versus and Librarius do, what data trained them, what their license allows and where they fail. They run in your browser.',
+    'h1': 'Mini Cookies\' own AI models: what they do, where they run and what license they have',
+    'b1': 'When the <a href="../herramientas/escanear-documento.html">Document scanner</a> looks for the corners of a sheet or OCR reads a scanned contract, a neural network does the work. Mini Cookies has three: Custos, Versus and Librarius. We designed and trained them ourselves, and none of them starts from another company\'s weights. They run in your browser, so the document isn\'t uploaded for the model to read.',
+    'b2': 'What each model does',
+    'b3-c1': 'Model',
+    'b3-c2': 'What it does',
+    'b3-c3': 'Where it works',
+    'b3-c4': 'File size',
+    'b3-f1c1': 'Custos Phone V2',
+    'b3-f1c2': 'Finds the four corners of a sheet or a rectangular object in a photo',
+    'b3-f1c3': 'Document scanner',
+    'b3-f1c4': 'About 3.9 MB',
+    'b3-f2c1': 'Versus Phone V2',
+    'b3-f2c2': 'Finds the text lines of a page and their tilt',
+    'b3-f2c3': 'OCR for scanned PDFs and images, and the OCR in Flows',
+    'b3-f2c4': 'About 2 MB',
+    'b3-f3c1': 'Librarius Phone V3',
+    'b3-f3c2': 'Reads the lines in the six main languages, and the new signs too',
+    'b3-f3c3': 'OCR for scanned PDFs and images, and the OCR in Flows',
+    'b3-f3c4': 'About 2.7 MB',
+    'b3-f4c1': 'Librarius Phone E V1, C V1 and O V1',
+    'b3-f4c2': 'Read the other language groups: Latin, Cyrillic and East Asian',
+    'b3-f4c3': 'OCR for scanned PDFs and images, and the OCR in Flows',
+    'b3-f4c4': 'From 2.7 to about 5 MB',
+    'b4': 'Versus and Librarius work as a pair inside <a href="../herramientas/ocr-pdf.html">OCR for scanned PDFs and images</a>: Versus finds the lines and Librarius reads each one. Custos has no screen of its own: the scanner uses it on its own.',
+    'b5': 'How they were trained',
+    'b6': 'Versus, Custos, Librarius Phone V3 and Librarius Phone O V1 were trained from scratch. Librarius Phone E V1 and Librarius Phone C V1 started from Librarius Phone V1, our previous reader, so they don\'t use third-party weights either.',
+    'b7': 'The training data is text and pages from books and documents in the public domain or under open licenses, such as Project Gutenberg, Wikipedia and Wikisource, OpenStax or HAL. The letters were drawn with Google Fonts typefaces, and real lines cut from PDFs of those books were used. The author took the photos of documents used for Custos, and the object photos come from Wikimedia Commons and Open Images, under free licenses.',
+    'b8': 'No model contains those texts or those photos. What they learned are letter shapes and sheets of paper.',
+    'b9': 'Each model file carries its author, copyright, license, version and the list of training data with its attributions. The same list is on the Credits page.',
+    'b10': 'What the license allows',
+    'b11': 'This is section 13 of the Mini Cookies Source Code and Models License, in short:',
+    'b12-1': 'You can use the models through the site\'s tools, including for commercial purposes.',
+    'b12-2': 'What you get from them, such as recognized text or a crop, belongs to whoever generated it. The original material still belongs to whoever holds it: a scanned book does not become yours by going through OCR.',
+    'b12-3': 'Without the owner\'s written permission, you cannot copy the files to use them outside the site, put them into another product, modify them, retrain them, or systematically use their results to train another model. You also cannot remove the author data they carry.',
+    'b12-4': 'You can describe the models and measure their quality with the site\'s tools, and publish those measurements with the model\'s name and version.',
+    'b13': 'This is a summary. What counts is the text of section 13 and the section “Our own artificial intelligence models” in the Terms of use. Section 14 adds that the models, the guide texts and the site\'s images may not be used to train other artificial intelligence systems without written permission.',
+    'b14': 'Limits of the models',
+    'b15': 'They make mistakes, so don\'t use their results without checking them. Custos may pick a rectangle that isn\'t the sheet, Versus may miss a very small line, and Librarius may swap a letter for a similar one, especially in a blurry photo. Librarius doesn\'t read handwriting reliably.',
+    'b16': 'Check numbers, names and dates before you use a result, especially in contracts, invoices or medical documents.',
+    'b17': 'The first time a model is used, the browser downloads it (between about 2 and 5 MB) and keeps it in its cache.',
+    'b18': 'Frequently asked questions',
+    'b19': '<strong>Does my document leave the computer?</strong> No. Librarius and Versus run in Web Workers in the browser, and Custos runs on the page itself, with onnxruntime-web. What gets downloaded are the model files, not your documents.',
+    'b20': '<strong>Does what I process help train the models?</strong> No. The models are fixed files downloaded to the browser, and processing a document doesn\'t change them.',
+    'b21': '<strong>Can I use the models in my own program?</strong> No, not without the owner\'s written permission. You can describe them and measure their quality, always with the name and version.',
+    'b22': '<strong>How well do they read?</strong> We measured Librarius on real scanned pages that were not used for training. The figures are in the guide to the Librarius reader.',
+    'b23': 'Summary',
+    'b24': 'Custos, Versus and Librarius are Mini Cookies models, trained without third-party weights and run in your browser. They make the scanner and the OCR work. The license lets you use them through the tools, including for commercial purposes, but not take them out of the site or train other models with them. Always check what they return.',
+    'rel1': 'OCR for scanned PDFs and images',
+    'rel2': 'Document scanner',
+    'rel3': 'Flows: chain tools together'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Modelos de IA propios de Mini Cookies: qué hacen, dónde corren y qué licencia tienen</h1>
+    <p data-i18n-html="b1">Cuando el <a href="../herramientas/escanear-documento.html">Escáner de documentos</a> busca las esquinas de una hoja o el OCR lee un contrato escaneado, trabaja una red neuronal. Mini Cookies tiene tres: Custos, Versus y Librarius. Los diseñamos y los entrenamos nosotros, y ninguno parte de pesos de otra empresa. Corren en tu navegador, así que el documento no se sube para que lo lea el modelo.</p>
+    <h2 data-i18n="b2">Qué hace cada modelo</h2>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b3-c1">Modelo</th><th data-i18n-html="b3-c2">Qué hace</th><th data-i18n-html="b3-c3">Dónde trabaja</th><th data-i18n-html="b3-c4">Peso del archivo</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b3-f1c1">Custos Phone V2</td><td data-i18n-html="b3-f1c2">Encuentra las cuatro esquinas de una hoja o de un objeto rectangular en una foto</td><td data-i18n-html="b3-f1c3">Escáner de documentos</td><td data-i18n-html="b3-f1c4">Unos 3,9 MB</td></tr>
+        <tr><td data-i18n-html="b3-f2c1">Versus Phone V2</td><td data-i18n-html="b3-f2c2">Encuentra las líneas de texto de una página y su inclinación</td><td data-i18n-html="b3-f2c3">OCR de PDF e imágenes escaneadas y el OCR de Flujos</td><td data-i18n-html="b3-f2c4">Unos 2 MB</td></tr>
+        <tr><td data-i18n-html="b3-f3c1">Librarius Phone V3</td><td data-i18n-html="b3-f3c2">Lee las líneas de los seis idiomas principales, y también los signos nuevos</td><td data-i18n-html="b3-f3c3">OCR de PDF e imágenes escaneadas y el OCR de Flujos</td><td data-i18n-html="b3-f3c4">Unos 2,7 MB</td></tr>
+        <tr><td data-i18n-html="b3-f4c1">Librarius Phone E V1, C V1 y O V1</td><td data-i18n-html="b3-f4c2">Leen los otros grupos de idiomas: latinos, cirílicos y orientales</td><td data-i18n-html="b3-f4c3">OCR de PDF e imágenes escaneadas y el OCR de Flujos</td><td data-i18n-html="b3-f4c4">De 2,7 a unos 5 MB</td></tr>
+      </tbody>
+    </table></div>
+    <p data-i18n-html="b4">Versus y Librarius trabajan en pareja dentro de <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a>: Versus encuentra las líneas y Librarius lee cada una. Custos no tiene pantalla propia: el escáner lo usa solo.</p>
+    <h2 data-i18n="b5">Cómo se entrenaron</h2>
+    <p data-i18n-html="b6">Versus, Custos, Librarius Phone V3 y Librarius Phone O V1 se entrenaron desde cero. Librarius Phone E V1 y Librarius Phone C V1 partieron de Librarius Phone V1, nuestro lector anterior, así que tampoco usan pesos de terceros.</p>
+    <p data-i18n-html="b7">Los datos de entrenamiento son textos y páginas de libros y documentos de dominio público o con licencia abierta, como Project Gutenberg, Wikipedia y Wikisource, OpenStax o HAL. Las letras se dibujaron con tipografías de Google Fonts, y se usaron líneas reales cortadas de PDF de esos libros. Las fotos de documentos de Custos las tomó el autor, y las de objetos vienen de Wikimedia Commons y Open Images, con licencias libres.</p>
+    <p data-i18n-html="b8">Ningún modelo contiene esos textos ni esas fotos. Lo que aprendieron son formas de letras y de hojas.</p>
+    <p data-i18n-html="b9">Cada archivo de modelo lleva dentro su autor, el copyright, la licencia, la versión y la lista de datos de entrenamiento con sus atribuciones. La misma lista está en la página de Créditos.</p>
+    <h2 data-i18n="b10">Qué permite la licencia</h2>
+    <p data-i18n-html="b11">Esto es la sección 13 de la Licencia de Código Fuente y Modelos de Mini Cookies, en corto:</p>
+    <ul>
+      <li data-i18n-html="b12-1">Podés usar los modelos por medio de las herramientas del sitio, también con fines comerciales.</li>
+      <li data-i18n-html="b12-2">Lo que obtenés con ellos, como el texto reconocido o un recorte, pertenece a quien lo generó. El material original sigue siendo de quien lo tiene: un libro escaneado no pasa a ser tuyo por pasarlo por el OCR.</li>
+      <li data-i18n-html="b12-3">Sin permiso escrito del titular, no podés copiar los archivos para usarlos fuera del sitio, meterlos en otro producto, modificarlos, reentrenarlos, ni usar sus resultados de forma sistemática para entrenar otro modelo. Tampoco podés quitar los datos de autor que llevan dentro.</li>
+      <li data-i18n-html="b12-4">Podés describir los modelos y medir su calidad con las herramientas del sitio, y publicar esas mediciones con el nombre y la versión.</li>
+    </ul>
+    <p data-i18n-html="b13">Es un resumen. Lo que vale es el texto de la sección 13 y la sección «Modelos de inteligencia artificial propios» de los Términos de uso. La sección 14 agrega que los modelos, los textos de las guías y las imágenes del sitio no se pueden usar para entrenar otros sistemas de inteligencia artificial sin permiso escrito.</p>
+    <h2 data-i18n="b14">Límites de los modelos</h2>
+    <p data-i18n-html="b15">Se equivocan, así que no conviene usar sus resultados sin mirarlos. Custos puede elegir un rectángulo que no es la hoja, Versus puede no ver una línea muy chica, y Librarius puede cambiar una letra por otra parecida, sobre todo en una foto borrosa. Librarius no lee la letra a mano de forma confiable.</p>
+    <p data-i18n-html="b16">Revisá las cifras, los nombres y las fechas antes de usar un resultado, sobre todo en contratos, facturas o documentos médicos.</p>
+    <p data-i18n-html="b17">La primera vez que se usa un modelo, el navegador lo descarga (de unos 2 a 5 MB) y lo guarda en su caché.</p>
+    <h2 data-i18n="b18">Preguntas frecuentes</h2>
+    <p data-i18n-html="b19"><strong>¿Mi documento sale de la computadora?</strong> No. Librarius y Versus corren en hilos de trabajo del navegador, y Custos en la propia página, con onnxruntime-web. Lo que se descarga son los archivos del modelo, no tus documentos.</p>
+    <p data-i18n-html="b20"><strong>¿Lo que procesás sirve para entrenar los modelos?</strong> No. Los modelos son archivos fijos que se descargan al navegador, y procesar un documento no los cambia.</p>
+    <p data-i18n-html="b21"><strong>¿Puedo usar los modelos en mi propio programa?</strong> No, sin permiso escrito del titular. Sí podés describirlos y medir su calidad, siempre con el nombre y la versión.</p>
+    <p data-i18n-html="b22"><strong>¿Qué tan bien leen?</strong> Medimos Librarius en páginas escaneadas reales que no se usaron para entrenar. Las cifras están en la guía sobre el lector Librarius.</p>
+    <h2 data-i18n="b23">Resumen</h2>
+    <p data-i18n-html="b24">Custos, Versus y Librarius son modelos de Mini Cookies, entrenados sin pesos de terceros y ejecutados en tu navegador. Hacen funcionar el escáner y el OCR. La licencia te deja usarlos por medio de las herramientas, también con fines comerciales, pero no sacarlos del sitio ni entrenar otros modelos con ellos. Revisá siempre lo que devuelven.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/ocr-pdf.html" data-i18n="rel1">OCR de PDF e imágenes escaneadas</a></li>
+      <li><a href="../herramientas/escanear-documento.html" data-i18n="rel2">Escáner de documentos</a></li>
+      <li><a href="../herramientas/flujos.html" data-i18n="rel3">Flujos: encadená herramientas</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>
