@@ -488,8 +488,8 @@
   const prepararOcr = async () => {
     await PDF_LIB();
     await js('pdfjs.js');
-    await js('ocr-librarius.js?v=8');   // versión: ver ocr-librarius.js
-    await js('ocr.js');
+    await js('ocr-librarius.js?v=9');   // versión: ver ocr-librarius.js
+    await js('ocr.js?v=2');
   };
   F.registrar({
     id: 'ocr-pdf',

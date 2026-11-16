@@ -265,7 +265,15 @@
       let fuente = pdfNuevo._fuenteOcr, texto = p.texto, ancho1;
       try { ancho1 = fuente.widthOfTextAtSize(texto, 1); } catch (e) {
         // Fuera de WinAnsi (cirílico, griego, signos): Noto Sans; si tampoco puede, la letra base o se omite.
-        try { fuente = await fuenteUnicode(pdfNuevo); ancho1 = fuente.widthOfTextAtSize(texto, 1); } catch (e2) {
+        try {
+          fuente = await fuenteUnicode(pdfNuevo);
+          // Noto Sans tampoco trae todos los signos (casillas, estrellas…): esos se quitan de la capa de texto (quedan en el .txt);
+          // si no, el PDF guarda un carácter vacío en su lugar.
+          if (!pdfNuevo._letrasNoto) pdfNuevo._letrasNoto = new Set(fuente.getCharacterSet());
+          texto = [...texto].filter((c) => pdfNuevo._letrasNoto.has(c.codePointAt(0))).join('');
+          if (!texto) continue;
+          ancho1 = fuente.widthOfTextAtSize(texto, 1);
+        } catch (e2) {
           fuente = pdfNuevo._fuenteOcr;
           texto = texto.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^ -~]/g, '');
           if (!texto) continue;
