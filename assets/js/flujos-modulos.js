@@ -33,7 +33,7 @@
 // Los marcados con `hilo: true` corren en los hilos de trabajo de flujos-hilo.js (ver flujos.js, «hilos»): su código y
 // el de sus piezas solo pueden usar canvas e imágenes de la página, nada de DOMParser ni elementos de verdad. Quedan
 // en la página: unir PDF (junta), documento a PDF y PowerPoint a imágenes (sus motores usan la página) y el OCR, que
-// ya corre en los hilos de Tesseract (varios a la vez).
+// ya reparte cada página entre los hilos de Librarius.
 // Agregar una herramienta: separar su lógica en una pieza compartida de assets/js, usarla en su página y
 // escribir aquí su ficha (ver el contrato en flujos.js).
 (function () {
@@ -450,48 +450,37 @@
   ];
   const OPCIONES_OCR = [
     { id: 'idiomas', tipo: 'select', defecto: 'spa+eng', etiqueta: { es: 'Idioma del texto', en: 'Text language' }, valores: IDIOMAS_OCR },
-    // Librarius (Beta, ocr-librarius.js): si no soporta los idiomas elegidos, Ocr.crearWorker usa Tesseract.
-    { id: 'motor', tipo: 'select', defecto: 'tesseract', etiqueta: { es: 'Motor de reconocimiento', en: 'Recognition engine' },
-      valores: [{ valor: 'tesseract', es: 'Tesseract (todos los idiomas)', en: 'Tesseract (all languages)' },
-        { valor: 'librarius', es: 'Librarius (Beta): IA propia, más precisa', en: 'Librarius (Beta): in-house AI, more accurate' }] },
     { id: 'enderezar', tipo: 'casilla', defecto: true, etiqueta: { es: 'Enderezar páginas torcidas', en: 'Straighten tilted pages' } },
-    { id: 'preproceso', tipo: 'select', defecto: 'contraste', etiqueta: { es: 'Preparar la imagen', en: 'Prepare the image' },
-      valores: [{ valor: 'contraste', es: 'Contraste automático', en: 'Automatic contrast' }, { valor: 'otsu', es: 'Blanco y negro puro', en: 'Pure black and white' },
-        { valor: 'ninguno', es: 'Tal cual', en: 'As is' }] },
   ];
-  // Motores de Tesseract por combinación de idiomas, compartidos por los dos módulos y por todos los archivos de una
-  // ejecución (crearlos tarda); terminar() los cierra al final. Cada motor reconoce un archivo a la vez y corre en su
-  // propio hilo: con varios archivos a la vez (simultaneos) se abren hasta OCR_SIMULTANEOS motores y se usan varios
-  // núcleos. El tope es bajo porque cada motor ocupa bastante memoria (el diccionario de cada idioma).
+  // Varios archivos a la vez (simultaneos): todos comparten el mismo lector de Librarius (ocr-librarius.js pone las páginas en fila y
+  // reparte cada una entre sus hilos), así que el tope solo limita cuántos archivos se abren y se dibujan juntos (la memoria).
+  // Los flujos guardados con las opciones viejas «motor» o «preproceso» siguen andando: Flujos descarta las opciones que no existen.
   const OCR_SIMULTANEOS = () => {
     const nucleos = navigator.hardwareConcurrency || 2;
     const movil = navigator.userAgentData ? navigator.userAgentData.mobile : /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
     return movil ? 1 : Math.max(1, Math.min(4, Math.floor(nucleos / 2)));
   };
-  // Con Librarius todos comparten el mismo lector (ocr-librarius.js pone las páginas en fila y reparte cada una entre sus hilos).
-  const motoresOcr = new Map();   // motor|idiomas -> { libres: [Promise<worker>], todos: [Promise<worker>] }
-  async function conMotorOcr(idiomas, tipoMotor, fn) {
-    const clave = (tipoMotor || 'tesseract') + '|' + idiomas;
-    if (!motoresOcr.has(clave)) motoresOcr.set(clave, { libres: [], todos: [] });
-    const g = motoresOcr.get(clave);
-    let p = g.libres.pop();
-    if (!p) { p = Ocr.crearWorker(idiomas.split('+'), null, tipoMotor); g.todos.push(p); }
-    let motor;
-    try { motor = await p; } catch (e) { g.todos.splice(g.todos.indexOf(p), 1); throw e; }   // no se reusa uno que no arrancó
-    try { return await fn(motor); } finally { g.libres.push(p); }
+  const motoresOcr = new Map();   // idiomas -> Promise<lector>, compartido por los dos módulos y por todos los archivos de una ejecución
+  async function conMotorOcr(idiomas, fn) {
+    if (!motoresOcr.has(idiomas)) {
+      const p = Ocr.crearWorker(idiomas.split('+'));
+      motoresOcr.set(idiomas, p);
+      p.catch(() => motoresOcr.delete(idiomas));      // no se reusa uno que no arrancó
+    }
+    return fn(await motoresOcr.get(idiomas));
   }
   async function cerrarMotoresOcr() {
-    const lista = [...motoresOcr.values()].flatMap((g) => g.todos);
+    const lista = [...motoresOcr.values()];
     motoresOcr.clear();
     for (const p of lista) { try { await (await p).terminate(); } catch (e) { /* ya cerrado */ } }
   }
   function reconocer(f, o) {
-    return conMotorOcr(o.idiomas, o.motor, async (worker) => {
+    return conMotorOcr(o.idiomas, async (worker) => {
       const pdf = await PDFLib.PDFDocument.create();
       const textos = [];
       // De a una página: las de un PDF largo, todas dibujadas a la vez, no entran en la memoria.
       await Ocr.recorrerPaginas(comoArchivo(f, f.tipo === 'pdf' ? 'application/pdf' : undefined), o.enderezar, async (pagina) => {
-        textos.push(await Ocr.agregarPagina(pdf, worker, pagina, o.preproceso));
+        textos.push(await Ocr.agregarPagina(pdf, worker, pagina));
       });
       return { pdf, texto: textos.join(separador()) };
     });
@@ -499,7 +488,6 @@
   const prepararOcr = async () => {
     await PDF_LIB();
     await js('pdfjs.js');
-    await F.cargarScript(rutaVendor('tesseract.js/7.0.0/dist/tesseract.min.js?v=2'));
     await js('ocr-librarius.js?v=8');   // versión: ver ocr-librarius.js
     await js('ocr.js');
   };

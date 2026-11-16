@@ -262,7 +262,7 @@
   // ---------- hilos (2026-11-10) ----------
   // Los módulos con `hilo: true` corren en hilos de trabajo (flujos-hilo.js), uno por núcleo menos uno (la página
   // sigue respondiendo). Los demás corren en la página: los que declaran `simultaneos` (p. ej. el OCR, cuyo trabajo
-  // pesado ya va en los hilos de Tesseract) de a varios; el resto, de a uno y nunca dos a la vez aunque sean de
+  // pesado ya va en los hilos de Librarius) de a varios; el resto, de a uno y nunca dos a la vez aunque sean de
   // módulos distintos (el mismo cuidado que antes, cuando todo iba de a un archivo).
   // En la PC: con 120 fotos (leer QR > recortar > comprimir, Ryzen 9 9900X de 12 núcleos) 4 hilos dieron 2,8x, 8 hilos
   // 4,3x y 12 hilos 5,7x; 16 igual que 12 y con más memoria (Investigaciones\investigacion-flujos\probar-multihilo.mjs).
