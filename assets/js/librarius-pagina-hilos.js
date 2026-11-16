@@ -6,7 +6,7 @@
  * El detector recorta por trozos de 16 líneas mientras los lectores ya leen los anteriores. Resultado idéntico al de un solo hilo.
  *
  *   const lector = await LibrariusPaginaHilos.crear({ rutaOrt: '/ort/', rutaPagina: '/js/librarius-pagina.js', rutaHilo: '/js/librarius-hilo.js',
- *                                                   modeloVersus: '/modelo/versus-phone-v1.onnx', modeloLibrarius: '/modelo/librarius-phone-v1-int8.onnx', alfabeto, hilos: 4 });
+ *                                                   modeloVersus: '/modelo/versus-phone-v2.onnx', modeloLibrarius: '/modelo/librarius-phone-v1-int8.onnx', alfabeto, hilos: 4 });
  *   const r = await lector.leer(gris, ancho, alto);   // { texto, lineas, giro, tiempos }
  *   lector.cerrar();
  * Requiere que librarius-pagina.js esté cargado en la página (usa sus funciones de geometría y de orden).

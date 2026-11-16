@@ -1,5 +1,5 @@
 /*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
-// Custos Phone V2 (experimento E8, 2026-11-10; reemplaza a V1 = E3): red neuronal propia que encuentra las 4 esquinas
+// Custos Phone V2 (2026-11-10; reemplaza a Custos Phone V1): red neuronal propia que encuentra las 4 esquinas
 // de un documento en una foto. También el área de objetos rectangulares: pizarras, pantallas, cuadros (el lienzo sin el
 // marco), pósters, rótulos, proyecciones, portadas y hojas de libros y cuadernos.
 //
