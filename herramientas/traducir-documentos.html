@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Traducir documentos gratis — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Traducí un Word, PDF, EPUB, Markdown o texto a otro idioma conservando su formato, con una IA propia que corre en tu navegador. Gratis y sin subir tu archivo.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Traducir documentos gratis — Mini Cookies',
+    'meta-descripcion': 'Traducí un Word, PDF, EPUB, Markdown o texto a otro idioma conservando su formato, con una IA propia que corre en tu navegador. Gratis y sin subir tu archivo.',
+    'h1': 'Traducir documentos (Beta)',
+    'intro': 'Elegí un documento y el idioma al que lo querés pasar. Sale en el mismo formato, con sus negritas, títulos, tablas e imágenes donde estaban.',
+    'zona-arrastre': '🌐 Arrastrá tu Word, PDF, EPUB, Markdown o texto acá o hacé clic para elegirlo',
+    'campo-destino': 'Traducir al',
+    'campo-origen': 'Idioma del documento (para páginas escaneadas)',
+    'idioma-es': 'Español', 'idioma-en': 'Inglés', 'idioma-pt': 'Portugués', 'idioma-fr': 'Francés', 'idioma-de': 'Alemán',
+    'idioma-it': 'Italiano', 'idioma-zh': 'Chino (simplificado)', 'idioma-ja': 'Japonés', 'idioma-ko': 'Coreano',
+    'modo-titulo': 'En el PDF, el texto original',
+    'modo-quitar': 'Quitar el original',
+    'modo-quitar-nota': 'Más limpio. Solo queda la traducción y los fondos quedan intactos. En algunos PDF no puede quitar todo el texto: ahí lo tapa.',
+    'modo-tapar': 'Tapar el original',
+    'modo-tapar-nota': 'Más seguro. Funciona con cualquier PDF. Pero el texto original queda debajo (al copiar o buscar también aparece) y sobre fondos con imagen o degradado se nota el recuadro.',
+    'boton-traducir': 'Traducir',
+    'boton-cancelar': 'Cancelar',
+    'progreso-cargando': 'Preparando el traductor… {mb} de {total} MB (solo la primera vez)',
+    'progreso-leyendo': 'Leyendo el documento…',
+    'progreso-traduciendo': 'Traduciendo: {hechos} de {total} oraciones',
+    'progreso-guardando': 'Armando el documento traducido…',
+    'cancelado': 'Traducción cancelada.',
+    'resultado-listo': '✅ Listo: {oraciones} oraciones traducidas.',
+    'resultado-planb': ' En {n} de ellas el formato de dentro de la oración no se pudo ubicar y quedó con el formato principal del párrafo.',
+    'resultado-sin-caber': ' {n} párrafos del PDF no entraban en su lugar ni con la letra más chica y ocupan un poco más.',
+    'resultado-tapados': ' {n} párrafos del PDF se taparon porque su texto original no se podía quitar.',
+    'resultado-descargar': 'Descargar traducción',
+    'resultado-descargar-docx': 'Descargar también como Word',
+    'error-formato': 'Este archivo no es un Word (.docx), PDF, EPUB, Markdown ni texto.',
+    'error-mismo-idioma': 'Elegí un idioma distinto del original.',
+    'error-traducir': 'No se pudo traducir el documento',
+    'error-navegador': 'Tu navegador no puede ejecutar el traductor (necesita WebAssembly y trabajadores en segundo plano). Probá con una versión reciente de Edge, Chrome o Firefox.',
+    'error-sin-modelo': 'El traductor todavía no está disponible.',
+    'ayuda-traductor': 'La traducción la hace Interpres, una IA de Mini Cookies que se descarga una vez (unos 45 MB) y corre en tu navegador, en varios hilos a la vez. Traduce oración por oración con la anterior como contexto, para que los términos se mantengan. El formato de dentro de cada oración (una palabra en negrita, un enlace) viaja con marcas que el modelo aprendió a conservar; si alguna vuelve rota, esa oración queda con el formato principal del párrafo y nunca se pierde texto.',
+    'sufijo-archivo': 'traducido',
+    'guia-titulo': 'Cómo traducir un documento sin perder el formato',
+    'guia-intro': 'Sirve para pasar un documento entero a otro idioma y recibirlo listo para usar, no un texto suelto para volver a armar. Un Word sale como Word, un EPUB como EPUB y un PDF como PDF, con las negritas, los títulos, las tablas y las imágenes en su lugar. Se traduce entre español, inglés, portugués, francés, alemán, italiano, chino simplificado, japonés y coreano.',
+    'guia-paso-1': 'Arrastrá el archivo a la zona de carga o hacé clic para elegirlo. Sirven .docx, .pdf, .epub, .md y .txt.',
+    'guia-paso-2': 'Elegí el idioma en «Traducir al». No hace falta decir en qué idioma está el original.',
+    'guia-paso-3': 'Si es un PDF, elegí qué pasa con el texto original: «Quitar el original» o «Tapar el original». Si tiene páginas escaneadas, elegí también el idioma del documento: esas páginas se leen primero con el OCR del sitio.',
+    'guia-paso-4': 'Pulsá «Traducir». La primera vez se descarga el traductor; después el avance muestra cuántas oraciones lleva. Al terminar, descargá el archivo traducido.',
+    'guia-consejo-1': 'Revisá siempre la traducción antes de usarla en algo importante: es una traducción automática y puede equivocarse con nombres propios, términos técnicos o frases ambiguas.',
+    'guia-consejo-2': 'De un PDF también podés bajar la traducción como Word, para corregirla con comodidad.',
+    'guia-consejo-3': 'Si un párrafo traducido de un PDF es más largo que el original, la letra se achica un poco para que entre en el mismo lugar.',
+    'guia-p1': '¿Mi documento se sube a algún servidor?',
+    'guia-r1': 'No. El traductor se descarga una vez y corre en tu navegador; el documento se lee, se traduce y se arma de nuevo en tu computadora.',
+    'guia-p2': '¿Por qué una palabra perdió la negrita?',
+    'guia-r2': 'El formato de dentro de una oración viaja con marcas que el traductor tiene que devolver en su lugar. Si no las devuelve bien, esa oración queda con el formato principal del párrafo y el aviso del final dice en cuántas pasó. El texto nunca se pierde.',
+    'guia-p3': '¿Qué pasa con las fórmulas, el código o los enlaces?',
+    'guia-r3': 'En Markdown, los bloques y fragmentos de código, las direcciones de los enlaces y las imágenes quedan como estaban. En Word y EPUB, los enlaces siguen funcionando y se traduce solo su texto.',
+  },
+  en: {
+    'titulo-pagina': 'Translate Documents Free — Mini Cookies',
+    'meta-descripcion': 'Translate a Word, PDF, EPUB, Markdown or text file into another language while keeping its formatting, with Mini Cookies’ own AI running in your browser. Free, and your file is never uploaded.',
+    'h1': 'Translate documents (Beta)',
+    'intro': 'Pick a document and the language you want it in. It comes out in the same format, with its bold text, headings, tables and pictures where they were.',
+    'zona-arrastre': '🌐 Drag your Word, PDF, EPUB, Markdown or text file here or click to choose it',
+    'campo-destino': 'Translate into',
+    'campo-origen': 'Language of the document (for scanned pages)',
+    'idioma-es': 'Spanish', 'idioma-en': 'English', 'idioma-pt': 'Portuguese', 'idioma-fr': 'French', 'idioma-de': 'German',
+    'idioma-it': 'Italian', 'idioma-zh': 'Chinese (simplified)', 'idioma-ja': 'Japanese', 'idioma-ko': 'Korean',
+    'modo-titulo': 'In the PDF, the original text',
+    'modo-quitar': 'Remove the original',
+    'modo-quitar-nota': 'Cleaner. Only the translation remains and backgrounds stay intact. In some PDFs it can’t remove all the text: there it covers it instead.',
+    'modo-tapar': 'Cover the original',
+    'modo-tapar-nota': 'Safest. Works with any PDF. But the original text stays underneath (it shows up when you copy or search) and the box can be seen on image or gradient backgrounds.',
+    'boton-traducir': 'Translate',
+    'boton-cancelar': 'Cancel',
+    'progreso-cargando': 'Getting the translator ready… {mb} of {total} MB (first time only)',
+    'progreso-leyendo': 'Reading the document…',
+    'progreso-traduciendo': 'Translating: {hechos} of {total} sentences',
+    'progreso-guardando': 'Building the translated document…',
+    'cancelado': 'Translation cancelled.',
+    'resultado-listo': '✅ Done: {oraciones} sentences translated.',
+    'resultado-planb': ' In {n} of them the formatting inside the sentence couldn’t be placed, so it took the paragraph’s main formatting.',
+    'resultado-sin-caber': ' {n} PDF paragraphs didn’t fit in their place even with the smallest text and take a little more room.',
+    'resultado-tapados': ' {n} PDF paragraphs were covered because their original text couldn’t be removed.',
+    'resultado-descargar': 'Download translation',
+    'resultado-descargar-docx': 'Also download as Word',
+    'error-formato': 'This file isn’t a Word (.docx), PDF, EPUB, Markdown or text file.',
+    'error-mismo-idioma': 'Choose a language other than the original.',
+    'error-traducir': 'The document couldn’t be translated',
+    'error-navegador': 'Your browser can’t run the translator (it needs WebAssembly and background workers). Try a recent version of Edge, Chrome or Firefox.',
+    'error-sin-modelo': 'The translator isn’t available yet.',
+    'ayuda-traductor': 'The translation is done by Interpres, a Mini Cookies AI that is downloaded once (about 45 MB) and runs in your browser, on several threads at once. It translates sentence by sentence with the previous one as context, so terms stay consistent. Formatting inside each sentence (a bold word, a link) travels as marks the model learned to keep; if one comes back broken, that sentence takes the paragraph’s main formatting and no text is ever lost.',
+    'sufijo-archivo': 'translated',
+    'guia-titulo': 'How to translate a document without losing its formatting',
+    'guia-intro': 'It turns a whole document into another language and gives it back ready to use, not loose text you have to put back together. A Word file comes out as Word, an EPUB as EPUB and a PDF as PDF, with bold text, headings, tables and pictures in place. It translates between Spanish, English, Portuguese, French, German, Italian, simplified Chinese, Japanese and Korean.',
+    'guia-paso-1': 'Drag the file onto the upload area or click to choose it. .docx, .pdf, .epub, .md and .txt work.',
+    'guia-paso-2': 'Choose the language in “Translate into”. You don’t need to say which language the original is in.',
+    'guia-paso-3': 'For a PDF, choose what happens to the original text: “Remove the original” or “Cover the original”. If it has scanned pages, also choose the document’s language: those pages are read first with the site’s OCR.',
+    'guia-paso-4': 'Press “Translate”. The first time, the translator is downloaded; after that the progress shows how many sentences are done. When it finishes, download the translated file.',
+    'guia-consejo-1': 'Always check the translation before using it for something important: it is a machine translation and can get proper names, technical terms or ambiguous sentences wrong.',
+    'guia-consejo-2': 'For a PDF you can also download the translation as Word, to correct it comfortably.',
+    'guia-consejo-3': 'If a translated PDF paragraph is longer than the original, the text shrinks a little so it fits in the same place.',
+    'guia-p1': 'Is my document uploaded to a server?',
+    'guia-r1': 'No. The translator is downloaded once and runs in your browser; the document is read, translated and rebuilt on your computer.',
+    'guia-p2': 'Why did a word lose its bold?',
+    'guia-r2': 'Formatting inside a sentence travels as marks the translator has to put back in place. If it doesn’t, that sentence takes the paragraph’s main formatting, and the notice at the end says how many times it happened. Text is never lost.',
+    'guia-p3': 'What happens to formulas, code or links?',
+    'guia-r3': 'In Markdown, code blocks and snippets, link addresses and images stay as they were. In Word and EPUB, links keep working and only their text is translated.',
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../generales.html" data-i18n="nav-cat-generales">Herramientas generales</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Traducir documentos (Beta)</h1>
+  <p data-i18n="intro">Elegí un documento y el idioma al que lo querés pasar. Sale en el mismo formato, con sus negritas, títulos, tablas e imágenes donde estaban.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">🌐 Arrastrá tu Word, PDF, EPUB, Markdown o texto acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept=".docx,.pdf,.epub,.md,.markdown,.txt,application/pdf,text/plain,text/markdown,application/epub+zip,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
+    </div>
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles">
+      <label class="campo">
+        <span data-i18n="campo-destino">Traducir al</span>
+        <select id="destino"></select>
+      </label>
+      <label class="campo" id="campoOrigen" hidden>
+        <span data-i18n="campo-origen">Idioma del documento (para páginas escaneadas)</span>
+        <select id="origen"></select>
+      </label>
+      <span class="ayuda-tip">
+        <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+        <span class="ayuda-burbuja" data-i18n="ayuda-traductor">La traducción la hace Interpres, una IA de Mini Cookies…</span>
+      </span>
+    </div>
+
+    <fieldset class="controles" id="opcionesPdf" hidden>
+      <legend data-i18n="modo-titulo">En el PDF, el texto original</legend>
+      <label class="campo">
+        <span><input type="radio" name="modoPdf" value="quitar" checked> <strong data-i18n="modo-quitar">Quitar el original</strong></span>
+        <span class="nota-suave" data-i18n="modo-quitar-nota">Más limpio. Solo queda la traducción y los fondos quedan intactos. En algunos PDF no puede quitar todo el texto: ahí lo tapa.</span>
+      </label>
+      <label class="campo">
+        <span><input type="radio" name="modoPdf" value="tapar"> <strong data-i18n="modo-tapar">Tapar el original</strong></span>
+        <span class="nota-suave" data-i18n="modo-tapar-nota">Más seguro. Funciona con cualquier PDF. Pero el texto original queda debajo (al copiar o buscar también aparece) y sobre fondos con imagen o degradado se nota el recuadro.</span>
+      </label>
+    </fieldset>
+
+    <div class="controles">
+      <button class="boton" id="botonTraducir" disabled data-i18n="boton-traducir">Traducir</button>
+      <button class="boton secundario" id="botonCancelar" hidden data-i18n="boton-cancelar">Cancelar</button>
+    </div>
+
+    <p class="nota-suave" id="progreso" hidden></p>
+    <p class="nota-suave error" id="mensajeError" hidden></p>
+
+    <div class="resultado" id="resultado">
+      <p id="resumen"></p>
+      <div class="controles">
+        <a class="boton" id="enlaceDescarga" data-i18n="resultado-descargar">Descargar traducción</a>
+        <a class="boton secundario" id="enlaceDocx" hidden data-i18n="resultado-descargar-docx">Descargar también como Word</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo traducir un documento sin perder el formato</h2>
+    <p data-i18n="guia-intro">Sirve para pasar un documento entero a otro idioma y recibirlo listo para usar, no un texto suelto para volver a armar. Un Word sale como Word, un EPUB como EPUB y un PDF como PDF, con las negritas, los títulos, las tablas y las imágenes en su lugar. Se traduce entre español, inglés, portugués, francés, alemán, italiano, chino simplificado, japonés y coreano.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá el archivo a la zona de carga o hacé clic para elegirlo. Sirven .docx, .pdf, .epub, .md y .txt.</li>
+      <li data-i18n="guia-paso-2">Elegí el idioma en «Traducir al». No hace falta decir en qué idioma está el original.</li>
+      <li data-i18n="guia-paso-3">Si es un PDF, elegí qué pasa con el texto original: «Quitar el original» o «Tapar el original». Si tiene páginas escaneadas, elegí también el idioma del documento: esas páginas se leen primero con el OCR del sitio.</li>
+      <li data-i18n="guia-paso-4">Pulsá «Traducir». La primera vez se descarga el traductor; después el avance muestra cuántas oraciones lleva. Al terminar, descargá el archivo traducido.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Revisá siempre la traducción antes de usarla en algo importante: es una traducción automática y puede equivocarse con nombres propios, términos técnicos o frases ambiguas.</li>
+      <li data-i18n="guia-consejo-2">De un PDF también podés bajar la traducción como Word, para corregirla con comodidad.</li>
+      <li data-i18n="guia-consejo-3">Si un párrafo traducido de un PDF es más largo que el original, la letra se achica un poco para que entre en el mismo lugar.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Mi documento se sube a algún servidor?</summary>
+      <p data-i18n="guia-r1">No. El traductor se descarga una vez y corre en tu navegador; el documento se lee, se traduce y se arma de nuevo en tu computadora.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Por qué una palabra perdió la negrita?</summary>
+      <p data-i18n="guia-r2">El formato de dentro de una oración viaja con marcas que el traductor tiene que devolver en su lugar. Si no las devuelve bien, esa oración queda con el formato principal del párrafo y el aviso del final dice en cuántas pasó. El texto nunca se pierde.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Qué pasa con las fórmulas, el código o los enlaces?</summary>
+      <p data-i18n="guia-r3">En Markdown, los bloques y fragmentos de código, las direcciones de los enlaces y las imágenes quedan como estaban. En Word y EPUB, los enlaces siguen funcionando y se traduce solo su texto.</p>
+    </details>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/vendor.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/xml-editar.js"></script>
+<script src="../assets/js/traductor-documentos.js"></script>
+<script src="../assets/js/traductor-docx.js"></script>
+<script src="../assets/js/traductor-epub.js"></script>
+<script src="../assets/js/traductor-hilos.js"></script>
+<script>
+// Lo pesado se carga solo si hace falta: PDF.js, pdf-lib y las fuentes al abrir un PDF; el OCR solo si el PDF tiene páginas escaneadas;
+// el modelo la primera vez que se traduce algo.
+const IDIOMAS = ['es', 'en', 'pt', 'fr', 'de', 'it', 'zh', 'ja', 'ko'];
+const OCR_DE = { es: 'spa', en: 'eng', pt: 'por', fr: 'fra', de: 'deu', it: 'ita', zh: 'chi_sim', ja: 'jpn', ko: 'kor' };
+const CJK = { zh: 'NotoSansSC', ja: 'NotoSansJP', ko: 'NotoSansKR' };
+// Archivos de Interpres Phone V1 (nombre elegido por el usuario el 2026-11-16). Mientras el modelo no exista, MODELO es null y la página dice que el
+// traductor todavía no está disponible.
+const MODELO = null; // { vocabulario: 'interpres-vocabulario.json', codificador: 'interpres-phone-v1-codificador-int8.onnx', decodificador: 'interpres-phone-v1-decodificador-int8.onnx', megas: 45 }
+
+const $ = (id) => document.getElementById(id);
+const zonaArrastre = $('zonaArrastre'), entradaArchivo = $('entradaArchivo'), listaArchivo = $('listaArchivo');
+const destino = $('destino'), origen = $('origen'), campoOrigen = $('campoOrigen'), opcionesPdf = $('opcionesPdf');
+const botonTraducir = $('botonTraducir'), botonCancelar = $('botonCancelar'), progreso = $('progreso'), mensajeError = $('mensajeError');
+const resultado = $('resultado'), resumen = $('resumen'), enlaceDescarga = $('enlaceDescarga'), enlaceDocx = $('enlaceDocx');
+
+let archivo = null, tipo = null, cancelar = false, traductor = null;
+
+function llenarIdiomas() {
+  for (const [select, porDefecto] of [[destino, idiomaActual() === 'es' ? 'en' : 'es'], [origen, idiomaActual()]]) {
+    const elegido = select.value || porDefecto;
+    select.replaceChildren(...IDIOMAS.map((l) => new Option(t('idioma-' + l), l)));
+    select.value = elegido;
+  }
+}
+document.addEventListener('DOMContentLoaded', llenarIdiomas);
+document.addEventListener('cambioIdioma', llenarIdiomas);
+
+const TIPOS = [[/\.docx$/i, 'docx'], [/\.pdf$/i, 'pdf'], [/\.epub$/i, 'epub'], [/\.(md|markdown)$/i, 'md'], [/\.txt$/i, 'txt']];
+function elegir(archivos) {
+  const a = archivos[0];
+  if (!a) return;
+  ocultarMensajes();
+  const t_ = TIPOS.find(([re]) => re.test(a.name));
+  if (!t_) { mostrarError(t('error-formato')); return; }
+  archivo = a; tipo = t_[1];
+  listaArchivo.replaceChildren(Object.assign(document.createElement('li'), { textContent: a.name }));
+  opcionesPdf.hidden = tipo !== 'pdf';
+  campoOrigen.hidden = tipo !== 'pdf';
+  botonTraducir.disabled = false;
+}
+conectarZonaArrastre(zonaArrastre, entradaArchivo, elegir);
+
+function ocultarMensajes() { mensajeError.hidden = true; resultado.classList.remove('visible'); }
+function mostrarError(texto) { mensajeError.textContent = texto; mensajeError.hidden = false; }
+function avance(texto) { progreso.textContent = texto; progreso.hidden = false; }
+const relleno = (texto, datos) => Object.entries(datos).reduce((s, [k, v]) => s.replace('{' + k + '}', () => String(v)), texto);
+
+function cargarScript(src) {
+  return new Promise((ok, mal) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = ok; s.onerror = () => mal(new Error('No cargó ' + src));
+    document.head.appendChild(s);
+  });
+}
+const absoluta = (ruta) => new URL(ruta, location.href).href;
+
+async function obtenerTraductor() {
+  if (window.traductorDePrueba) return window.traductorDePrueba; // solo lo ponen las pruebas
+  if (traductor) return traductor;
+  if (!MODELO) throw new Error(t('error-sin-modelo'));
+  if (typeof Worker === 'undefined' || typeof WebAssembly === 'undefined') throw new Error(t('error-navegador'));
+  const base = absoluta('../assets/js/');
+  traductor = await TraductorHilos.crear({
+    rutaOrt: absoluta(rutaVendor('onnxruntime-web/1.20.1/')), rutaHilo: base + 'traductor-hilo.js',
+    rutaPiezas: base + 'traductor-piezas.js', rutaMotor: base + 'traductor-motor.js',
+    vocabulario: absoluta('../assets/modelos/' + MODELO.vocabulario), codificador: absoluta('../assets/modelos/' + MODELO.codificador),
+    decodificador: absoluta('../assets/modelos/' + MODELO.decodificador),
+    hilos: Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 4) - 1)),
+    alCargar: (bytes, total) => avance(relleno(t('progreso-cargando'), { mb: Math.round(bytes / 1e6), total: Math.round((total || MODELO.megas * 1e6) / 1e6) })),
+  });
+  return traductor;
+}
+
+async function pdfListo() {
+  if (!window.abrirPdf) await cargarScript(absoluta('../assets/js/pdfjs.js'));
+  if (!window.PDFLib) await cargarScript(rutaVendor('pdf-lib/1.17.1/pdf-lib.min.js'));
+  if (!window.fontkit) await cargarScript(rutaVendor('@pdf-lib/fontkit/1.1.1/dist/fontkit.umd.min.js'));
+  if (!window.EscritorDocx) await cargarScript(absoluta('../assets/js/escritor-docx.js'));
+  if (!window.TraductorPdf || !TraductorPdf.traducir) await cargarScript(absoluta('../assets/js/traductor-pdf.js'));
+}
+const bytesDe = async (ruta) => new Uint8Array(await (await fetch(ruta)).arrayBuffer());
+async function fuentesPdf(dest) {
+  const lib = (n) => bytesDe(rutaVendor(`liberation-fonts/2.1.5/${n}.ttf`));
+  const f = { sans: await lib('LiberationSans-Regular'), sansNegrita: await lib('LiberationSans-Bold'),
+    serifa: await lib('LiberationSerif-Regular'), serifaNegrita: await lib('LiberationSerif-Bold') };
+  if (CJK[dest]) {
+    f.cjk = await bytesDe(rutaVendor(`noto-sans-cjk/2.004/${CJK[dest]}-Regular.ttf`));
+    f.cjkNegrita = await bytesDe(rutaVendor(`noto-sans-cjk/2.004/${CJK[dest]}-Bold.ttf`));
+  }
+  return f;
+}
+// El OCR se crea solo si aparece una página escaneada.
+function ocrPerezoso(idioma) {
+  let motor = null;
+  return {
+    async leerPagina(lienzo) {
+      if (!motor) {
+        if (!window.OcrLibrarius) await cargarScript(absoluta('../assets/js/ocr-librarius.js'));
+        motor = await OcrLibrarius.crear([OCR_DE[idioma]]);
+      }
+      return motor.leerPagina(lienzo);
+    },
+    cerrar() { if (motor) motor.cerrar(); },
+  };
+}
+
+function nombreSalida(ext, dest) {
+  const base = archivo.name.replace(/\.[^.]+$/, '');
+  return `${base}-${t('sufijo-archivo')}-${dest}.${ext}`;
+}
+function ofrecer(enlace, bytes, mime, nombre) {
+  if (enlace.href) URL.revokeObjectURL(enlace.href);
+  enlace.href = URL.createObjectURL(new Blob([bytes], { type: mime }));
+  enlace.download = nombre;
+}
+
+botonTraducir.addEventListener('click', async () => {
+  if (!archivo) return;
+  const dest = destino.value;
+  ocultarMensajes();
+  if (tipo === 'pdf' && origen.value === dest) { mostrarError(t('error-mismo-idioma')); return; }
+  cancelar = false;
+  botonTraducir.disabled = true;
+  botonCancelar.hidden = false;
+  enlaceDocx.hidden = true;
+  let ocr = null;
+  try {
+    const motor = await obtenerTraductor();
+    avance(t('progreso-leyendo'));
+    const traducir = (segs, d, op = {}) => motor.traducir(segs, d, {
+      progreso: (h, total) => { avance(relleno(t('progreso-traduciendo'), { hechos: h, total })); if (op.progreso) op.progreso(h, total); },
+      cancelado: () => cancelar,
+    });
+    const op = { traducir, destino: dest };
+    let salida, mime, ext, est, docx = null;
+    if (tipo === 'txt' || tipo === 'md') {
+      const texto = await archivo.text();
+      const r = await (tipo === 'txt' ? TraductorDocumentos.traducirTexto : TraductorDocumentos.traducirMarkdown)(texto, op);
+      salida = new TextEncoder().encode(typeof r === 'string' ? r : r.texto);
+      est = r.estadistica || {};
+      mime = tipo === 'md' ? 'text/markdown;charset=utf-8' : 'text/plain;charset=utf-8';
+      ext = tipo === 'md' ? 'md' : 'txt';
+    } else if (tipo === 'docx') {
+      const r = await TraductorDocx.traducir(await archivo.arrayBuffer(), op);
+      salida = r.bytes; est = r.estadistica; ext = 'docx';
+      mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    } else if (tipo === 'epub') {
+      const r = await TraductorEpub.traducir(await archivo.arrayBuffer(), op);
+      salida = r.bytes; est = r.estadistica; ext = 'epub'; mime = 'application/epub+zip';
+    } else {
+      await pdfListo();
+      ocr = ocrPerezoso(origen.value);
+      const modo = document.querySelector('input[name="modoPdf"]:checked').value;
+      const r = await TraductorPdf.traducir(new Uint8Array(await archivo.arrayBuffer()), { ...op, fuentes: await fuentesPdf(dest), ocr, modo });
+      salida = r.bytes; est = r.estadistica; ext = 'pdf'; mime = 'application/pdf';
+      avance(t('progreso-guardando'));
+      docx = await EscritorDocx.generar(TraductorPdf.comoDocx(r.paginas));
+    }
+    if (cancelar) { avance(t('cancelado')); return; }
+    ofrecer(enlaceDescarga, salida, mime, nombreSalida(ext, dest));
+    if (docx) { ofrecer(enlaceDocx, docx, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', nombreSalida('docx', dest)); enlaceDocx.hidden = false; }
+    let texto = relleno(t('resultado-listo'), { oraciones: est.oraciones ?? 0 });
+    if (est.planB) texto += relleno(t('resultado-planb'), { n: est.planB });
+    if (est.sinCaber) texto += relleno(t('resultado-sin-caber'), { n: est.sinCaber });
+    if (est.modo === 'quitar' && est.tapados) texto += relleno(t('resultado-tapados'), { n: est.tapados });
+    resumen.textContent = texto;
+    progreso.hidden = true;
+    resultado.classList.add('visible');
+  } catch (error) {
+    progreso.hidden = true;
+    if (cancelar) avance(t('cancelado'));
+    else mostrarError(t('error-traducir') + ': ' + detalleError(error));
+  } finally {
+    if (ocr) ocr.cerrar();
+    botonTraducir.disabled = false;
+    botonCancelar.hidden = true;
+  }
+});
+botonCancelar.addEventListener('click', () => { cancelar = true; });
+</script>
+<script src="../assets/js/ayuda-tip.js"></script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>
