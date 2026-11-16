@@ -164,7 +164,7 @@ const LienzoPdf = (() => {
     return (fontkitListo ||= new Promise((listo, falla) => {
       const s = document.createElement('script');
       s.src = URL_FONTKIT; s.onload = listo;
-      s.onerror = () => { fontkitListo = null; falla(new Error('No se pudo cargar fontkit.')); };
+      s.onerror = () => { fontkitListo = null; falla(errorMC('pdf-fontkit-no-carga', {}, 'No se pudo cargar fontkit.')); };
       document.head.appendChild(s);
     }));
   }
@@ -206,7 +206,7 @@ const LienzoPdf = (() => {
     await Promise.all([...urls].filter((u) => !fuentesCargadas.has(u)).map(async (url) => {
       const promesa = (async () => {
         const r = await fetch(url);
-        if (!r.ok) throw new Error('No se pudo cargar ' + url);
+        if (!r.ok) throw errorMC('carga-no-se-pudo', { archivo: url }, 'No se pudo cargar {archivo}');
         const bytes = new Uint8Array(await r.arrayBuffer());
         return { bytes, fk: window.fontkit.create(bytes) };
       })();

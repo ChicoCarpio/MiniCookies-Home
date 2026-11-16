@@ -6,7 +6,7 @@
 //   await OdpLector.leer(bytes)              → { contrato, mensajes: [clave…] }
 //   await OdpLector.aPptx(bytes)             → { bytes, mensajes }
 //
-// Lanza Error (con .codigo = 'cifrado' si el .odp tiene contraseña) con un mensaje listo para mostrar.
+// Lanza Error (con .codigo del catálogo de mensajes-error.js y .tipo = 'cifrado' si el .odp tiene contraseña) con un mensaje listo para mostrar.
 // Se llevan: diapositivas con su página maestra (fondo y formas), marcos de texto y marcadores de posición, formas (rectángulo, elipse, línea, polígono, trazados, formas predefinidas;
 // las demás, como las que escribe PowerPoint, se dibujan como forma libre evaluando su trazado con ecuaciones), relleno (color, degradado, imagen), línea, sombra, giro, grupos, texto con su formato (fuente, tamaño, color, negrita, cursiva, subrayado, tachado, superíndice, subíndice,
 // alineación, sangrías, espaciado, interlineado, viñetas y numeración, enlaces), imágenes, tablas, notas del orador, diapositivas ocultas, encabezado/pie/número/fecha.
@@ -519,8 +519,8 @@
       this.presupuestoGeom = { pasos: MAX_PASOS_GEOMETRIA };     // pasos de evaluación de las ecuaciones de todas las formas
     }
     aviso(c) { this.mensajes.add(c); }
-    contarUnidad(n) { if ((this.unidades += n) > MAX_UNIDADES) throw new Error('La presentación es demasiado grande y no se puede leer.'); }
-    contar() { if (++this.formas > MAX_FORMAS) throw new Error('La presentación tiene demasiadas formas y no se puede leer.'); }
+    contarUnidad(n) { if ((this.unidades += n) > MAX_UNIDADES) throw errorMC('pptx-demasiado-grande', {}, 'La presentación es demasiado grande y no se puede leer.'); }
+    contar() { if (++this.formas > MAX_FORMAS) throw errorMC('pptx-demasiadas-formas', {}, 'La presentación tiene demasiadas formas y no se puede leer.'); }
 
     // ───── propiedades de texto y párrafo ─────
     runDe(t) {
@@ -633,7 +633,7 @@
       for (const x of el.h) {
         if (typeof x === 'string') {
           const s = x.replace(/[\r\n\t]+/g, ' ');
-          if ((this.caracteres += s.length) > MAX_CARACTERES) throw new Error('La presentación tiene demasiado texto y no se puede leer.');
+          if ((this.caracteres += s.length) > MAX_CARACTERES) throw errorMC('pptx-demasiado-texto', {}, 'La presentación tiene demasiado texto y no se puede leer.');
           if (s === '') continue;
           const r = runBase();
           poner(Object.keys(r).length ? { texto: s, r } : { texto: s });
@@ -663,7 +663,7 @@
           }
           case 'text:line-break': salida.push({ salto: true }); break;
           case 'text:tab': poner({ texto: '\t', r: runBase() }); break;
-          case 'text:s': { const n = acotar(parseInt(atr(x, 'text:c'), 10) || 1, 1, 10000); if ((this.caracteres += n) > MAX_CARACTERES) throw new Error('La presentación tiene demasiado texto y no se puede leer.'); poner({ texto: ' '.repeat(n), r: runBase() }); break; }
+          case 'text:s': { const n = acotar(parseInt(atr(x, 'text:c'), 10) || 1, 1, 10000); if ((this.caracteres += n) > MAX_CARACTERES) throw errorMC('pptx-demasiado-texto', {}, 'La presentación tiene demasiado texto y no se puede leer.'); poner({ texto: ' '.repeat(n), r: runBase() }); break; }
           case 'text:page-number': case 'presentation:page-number': salida.push({ campo: 'numero', texto: '‹#›', r: runBase() }); break;
           case 'text:date': case 'text:time': case 'presentation:date-time': salida.push({ campo: 'fecha', texto: textoDe(x) || '', r: runBase() }); break;
           case 'presentation:footer': { const f = ctx.pie && ctx.pie.pie; if (f) poner({ texto: f, r: runBase() }); break; }
@@ -744,7 +744,7 @@
       const entrada = this.zip.file(ruta);
       if (!entrada) { this.aviso('imagen-falta'); return null; }
       if (this.imagenes.has(ruta)) return this.imagenes.get(ruta);
-      if (this.imagenes.size >= MAX_IMAGENES) throw new Error('La presentación tiene demasiadas imágenes y no se puede leer.');
+      if (this.imagenes.size >= MAX_IMAGENES) throw errorMC('odp-demasiadas-imagenes', {}, 'La presentación tiene demasiadas imágenes y no se puede leer.');
       const im = { datos: null, _entrada: entrada, _ruta: ruta };
       this.imagenes.set(ruta, im);
       this.pendientes.push(im);
@@ -864,7 +864,7 @@
         cmds = pts.slice(0, 200000).map((p, i) => [i ? 'L' : 'M', p[0], p[1]]);
         if (el.n === 'draw:polygon' && cmds.length) cmds.push(['Z']);
       }
-      if ((this.puntos += cmds.length) > MAX_PUNTOS) throw new Error('La presentación tiene demasiados trazos y no se puede leer.');
+      if ((this.puntos += cmds.length) > MAX_PUNTOS) throw errorMC('odp-demasiados-trazos', {}, 'La presentación tiene demasiados trazos y no se puede leer.');
       if (!cmds.length) return null;
       const cerrado = cmds.some((c) => c[0] === 'Z');
       const f = Object.assign({ tipo: 'forma', geom: { rutas: [{ w, h, cmds, sinRelleno: !cerrado && el.n !== 'draw:path' }] } }, caja);
@@ -884,7 +884,7 @@
         // las demás (las de PowerPoint son todas «non-primitive»): el trazado con sus ecuaciones, como forma libre
         let libre = null;
         try { libre = trazadoMejorado(geo, caja, this.presupuestoGeom); } catch (e) { libre = null; }
-        if (libre && (this.puntos += libre.puntos) > MAX_PUNTOS) throw new Error('La presentación tiene demasiados trazos y no se puede leer.');
+        if (libre && (this.puntos += libre.puntos) > MAX_PUNTOS) throw errorMC('odp-demasiados-trazos', {}, 'La presentación tiene demasiados trazos y no se puede leer.');
         if (libre && esRectangulo(libre.rutas)) geom = 'rect';      // el rectángulo sigue siendo un rectángulo (se puede editar como tal en PowerPoint)
         else if (libre) geom = { rutas: libre.rutas }; else this.aviso('formas');
       }
@@ -994,12 +994,12 @@
         const alto = emu(estF.fila['style:row-height'] || estF.fila['style:min-row-height']) || 365760;
         const celdas = [];
         const rep = acotar(parseInt(atr(fe, 'table:number-rows-repeated'), 10) || 1, 1, 1000);
-        if ((this.celdasDoc += rep * columnas.length) > MAX_CELDAS) throw new Error('Las tablas de la presentación tienen demasiadas celdas y no se puede leer.');
+        if ((this.celdasDoc += rep * columnas.length) > MAX_CELDAS) throw errorMC('odp-celdas-presentacion', {}, 'Las tablas de la presentación tienen demasiadas celdas y no se puede leer.');
         for (const ce of hijos(fe)) {
           if (ce.n !== 'table:table-cell' && ce.n !== 'table:covered-table-cell') continue;
           const nRep = acotar(parseInt(atr(ce, 'table:number-columns-repeated'), 10) || 1, 1, 63);
           for (let k = 0; k < nRep && celdas.length < columnas.length; k++) {
-            if (++celdasTotal > MAX_CELDAS) throw new Error('La tabla tiene demasiadas celdas y no se puede leer.');
+            if (++celdasTotal > MAX_CELDAS) throw errorMC('odp-celdas-tabla', {}, 'La tabla tiene demasiadas celdas y no se puede leer.');
             const cubierta = ce.n === 'table:covered-table-cell';
             const c = {};
             if (cubierta) c.fusionada = true;
@@ -1099,13 +1099,13 @@
   async function abrir(bytes) {
     const datos = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
     let zip;
-    try { zip = await ZipPropio.loadAsync(datos); } catch (e) { throw new Error('El archivo no es un .odp válido (no se puede abrir como un paquete).'); }
+    try { zip = await ZipPropio.loadAsync(datos); } catch (e) { throw errorMC('odp-paquete-invalido', {}, 'El archivo no es un .odp válido (no se puede abrir como un paquete).'); }
     if (zip.file('encrypted-package') || (zip.file('META-INF/manifest.xml') && /encryption-data/.test(await zip.file('META-INF/manifest.xml').async('string')))) {
-      const err = new Error('La presentación está protegida con contraseña. Sacale la contraseña en LibreOffice y volvé a intentarlo.');
-      err.codigo = 'cifrado';
+      const err = errorMC('odp-cifrado', {}, 'La presentación está protegida con contraseña. Sacale la contraseña en LibreOffice y volvé a intentarlo.');
+      err.tipo = 'cifrado';
       throw err;
     }
-    if (!zip.file('content.xml')) throw new Error('El archivo no es una presentación de OpenDocument (.odp).');
+    if (!zip.file('content.xml')) throw errorMC('odp-no-es-odp', {}, 'El archivo no es una presentación de OpenDocument (.odp).');
     return zip;
   }
   async function parece(bytes) {
@@ -1124,15 +1124,15 @@
     const texto = async (ruta) => {
       const f = zip.file(ruta);
       if (!f) return null;
-      if (tamanoDe(f) > MAX_TEXTO_XML) throw new Error('La presentación es demasiado grande para abrirla aquí.');
+      if (tamanoDe(f) > MAX_TEXTO_XML) throw errorMC('odp-demasiado-grande-abrir', {}, 'La presentación es demasiado grande para abrirla aquí.');
       const t = await f.async('string');
-      if (t.length > MAX_TEXTO_XML) throw new Error('La presentación es demasiado grande para abrirla aquí.');
+      if (t.length > MAX_TEXTO_XML) throw errorMC('odp-demasiado-grande-abrir', {}, 'La presentación es demasiado grande para abrirla aquí.');
       return t;
     };
     const contenido = arbol(await texto('content.xml'));
     const estilosXml = await texto('styles.xml');
     const estilosRaiz = estilosXml ? arbol(estilosXml) : null;
-    if (!contenido || contenido.n !== 'office:document-content') throw new Error('El archivo no es una presentación de OpenDocument (.odp).');
+    if (!contenido || contenido.n !== 'office:document-content') throw errorMC('odp-no-es-odp', {}, 'El archivo no es una presentación de OpenDocument (.odp).');
     const est = new Estilos();
     if (estilosRaiz) {
       est.leerFuentes(estilosRaiz);
@@ -1147,20 +1147,20 @@
     est.leerEstilosDe(hijo(contenido, 'office:automatic-styles'), 'c', true);
     const conv = new Conversor(est, zip, contenido);
     const presentacion = hijo(hijo(contenido, 'office:body'), 'office:presentation');
-    if (!presentacion) throw new Error('El archivo no es una presentación de OpenDocument (.odp).');
+    if (!presentacion) throw errorMC('odp-no-es-odp', {}, 'El archivo no es una presentación de OpenDocument (.odp).');
     // declaraciones de pie y fecha
     const decl = { pie: new Map(), fecha: new Map() };
     for (const d of hijos(presentacion, 'presentation:footer-decl')) decl.pie.set(atr(d, 'presentation:name'), textoDe(d));
     for (const d of hijos(presentacion, 'presentation:date-time-decl')) decl.fecha.set(atr(d, 'presentation:name'), textoDe(d));
     const paginas = hijos(presentacion, 'draw:page').slice(0, MAX_DIAPOSITIVAS);
-    if (!paginas.length) throw new Error('La presentación no tiene diapositivas.');
+    if (!paginas.length) throw errorMC('pptx-sin-diapositivas', {}, 'La presentación no tiene diapositivas.');
 
     // tamaño: el de la página maestra de la primera diapositiva
     const nombreMaestra0 = atr(paginas[0], 'draw:master-page-name');
     const m0 = est.maestras.get(nombreMaestra0) || [...est.maestras.values()][0];
     const pag0 = m0 ? est.paginas.get(atr(m0, 'style:page-layout-name')) : null;
     const ancho = (pag0 && pag0.ancho) || 9144000, alto = (pag0 && pag0.alto) || 6858000;
-    if (ancho > 51206400 || alto > 51206400 || ancho < 1 || alto < 1) throw new Error('El archivo está dañado (tamaño de la diapositiva).');
+    if (ancho > 51206400 || alto > 51206400 || ancho < 1 || alto < 1) throw errorMC('odp-danado-tamano', {}, 'El archivo está dañado (tamaño de la diapositiva).');
 
     // páginas maestras usadas
     const indiceMaestra = new Map();
@@ -1231,10 +1231,10 @@
     const contrato = { ancho, alto, maestros, diapositivas, propiedades: {} };
     // Las imágenes se leen una por una (con tope de bytes)
     for (const im of conv.pendientes) {
-      if (conv.bytesImagenes + tamanoDe(im._entrada) > MAX_IMAGENES_BYTES) throw new Error('Las imágenes de la presentación ocupan demasiado y no se puede leer.');
+      if (conv.bytesImagenes + tamanoDe(im._entrada) > MAX_IMAGENES_BYTES) throw errorMC('pptx-imagenes-ocupan', {}, 'Las imágenes de la presentación ocupan demasiado y no se puede leer.');
       im.datos = await im._entrada.async('uint8array');
       conv.bytesImagenes += im.datos.length;
-      if (conv.bytesImagenes > MAX_IMAGENES_BYTES) throw new Error('Las imágenes de la presentación ocupan demasiado y no se puede leer.');
+      if (conv.bytesImagenes > MAX_IMAGENES_BYTES) throw errorMC('pptx-imagenes-ocupan', {}, 'Las imágenes de la presentación ocupan demasiado y no se puede leer.');
       delete im._entrada; delete im._ruta;
     }
     // recortes: de distancias a fracciones del tamaño original de la imagen

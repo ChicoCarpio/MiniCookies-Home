@@ -34,7 +34,7 @@
     if (tipo === 'xls') return XlsLector.leer(bytes);
     if (tipo === 'xml') return Xml2003Lector.leer(bytes);
     if (tipo === 'html') return HtmlTablaLector.leer(bytes);
-    throw new Error('el archivo no es una hoja de cálculo que se pueda leer');
+    throw errorMC('excel-no-legible', {}, 'el archivo no es una hoja de cálculo que se pueda leer');
   }
 
   async function aXlsx(bytes) {

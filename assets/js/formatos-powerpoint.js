@@ -10,7 +10,7 @@
 //   await FormatosPowerpoint.comoPptx(datos)          → datos (ArrayBuffer, Uint8Array o Blob) listos para leer como .pptx; PptxModelo.abrir lo llama solo, así que
 //                                                       PowerPoint → PDF, → imágenes y lo que pasa por el motor acepta .ppt y .odp sin más. Un .pptx no se toca (ni se examina).
 //
-// Lanza Error (con .codigo = 'cifrado' si la presentación tiene contraseña) con un mensaje listo para mostrar.
+// Lanza Error (con .codigo del catálogo de mensajes-error.js y .tipo = 'cifrado' si la presentación tiene contraseña) con un mensaje listo para mostrar.
 // mensajes: claves de lo que no se pudo llevar al .pptx: 'formas', 'objetos', 'wordart', 'imagen-formato', 'imagen-falta', 'imagen-externa', 'enlace-descartado', 'grupos-anidados'.
 //
 // Los lectores de .ppt y .odp (cfb-propio.js, ppt-lector.js, odp-lector.js, pptx-desde-contrato.js, escritor-pptx.js, xml-ligero.js) se piden la primera vez que llega un
@@ -35,7 +35,7 @@
         const s = document.createElement('script');
         s.src = src;
         s.onload = resolver;
-        s.onerror = () => { cargas.delete(src); rechazar(new Error('No se pudo cargar el lector de este tipo de presentación (' + archivo + '). Revisá tu conexión y volvé a intentarlo.')); };
+        s.onerror = () => { cargas.delete(src); rechazar(errorMC('pptx-lector-no-carga', { archivo }, 'No se pudo cargar el lector de este tipo de presentación ({archivo}). Revisá tu conexión y volvé a intentarlo.')); };
         document.head.appendChild(s);
       }));
     }
@@ -81,7 +81,7 @@
     if (origen === 'ppt') { const r = await PptLector.aPptx(bytes); return { bytes: r.bytes, origen, mensajes: r.mensajes }; }
     if (origen === 'odp') { const r = await OdpLector.aPptx(bytes); return { bytes: r.bytes, origen, mensajes: r.mensajes }; }
     if (esCfb(bytes)) await PptLector.aPptx(bytes);   // otro contenedor de Office (un .pptx con contraseña, un .doc renombrado): el lector dice el motivo
-    throw new Error('el archivo no es una presentación de PowerPoint que se pueda leer (.pptx, .ppt u .odp)');
+    throw errorMC('pptx-no-legible', {}, 'el archivo no es una presentación de PowerPoint que se pueda leer (.pptx, .ppt u .odp)');
   }
 
   const aBytes = async (datos) => (typeof Blob !== 'undefined' && datos instanceof Blob ? new Uint8Array(await datos.arrayBuffer()) : datos instanceof Uint8Array ? datos : new Uint8Array(datos));

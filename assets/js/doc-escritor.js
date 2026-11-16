@@ -14,7 +14,7 @@
   const MAX_TEXTO = 64 * 1024 * 1024;
   const MAX_BLOQUES = 4000000;          // párrafos (y marcas de fila) que se escriben en total: Word guarda las historias de cada sección, así que un encabezado repetido se escribe cada vez
   const MAX_DATA = 256 * 1024 * 1024;   // bytes del flujo Data (imágenes)
-  const ERROR_GRANDE = 'El documento es demasiado grande para guardarlo como .doc.';
+  const errorGrande = () => errorMC('doc-demasiado-grande-guardar', {}, 'El documento es demasiado grande para guardarlo como .doc.');
   const MAX_ESTILOS = 4000;
   const MAX_SECCIONES = 4096;
   const MAX_FUENTES = 30000;            // Word abre un .doc con 31.000 fuentes y no con 31.500 (medido el 2026-10-23)
@@ -99,7 +99,7 @@
       this.marcadores = []; // { nombre, cp }
     }
     car(c) {
-      if (this.n >= MAX_TEXTO) throw new Error('El documento es demasiado grande para guardarlo como .doc.');
+      if (this.n >= MAX_TEXTO) throw errorGrande();
       if (this.n >= this.T.length) { const t = new Uint16Array(this.T.length * 2); t.set(this.T); this.T = t; }
       this.T[this.n++] = c;
     }
@@ -258,7 +258,7 @@
       if (!porImagen) { porImagen = new Map(); imagenesEscritas.set(bytes, porImagen); }
       if (porImagen.has(clave)) return porImagen.get(clave);
       // Word guarda la imagen dentro de cada dibujo en línea, así que cada tamaño distinto de la misma imagen la lleva otra vez: el flujo Data tiene tope
-      if (data.n + bytes.length + 1024 > MAX_DATA) throw new Error(ERROR_GRANDE);
+      if (data.n + bytes.length + 1024 > MAX_DATA) throw errorGrande();
       hayImagenes = true;
       data.alinear(4);
       const pos = data.n;
@@ -386,7 +386,7 @@
     // Las propiedades iguales comparten un solo arreglo de bytes (hasta cierto número de distintas: con claves todas diferentes la caché no sirve de nada); no se guarda la lista de sprms
     const cachePars = new Map();
     function finParrafo(marca, istd, sprms) {
-      if (++bloquesEscritos > MAX_BLOQUES) throw new Error(ERROR_GRANDE);
+      if (++bloquesEscritos > MAX_BLOQUES) throw errorGrande();
       D.car(marca); D.tramo(1, null, '');
       let g = null;
       if (sprms && !sprms.vacio()) {
@@ -620,7 +620,7 @@
           const total = L % 2 === 1 ? 1 + L : 2 + L;   // con cb de una palabra (L impar) o con el byte de relleno y cb (L par)
           const nuevoPos = (pos - total) & ~1;
           const cabecera = 4 * (n + 2) + 13 * (n + 1) + 1;
-          if (cabecera > nuevoPos) { if (n === 0) throw new Error('Un párrafo tiene demasiadas propiedades para guardarlo como .doc.'); break; }
+          if (cabecera > nuevoPos) { if (n === 0) throw errorMC('doc-parrafo-propiedades', {}, 'Un párrafo tiene demasiadas propiedades para guardarlo como .doc.'); break; }
           pos = nuevoPos;
           const c = new Bytes(total);
           if (L % 2 === 1) c.u8((L + 1) / 2); else c.u8(0).u8(L / 2);

@@ -176,6 +176,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/formatos-powerpoint.js"></script>
 <script src="../assets/js/ooxml-paquete.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
@@ -243,7 +244,7 @@ botonDividir.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blobFinal);
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-dividir') + ': ' + error.message);
+    alert(t('error-dividir') + ': ' + detalleError(error));
   } finally {
     botonDividir.disabled = false;
     botonDividir.textContent = t('boton-dividir');

@@ -251,6 +251,7 @@ window.i18nPagina = {
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/epub.js"></script>
 <script src="../assets/js/lote-archivos.js"></script>
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
@@ -329,7 +330,7 @@ botonAPdf.addEventListener('click', async () => {
     }
     resultadoPdf.classList.add('visible');
   } catch (error) {
-    alert(t('error-generar-pdf') + ': ' + (error && error.message || String(error)));
+    alert(t('error-generar-pdf') + ': ' + detalleError(error));
   } finally {
     botonAPdf.disabled = false;
     botonAPdf.textContent = t('boton-a-pdf');
@@ -413,7 +414,7 @@ botonAEpub.addEventListener('click', async () => {
     }
     resultadoEpub.classList.add('visible');
   } catch (error) {
-    alert(t('error-generar-epub') + ': ' + (error && error.message || String(error)));
+    alert(t('error-generar-epub') + ': ' + detalleError(error));
   } finally {
     botonAEpub.disabled = false;
     botonAEpub.textContent = t('boton-a-epub');

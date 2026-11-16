@@ -215,6 +215,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/xml-editar.js"></script>
 <script src="../assets/js/xlsx-formato.js"></script>
@@ -270,7 +271,7 @@ async function mostrarVistaPrevia(indiceHoja) {
   nombreHojaVista.textContent = libroActual.hojas.find(h => h.indice === indiceHoja).nombre;
   bloqueVistaPrevia.style.display = 'block';
   let hoja;
-  try { hoja = await hojaLeida(indiceHoja); } catch (error) { alert(t('error-leer') + ': ' + error.message); return; }
+  try { hoja = await hojaLeida(indiceHoja); } catch (error) { alert(t('error-leer') + ': ' + detalleError(error)); return; }
   if (miNumero !== numeroDeVista) return;
 
   if (hoja.nfilas === 0) {
@@ -351,7 +352,7 @@ async function cargarLibro(archivo) {
   try {
     libro = await LectorHojas.abrir(archivo);
   } catch (error) {
-    alert(t('error-leer') + ': ' + error.message);
+    alert(t('error-leer') + ': ' + detalleError(error));
     return;
   }
   libroActual = libro;
@@ -473,7 +474,7 @@ botonProcesar.addEventListener('click', async () => {
     if (motivoReconstruido && duplicadas > 0) mensaje.textContent += ' ' + t('aviso-reconstruido').replace('{motivo}', motivoReconstruido);
     mensaje.style.display = 'block';
   } catch (error) {
-    alert(t('error-procesar') + ': ' + error.message);
+    alert(t('error-procesar') + ': ' + detalleError(error));
   } finally {
     botonProcesar.disabled = false;
   }

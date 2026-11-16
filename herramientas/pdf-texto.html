@@ -361,7 +361,7 @@ botonAPdf.addEventListener('click', async () => {
     enlaceDescargaPdf.download = archivoTxtActual.name.replace(/\.txt$/i, '') + '.pdf';
     resultadoPdf.classList.add('visible');
   } catch (error) {
-    alert(t('error-generar') + ': ' + error.message);
+    alert(t('error-generar') + ': ' + detalleError(error));
   } finally {
     botonAPdf.disabled = false;
     botonAPdf.textContent = t('boton-a-pdf');

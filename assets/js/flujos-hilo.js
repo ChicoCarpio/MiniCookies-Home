@@ -13,7 +13,7 @@
 //
 // Mensajes:  { tipo: 'iniciar', scripts: [url…], idioma }        -> { tipo: 'listo' } | { tipo: 'error', mensaje }
 //            { tipo: 'paso', id, modulo, ficha, opciones, contexto } -> { tipo: 'hecho', id, r, vacio }
-//                                                                   | { tipo: 'fallo', id, enPreparar, nombre, mensaje }
+//                                                                   | { tipo: 'fallo', id, enPreparar, nombre, mensaje, codigo?, datos? }
 (function () {
   self.window = self;
   let idioma = 'es';
@@ -136,7 +136,11 @@
       const r = await m.ejecutar(d.ficha, d.opciones, d.contexto);
       postMessage({ tipo: 'hecho', id: d.id, r: r === undefined ? null : r, vacio: r === undefined });
     } catch (error) {
-      postMessage({ tipo: 'fallo', id: d.id, enPreparar, nombre: (error && error.name) || 'Error', mensaje: mensajeDe(error) });
+      // Con código (errorMC): la página lo cuenta en su idioma con detalleError.
+      const codigo = error && typeof error.codigo === 'string' ? error.codigo : undefined;
+      let datos;
+      try { datos = codigo && error.datos ? JSON.parse(JSON.stringify(error.datos)) : undefined; } catch (e) { datos = undefined; }
+      postMessage({ tipo: 'fallo', id: d.id, enPreparar, nombre: (error && error.name) || 'Error', mensaje: mensajeDe(error), codigo, datos });
     }
   };
 })();

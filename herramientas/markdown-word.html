@@ -281,6 +281,7 @@ Este es un ejemplo de **Markdown** con:
 </footer>
 
 <script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/formatos-word.js"></script>
 <script src="../assets/js/docx-base.js"></script>
@@ -374,7 +375,7 @@ botonConvertirWord.addEventListener('click', async () => {
     }
     resultadoWord.classList.add('visible');
   } catch (error) {
-    alert(t('error-generar') + ': ' + (error && error.message || String(error)));
+    alert(t('error-generar') + ': ' + detalleError(error));
   } finally {
     botonConvertirWord.disabled = false;
     botonConvertirWord.textContent = t('boton-convertir-word');
@@ -395,7 +396,7 @@ document.getElementById('botonGenerar').addEventListener('click', async () => {
     enlace.download = `${nombreArchivo}.docx`;
     enlace.click();
   } catch (error) {
-    alert(t('error-generar') + ': ' + error.message);
+    alert(t('error-generar') + ': ' + detalleError(error));
   } finally {
     boton.disabled = false;
     boton.textContent = t('boton-generar');
@@ -507,7 +508,7 @@ botonConvertir.addEventListener('click', async () => {
       LoteArchivos.pintarResumen(resumenLote, resultados, t);
     }
   } catch (error) {
-    alert(t('error-convertir') + ': ' + error.message);
+    alert(t('error-convertir') + ': ' + detalleError(error));
   } finally {
     botonConvertir.disabled = false;
     botonConvertir.textContent = t('boton-convertir');

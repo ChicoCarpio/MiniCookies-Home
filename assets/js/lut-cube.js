@@ -2,7 +2,7 @@
 // LUT de color en formato .cube (Adobe/Resolve): una tabla que dice a qué color se cambia cada color. Lee el archivo de texto y lo aplica a un
 // canvas. Los editores de imagen lo usan como un paso más del pipeline (ProcesarFiltros.renderizarFiltro, ajustes.lut).
 //
-//   LutCube.leer(texto)               → { titulo, tipo: '3d' | '1d', tamano, datos: Float32Array, min: [r,g,b], max: [r,g,b] }  (lanza Error con 'codigo')
+//   LutCube.leer(texto)               → { titulo, tipo: '3d' | '1d', tamano, datos: Float32Array, min: [r,g,b], max: [r,g,b] }  (lanza errorMC con código 'lut-…')
 //   LutCube.aplicar(canvas, lut, f)   → muta el canvas: original + (con LUT − original) × f, f de 0 a 2. No toca el canal alfa.
 //
 // Formato: líneas "TITLE", "DOMAIN_MIN/MAX r g b", "LUT_3D_SIZE n" (o "LUT_1D_SIZE n") y luego n³ (o n) filas "r g b" entre 0 y 1; en las de
@@ -12,11 +12,7 @@
   var TAMANO_3D_MAXIMO = 129;
   var TAMANO_1D_MAXIMO = 65536;
 
-  function fallo(codigo, texto) {
-    var error = new Error(texto || codigo);
-    error.codigo = codigo;
-    return error;
-  }
+  // Los errores llevan código (errorMC, de mensajes-error.js): la página los muestra en su idioma con detalleError.
 
   function tresNumeros(partes) {
     var v = [Number(partes[1]), Number(partes[2]), Number(partes[3])];
@@ -36,15 +32,15 @@
         if (palabra === 'TITLE') { titulo = linea.replace(/^TITLE\s*/i, '').replace(/^"|"$/g, ''); continue; }
         if (palabra === 'DOMAIN_MIN' || palabra === 'DOMAIN_MAX') {
           var d = tresNumeros(partes);
-          if (!d) throw fallo('dominio', 'DOMAIN inválido en la línea ' + (i + 1));
+          if (!d) throw errorMC('lut-dominio', { linea: i + 1 }, 'DOMAIN inválido en la línea {linea}');
           if (palabra === 'DOMAIN_MIN') min = d; else max = d;
           continue;
         }
         if (palabra === 'LUT_3D_SIZE' || palabra === 'LUT_1D_SIZE') {
-          if (tipo) throw fallo('formato', 'El archivo declara dos tablas');
+          if (tipo) throw errorMC('lut-dos-tablas', null, 'El archivo declara dos tablas');
           tipo = palabra === 'LUT_3D_SIZE' ? '3d' : '1d';
           tamano = Number(partes[1]);
-          if (!Number.isInteger(tamano) || tamano < 2 || tamano > (tipo === '3d' ? TAMANO_3D_MAXIMO : TAMANO_1D_MAXIMO)) throw fallo('tamano', 'Tamaño de tabla no válido: ' + partes[1]);
+          if (!Number.isInteger(tamano) || tamano < 2 || tamano > (tipo === '3d' ? TAMANO_3D_MAXIMO : TAMANO_1D_MAXIMO)) throw errorMC('lut-tamano', { tamano: partes[1] }, 'Tamaño de tabla no válido: {tamano}');
           esperado = tipo === '3d' ? tamano * tamano * tamano : tamano;
           datos = new Float32Array(esperado * 3);
           continue;
@@ -52,15 +48,15 @@
         if (/^[A-Z_]+[A-Z0-9_]*$/.test(palabra) && isNaN(Number(palabra))) continue;   // otra palabra clave que no usamos
       }
       var v = tresNumeros(['', partes[0], partes[1], partes[2]]);
-      if (!v || partes.length < 3) throw fallo('fila', 'Fila no válida en la línea ' + (i + 1));
-      if (!datos) throw fallo('formato', 'Hay colores antes de LUT_3D_SIZE o LUT_1D_SIZE');
-      if (n >= esperado) throw fallo('filas', 'Sobran filas respecto del tamaño declarado');
+      if (!v || partes.length < 3) throw errorMC('lut-fila', { linea: i + 1 }, 'Fila no válida en la línea {linea}');
+      if (!datos) throw errorMC('lut-colores-antes', null, 'Hay colores antes de LUT_3D_SIZE o LUT_1D_SIZE');
+      if (n >= esperado) throw errorMC('lut-sobran-filas', null, 'Sobran filas respecto del tamaño declarado');
       datos[n * 3] = v[0]; datos[n * 3 + 1] = v[1]; datos[n * 3 + 2] = v[2];
       n++;
     }
-    if (!datos) throw fallo('formato', 'No es un archivo .cube (falta LUT_3D_SIZE o LUT_1D_SIZE)');
-    if (n < esperado) throw fallo('filas', 'Faltan filas: hay ' + n + ' de ' + esperado);
-    for (var k = 0; k < 3; k++) if (!(max[k] > min[k])) throw fallo('dominio', 'DOMAIN_MAX debe ser mayor que DOMAIN_MIN');
+    if (!datos) throw errorMC('lut-no-es-cube', null, 'No es un archivo .cube (falta LUT_3D_SIZE o LUT_1D_SIZE)');
+    if (n < esperado) throw errorMC('lut-faltan-filas', { hay: n, esperado: esperado }, 'Faltan filas: hay {hay} de {esperado}');
+    for (var k = 0; k < 3; k++) if (!(max[k] > min[k])) throw errorMC('lut-dominio-orden', null, 'DOMAIN_MAX debe ser mayor que DOMAIN_MIN');
     return { titulo: titulo, tipo: tipo, tamano: tamano, datos: datos, min: min, max: max };
   }
 

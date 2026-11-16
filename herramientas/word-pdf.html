@@ -240,6 +240,7 @@ window.i18nPagina = {
 <script src="../assets/js/miniaturas.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/formatos-word.js"></script>
 <script src="../assets/js/docx-base.js"></script>
@@ -320,7 +321,7 @@ botonAPdf.addEventListener('click', async () => {
     vistaPrevia.style.display = 'block';
     controlesDescarga.style.display = 'flex';
   } catch (error) {
-    alert(t('error-vista-previa') + ': ' + error.message);
+    alert(t('error-vista-previa') + ': ' + detalleError(error));
   } finally {
     botonAPdf.disabled = false;
     botonAPdf.textContent = t('boton-a-pdf');
@@ -366,7 +367,7 @@ botonDescargarPdf.addEventListener('click', async () => {
     }
     resultadoPdf.classList.add('visible');
   } catch (error) {
-    alert(t('error-generar-pdf') + ': ' + (error && error.message || String(error)));
+    alert(t('error-generar-pdf') + ': ' + detalleError(error));
   } finally {
     botonDescargarPdf.disabled = false;
     botonDescargarPdf.textContent = t('boton-descargar-pdf');
@@ -454,7 +455,7 @@ botonAWord.addEventListener('click', async () => {
       LoteArchivos.pintarResumen(resumenLotePdf, resultados, t);
     }
   } catch (error) {
-    alert(t('error-generar-doc') + ': ' + error.message);
+    alert(t('error-generar-doc') + ': ' + detalleError(error));
   } finally {
     botonAWord.disabled = false;
     botonAWord.textContent = t('boton-a-word');

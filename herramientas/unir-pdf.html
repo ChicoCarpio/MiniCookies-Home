@@ -344,7 +344,7 @@ async function prepararTarjeta(id, archivo, tarjeta) {
     } catch (error) {
       if (error.protegido) {
         tarjeta.remove();
-        fallos.push({ nombre: archivo.name, motivo: error.message });
+        fallos.push({ nombre: archivo.name, motivo: detalleError(error) });
         mostrarNoConvertidos(fallos);
       } else if (esPdf(archivo) || esImagen(archivo)) {
         // Como antes: un PDF o una imagen sin miniatura igual se puede unir

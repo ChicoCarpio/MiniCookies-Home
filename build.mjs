@@ -24,6 +24,7 @@ import { revisarTerceros } from './terceros.mjs';
 import { revisarReferenciasVendor } from './referencias-vendor.mjs';
 import { revisarMotorPptx } from './motor-pptx.mjs';
 import { revisarDependenciasScripts } from './dependencias-scripts.mjs';
+import { revisarMensajesError } from './mensajes-error.mjs';
 import { join, relative, extname, dirname } from 'node:path';
 import { createHash } from 'node:crypto';
 
@@ -456,6 +457,8 @@ const rutasVendor = revisarReferenciasVendor(SALIDA, RAIZ);
 // Las páginas con el motor de PowerPoint en <script> lo traen completo (motor-pptx.mjs).
 if (!ES_SEGURO) revisarMotorPptx(RAIZ);
 if (!ES_SEGURO) revisarDependenciasScripts(RAIZ);
+// Errores con código: cada uno con su texto en es y en, y el catálogo cargado antes de quien lo usa (mensajes-error.mjs).
+if (!ES_SEGURO) revisarMensajesError(RAIZ);
 // Todo módulo propio empieza con el aviso de copyright. Copiar un archivo desde una investigación lo reemplazó sin que nada avisara (2026-11-06).
 (function revisarAvisos(dir) {
   for (const e of readdirSync(dir, { withFileTypes: true })) {

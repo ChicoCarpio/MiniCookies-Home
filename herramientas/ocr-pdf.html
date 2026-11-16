@@ -305,6 +305,7 @@ window.i18nPagina = {
 <script src="../assets/js/vendor.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/ocr-librarius.js?v=9"></script>
 <script src="../assets/js/ocr.js?v=2"></script>
 <script src="../assets/js/reordenar-tactil.js"></script>
@@ -437,7 +438,7 @@ botonOcr.addEventListener('click', async () => {
     mensajeResultado.textContent = t('resultado-mensaje').replace('{n}', totalPaginas).replace('{s}', totalPaginas === 1 ? '' : 's');
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-ocr') + ': ' + error.message);
+    alert(t('error-ocr') + ': ' + detalleError(error));
   } finally {
     if (worker) await worker.terminate();
     botonOcr.disabled = false;

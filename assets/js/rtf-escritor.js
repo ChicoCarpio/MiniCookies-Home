@@ -15,7 +15,7 @@
   const MAX_BLOQUES = 4000000;          // párrafos que se escriben en total: un encabezado grande repetido por miles de secciones no tiene que multiplicarse sin freno
   const MAX_SALIDA = 500000000;         // caracteres del .rtf (cerca del tope de una cadena de V8); una imagen citada muchas veces o un documento enorme dan un Error claro
   const CAMPOS = new Set(['PAGE', 'NUMPAGES', 'SECTIONPAGES', 'DATE', 'TIME', 'SAVEDATE', 'PRINTDATE', 'CREATEDATE', 'FILENAME', 'TITLE', 'AUTHOR', 'NUMWORDS', 'NUMCHARS']);   // los campos que se escriben como campo; lo demás queda como su texto
-  const ERROR_GRANDE = 'El documento es demasiado grande para guardarlo como .rtf.';
+  const errorGrande = () => errorMC('rtf-demasiado-grande-guardar', {}, 'El documento es demasiado grande para guardarlo como .rtf.');
   const sinProto = (o) => Object.assign(Object.create(null), o);
   const entero = (v, min, max, def = 0) => { const n = Math.round(Number(v)); return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : def; };
   const rgb = (hex) => (/^[0-9a-fA-F]{6}$/.test(hex || '') ? [parseInt(hex.slice(0, 2), 16), parseInt(hex.slice(2, 4), 16), parseInt(hex.slice(4, 6), 16)] : null);
@@ -59,7 +59,7 @@
   const DIGITOS = Uint8Array.from('0123456789abcdef', (c) => c.charCodeAt(0));
   const hexa = (bytes) => {
     const lineas = Math.ceil(bytes.length / 64);
-    if (bytes.length * 2 + lineas > MAX_SALIDA) throw new Error(ERROR_GRANDE);
+    if (bytes.length * 2 + lineas > MAX_SALIDA) throw errorGrande();
     const salida = new Uint8Array(bytes.length * 2 + lineas);
     let o = 0;
     for (let i = 0; i < bytes.length; i++) {
@@ -206,13 +206,13 @@
       let hex = hexaDe.get(bytes);
       if (hex === undefined) { hex = hexa(bytes); hexaDe.set(bytes, hex); }
       hexaTotal += hex.length;
-      if (hexaTotal > MAX_SALIDA) throw new Error(ERROR_GRANDE);
+      if (hexaTotal > MAX_SALIDA) throw errorGrande();
       const wTw = entero((Number(img.ancho) || 72) * 20, 20, 31680, 1440), hTw = entero((Number(img.alto) || 72) * 20, 20, 31680, 1440);
       return `{\\pict\\${tipo === 'png' ? 'pngblip' : 'jpegblip'}\\picw${Math.max(1, Math.round(wTw / 15))}\\pich${Math.max(1, Math.round(hTw / 15))}\\picwgoal${wTw}\\pichgoal${hTw}\n${hex}}`;
     }
 
     function parrafo(b, ctx) {
-      if (++bloquesEscritos > MAX_BLOQUES) throw new Error(ERROR_GRANDE);
+      if (++bloquesEscritos > MAX_BLOQUES) throw errorGrande();
       const e = b.estilo != null && idEstilo.has(b.estilo) ? idEstilo.get(b.estilo) : 0;
       let nivel = null, lista = '';
       if (b.p && b.p.lista && b.p.lista.id != null && numLista.has(b.p.lista.id)) {
@@ -285,7 +285,7 @@
       (lista || []).forEach((b, k) => {
         if (b.tipo === 'tabla') { x += tabla(b, 1); ultimoEsTabla = true; }
         else { x += parrafo(b, null) + (sinFinal && k === n - 1 ? '\n' : '\\par\n'); ultimoEsTabla = false; }
-        if (x.length > MAX_SALIDA) throw new Error(ERROR_GRANDE);
+        if (x.length > MAX_SALIDA) throw errorGrande();
       });
       if (ultimoEsTabla) x += '\\pard\\par\n';
       return x;
@@ -298,7 +298,7 @@
     let cuerpo = '';
     let encAnterior = null, pieAnterior = null;   // RTF hereda el encabezado y el pie de la sección anterior: solo se escriben cuando cambian (la misma lista, por identidad, no se repite)
     secciones.forEach((s, i) => {
-      if (cuerpo.length > MAX_SALIDA) throw new Error(ERROR_GRANDE);
+      if (cuerpo.length > MAX_SALIDA) throw errorGrande();
       const pg = s.pagina || {}, m = s.margenes || {};
       cuerpo += i > 0 ? '\\sect' : '';
       cuerpo += `\\sectd${i > 0 && s.tipo === 'continua' ? '\\sbknone' : '\\sbkpage'}\\pgwsxn${entero(pg.ancho || 12240, 720, 31680)}\\pghsxn${entero(pg.alto || 15840, 720, 31680)}${pg.horizontal ? '\\lndscpsxn' : ''}`
@@ -364,7 +364,7 @@
       + `{\\info${pr.titulo ? `{\\title ${textoRtf(pr.titulo)}}` : ''}${pr.autor ? `{\\author ${textoRtf(pr.autor)}}` : ''}}\n`;
     // la cabecera se arma al final porque las fuentes y los colores se descubren al recorrer el contenido
     const texto = cab.replace(/^/, '') + cuerpo + '}';
-    if (texto.length > MAX_SALIDA) throw new Error(ERROR_GRANDE);
+    if (texto.length > MAX_SALIDA) throw errorGrande();
     return { bytes: new TextEncoder().encode(texto), mensajes };
   }
 

@@ -182,6 +182,7 @@ window.i18nPagina = {
 <canvas id="canvasRender" style="display:none;"></canvas>
 
 <script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/formatos-powerpoint.js"></script>
 <script src="../assets/js/pptx-xml.js"></script>
 <script src="../vendor/ecma-376-geometrias/5ed-2016/geometrias.js"></script>
@@ -246,7 +247,7 @@ botonConvertir.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blobZip);
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-renderizar') + ': ' + error.message);
+    alert(t('error-renderizar') + ': ' + detalleError(error));
   } finally {
     botonConvertir.disabled = false;
     botonConvertir.textContent = t('boton-convertir');

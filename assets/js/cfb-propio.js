@@ -3,7 +3,7 @@
 // Un archivo CFB es una lista de sectores; una tabla (FAT) dice qué sector sigue a cuál, y un directorio da nombre a cada flujo.
 // Los flujos de menos de 4096 bytes van en el "miniflujo" (sectores de 64 bytes, con su propia tabla, la MiniFAT). No depende del navegador.
 //
-//   const cfb = CfbPropio.leer(bytes, { danado: (detalle) => new Error(detalle) });   // danado es opcional: arma el error de un archivo roto
+//   const cfb = CfbPropio.leer(bytes, { danado: (detalle, codigoDetalle) => new Error(detalle) });   // danado es opcional: arma el error de un archivo roto (codigoDetalle: el código cfb-* del detalle, para traducirlo)
 //   cfb.entradas   // [{ id, nombre, tipo: 1 almacén | 2 flujo | 5 raíz, inicio, tam, izq, der, hijo }]  (las entradas vacías no están)
 //   cfb.flujo(entrada)   // Uint8Array con el contenido de un flujo
 //
@@ -20,14 +20,15 @@
   // ---- lector -------------------------------------------------------------------------------------------------------
   function leer(b, opciones) {
     const danado = (opciones && opciones.danado) || ((detalle) => Object.assign(new Error('CFB dañado: ' + detalle), { codigo: 'danado', detalle }));
-    if (b.length < 512) throw danado('contenedor muy corto');
+    const roto = (motivo) => danado(motivo.message, motivo.codigo);   // el detalle en español y su código (cfb-*): quien muestra el error lo traduce
+    if (b.length < 512) throw roto(errorMC('cfb-corto', {}, 'contenedor muy corto'));
     const desp = u16(b, 0x1E), despMini = u16(b, 0x20);
-    if (desp < 7 || desp > 16 || despMini > desp) throw danado('tamaño de sector');
+    if (desp < 7 || desp > 16 || despMini > desp) throw roto(errorMC('cfb-tamano-sector', {}, 'tamaño de sector'));
     const tam = 1 << desp, tamMini = 1 << despMini;
     const nSect = Math.floor((b.length - 512) / tam) + 1;
     const sector = (id) => {
       const ini = (id + 1) * tam;
-      if (id >= nSect + 1 || ini >= b.length) throw danado('sector fuera del archivo');
+      if (id >= nSect + 1 || ini >= b.length) throw roto(errorMC('cfb-sector-fuera', {}, 'sector fuera del archivo'));
       return b.subarray(ini, Math.min(ini + tam, b.length));
     };
     // tabla de asignación (FAT): sus sectores los dice el encabezado y, si son más de 109, la cadena DIFAT. No puede haber más sectores de FAT que
@@ -40,7 +41,7 @@
       for (let k = 0; k < tam / 4 - 1; k++) { const id = u32(s, k * 4); if (id < 0xFFFFFFFA) idsFat.push(id); }
       dif = u32(s, tam - 4);
     }
-    if (idsFat.length > nSect) throw danado('FAT más grande que el archivo');
+    if (idsFat.length > nSect) throw roto(errorMC('cfb-fat-grande', {}, 'FAT más grande que el archivo'));
     const fat = new Uint32Array(idsFat.length * (tam / 4));
     idsFat.forEach((id, k) => { const s = sector(id); for (let j = 0; j < tam / 4; j++) fat[k * (tam / 4) + j] = u32(s, j * 4); });
     // una cadena no pasa por más sectores que los que tiene el archivo (con un ciclo, la tabla entera: un flujo de cientos de megas)
@@ -48,7 +49,7 @@
       const ids = [];
       let id = inicio;
       while (id < 0xFFFFFFFA) {
-        if (ids.length >= max || id >= tabla.length) throw danado('cadena de sectores');
+        if (ids.length >= max || id >= tabla.length) throw roto(errorMC('cfb-cadena-sectores', {}, 'cadena de sectores'));
         ids.push(id); id = tabla[id];
       }
       return ids;
@@ -80,7 +81,7 @@
           miniFlujo = leerCadena(raiz.inicio, raiz.tam);
         }
         const ids = cadena(e.inicio, miniFat, Math.ceil(miniFlujo.length / tamMini)), r = new Uint8Array(ids.length * tamMini);
-        ids.forEach((id, k) => { const ini = id * tamMini; if (ini + tamMini > miniFlujo.length + tamMini) throw danado('minisector'); r.set(miniFlujo.subarray(ini, ini + tamMini), k * tamMini); });
+        ids.forEach((id, k) => { const ini = id * tamMini; if (ini + tamMini > miniFlujo.length + tamMini) throw roto(errorMC('cfb-minisector', {}, 'minisector')); r.set(miniFlujo.subarray(ini, ini + tamMini), k * tamMini); });
         return r.subarray(0, e.tam);
       }
       return leerCadena(e.inicio, e.tam);
@@ -163,7 +164,7 @@
       nFat = fat; nDifat = difat;
     }
     const total = nDatos + nFat + nDifat;
-    if (total > 0x7FFFFFF0 / TAM) throw new Error('CFB: archivo demasiado grande');
+    if (total > 0x7FFFFFF0 / TAM) throw errorMC('cfb-demasiado-grande', {}, 'CFB: archivo demasiado grande');
     const fat = new Uint32Array(nFat * POR_SECTOR).fill(LIBRE);
     let siguiente = 0;
     const reservar = (k) => {   // k sectores seguidos, encadenados en la FAT; devuelve el primero (o FIN si k = 0)

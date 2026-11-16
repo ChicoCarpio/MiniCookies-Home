@@ -242,10 +242,10 @@ const PptxModelo = (() => {
     const { parte, imagen } = paquete(zip, o.imagenes);
 
     const pres = await parte('ppt/presentation.xml');
-    if (!pres) throw new Error('No se pudo leer ppt/presentation.xml');
+    if (!pres) throw errorMC('pptx-sin-presentacion', {}, 'No se pudo leer ppt/presentation.xml');
     const sldSz = hijo(pres.raiz, 'sldSz');
     const ancho = ent(sldSz, 'cx', 0), alto = ent(sldSz, 'cy', 0);
-    if (!ancho || !alto) throw new Error('Tamaño de diapositiva inválido.');
+    if (!ancho || !alto) throw errorMC('pptx-tamano-invalido', {}, 'Tamaño de diapositiva inválido.');
     const diapositivas = hijos(hijo(pres.raiz, 'sldIdLst'), 'sldId')
       .map((s) => pres.rels.porId(s.getAttributeNS(NS_R, 'id'))).filter((r) => r && r.destino).map((r) => r.destino);
     const textoPorDefecto = hijo(pres.raiz, 'defaultTextStyle');
@@ -258,7 +258,7 @@ const PptxModelo = (() => {
 
     async function diapositiva(i) {
       const sld = await parte(diapositivas[i]);
-      if (!sld) throw new Error('Diapositiva ilegible: ' + diapositivas[i]);
+      if (!sld) throw errorMC('pptx-diapositiva-ilegible', { nombre: diapositivas[i] }, 'Diapositiva ilegible: {nombre}');
       const relLayout = sld.rels.porTipo('slideLayout')[0];
       const layout = relLayout ? await parte(relLayout.destino) : null;
       const relMaster = layout && layout.rels.porTipo('slideMaster')[0];

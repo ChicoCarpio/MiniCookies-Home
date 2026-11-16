@@ -90,7 +90,7 @@
       this.mediosPorDatos = new Map();
     }
     aviso(clave) { this.mensajes.add(clave); }
-    contar(n = 1) { if ((this.formas += n) > MAX_FORMAS) throw new Error('La presentación tiene demasiadas formas y no se puede escribir.'); }
+    contar(n = 1) { if ((this.formas += n) > MAX_FORMAS) throw errorMC('pptx-escribir-demasiadas-formas', {}, 'La presentación tiene demasiadas formas y no se puede escribir.'); }
     medio(imagen) {
       if (!imagen || !(imagen.datos instanceof Uint8Array) || !imagen.datos.length) return null;
       const tipo = tipoDeImagen(imagen.datos, imagen.tipo);
@@ -207,11 +207,11 @@
       hijos += `<a:buFont typeface="${escAttr((v.fuente || 'Arial').slice(0, 64))}"/><a:buChar char="${escAttr(Array.from(v.car)[0])}"/>`;
     }
     const salida = [];
-    if ((ctx.unidades += 1 + (p.hijos || []).length) > MAX_UNIDADES) throw new Error('La presentación tiene demasiado texto y no se puede escribir.');
+    if ((ctx.unidades += 1 + (p.hijos || []).length) > MAX_UNIDADES) throw errorMC('pptx-escribir-demasiado-texto', {}, 'La presentación tiene demasiado texto y no se puede escribir.');
     for (const run of p.hijos || []) {
       if (!run || typeof run !== 'object') continue;
       if (run.salto) { salida.push(`<a:br>${propsR(run.r, rels, ctx, lang)}</a:br>`); continue; }
-      if ((ctx.texto += String(run.texto || '').length) > MAX_TEXTO) throw new Error('La presentación tiene demasiado texto y no se puede escribir.');
+      if ((ctx.texto += String(run.texto || '').length) > MAX_TEXTO) throw errorMC('pptx-escribir-demasiado-texto', {}, 'La presentación tiene demasiado texto y no se puede escribir.');
       if (run.campo) {
         const tipo = run.campo === 'numero' ? 'slidenum' : 'datetime1';
         const id = run.campo === 'numero' ? '{B0A0BC7D-E01F-4586-9EED-2E3260ECE181}' : '{5E4B1A11-67A4-4E0C-8E5A-8D5D3F0A9C11}';
@@ -261,7 +261,7 @@
       const xy = (x, y) => `<a:pt x="${entero(x, -2147483647, 2147483647)}" y="${entero(y, -2147483647, 2147483647)}"/>`;
       const cmds = [];
       for (const c of r.cmds) {
-        if ((ctx.puntos += 1) > MAX_PUNTOS) throw new Error('La presentación tiene demasiados trazos y no se puede escribir.');
+        if ((ctx.puntos += 1) > MAX_PUNTOS) throw errorMC('pptx-escribir-demasiados-trazos', {}, 'La presentación tiene demasiados trazos y no se puede escribir.');
         if (!Array.isArray(c)) continue;
         if (c[0] === 'M') cmds.push(`<a:moveTo>${xy(c[1], c[2])}</a:moveTo>`);
         else if (c[0] === 'L') cmds.push(`<a:lnTo>${xy(c[1], c[2])}</a:lnTo>`);
@@ -318,7 +318,7 @@
     const filas = (f.filas || []).slice(0, 5000);
     if (!columnas.length || !filas.length) return '';
     const celdasTotal = filas.reduce((s, fi) => s + ((fi && fi.celdas) || []).length, 0);
-    if (celdasTotal > MAX_CELDAS) throw new Error('La tabla tiene demasiadas celdas y no se puede escribir.');
+    if (celdasTotal > MAX_CELDAS) throw errorMC('pptx-escribir-demasiadas-celdas', {}, 'La tabla tiene demasiadas celdas y no se puede escribir.');
     ctx.contar(celdasTotal);
     const ancho = columnas.reduce((a, b) => a + b, 0), alto = filas.reduce((a, fi) => a + entero(fi && fi.alto, 0, 51206400), 0);
     const trs = filas.map((fi) => {

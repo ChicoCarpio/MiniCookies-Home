@@ -348,7 +348,7 @@ botonConvertir.addEventListener('click', () => {
     }
     enlaceDescarga.style.display = 'inline-block';
   } catch (error) {
-    alert(t('error-convertir') + ': ' + error.message);
+    alert(t('error-convertir') + ': ' + detalleError(error));
   }
 });
 

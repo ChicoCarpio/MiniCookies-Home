@@ -41,7 +41,7 @@ const ExcelAPdfMotor = (() => {
   // El libro del motor para imprimir: el que ya abrió LectorHojas. Un .xls, .xlsb u .ods ya viene pasado a .xlsx (valores, formatos de número,
   // anchos y combinadas; sin estilos de celda).
   async function libroDeMotor(libroLector) {
-    if (!libroLector.libroMotor) throw new Error('No se pudo preparar el libro para imprimir.');
+    if (!libroLector.libroMotor) throw errorMC('excel-preparar-impresion', {}, 'No se pudo preparar el libro para imprimir.');
     return libroLector.libroMotor;
   }
 

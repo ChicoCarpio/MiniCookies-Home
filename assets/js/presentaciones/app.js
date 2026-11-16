@@ -121,7 +121,7 @@
     mostrarCargando(false);
   }
   function mostrarCargando(si) { $('cargando').hidden = !si; if (si) $('errorInicio').hidden = true; }
-  function mostrarError(e) { console.error(e); const el = $('errorInicio'); el.textContent = tx('error-abrir') + ': ' + (e && e.message ? e.message : e); el.hidden = false; $('inicio').hidden = false; $('app').hidden = true; document.documentElement.classList.remove('of-abierta'); }
+  function mostrarError(e) { console.error(e); const el = $('errorInicio'); el.textContent = tx('error-abrir') + ': ' + (e && e.message ? detalleError(e) : e); el.hidden = false; $('inicio').hidden = false; $('app').hidden = true; document.documentElement.classList.remove('of-abierta'); }
 
   // ---- dibujo: una cola, porque el modelo se comparte ---------------------------------------------------------------
   let cola = Promise.resolve();
@@ -246,7 +246,7 @@
         return op;
       } catch (e) {
         console.warn(e);
-        avisar(tx('aviso-no-se-pudo') + ': ' + (e && e.message ? e.message : e));
+        avisar(tx('aviso-no-se-pudo') + ': ' + (e && e.message ? detalleError(e) : e));
         armarPanel();
         return null;
       }
@@ -616,7 +616,7 @@
       const i = actual, caja_ = { x: Math.round((modelo.ancho - cx) / 2), y: Math.round((modelo.alto - cy) / 2), cx, cy };
       const r = await hacer('Imagen', () => pe.opImagen(i, bytes, tipo, caja_));
       if (r) { await cadena; await seleccionarPorId(r.id); }
-    } catch (e) { console.warn(e); avisar(tx('aviso-no-se-pudo') + ': ' + (e && e.message ? e.message : e)); }
+    } catch (e) { console.warn(e); avisar(tx('aviso-no-se-pudo') + ': ' + (e && e.message ? detalleError(e) : e)); }
   }
   async function seleccionarPorId(id) { const e = seleccionables().find((x) => x.origen.camino[0] === String(id)); if (e) await seleccionar(e); }
 
@@ -668,7 +668,7 @@
       }
       descargarBlob(new Blob([await pdf.save()], { type: 'application/pdf' }), nombreDoc + '.pdf');
       avisar(tx('aviso-pdf-listo', hechas));
-    } catch (e) { console.warn(e); avisar(tx('aviso-no-se-pudo') + ': ' + (e && e.message ? e.message : e)); }
+    } catch (e) { console.warn(e); avisar(tx('aviso-no-se-pudo') + ': ' + (e && e.message ? detalleError(e) : e)); }
   }
 
   // ---- inspector (con controles), línea honesta ----------------------------------------------------------------------------------------------------------

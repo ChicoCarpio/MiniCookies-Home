@@ -378,6 +378,7 @@ window.i18nPagina = {
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/camara.js"></script>
 <script src="../assets/js/escaner-documento.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/custos.js"></script>
 <script>
 const E = EscanerDocumento;
@@ -491,7 +492,7 @@ async function iniciarCamara() {
   } catch (error) {
     cam = null;
     estado('inicio');
-    aviso(error.name === 'SinCamara' ? t('error-sin-camara') : t('error-camara') + (error.message || error.name), true);
+    aviso(error.name === 'SinCamara' ? t('error-sin-camara') : t('error-camara') + (error.message ? detalleError(error) : error.name), true);
   }
 }
 
@@ -1066,7 +1067,7 @@ $('botonImprimir').addEventListener('click', async () => {
     setTimeout(limpiar, 120000);   // por si el navegador no avisa al terminar
   } catch (error) {
     limpiar();
-    mostrarError(t('error-imprimir') + ': ' + (error.message || error.name));
+    mostrarError(t('error-imprimir') + ': ' + (error.message ? detalleError(error) : error.name));
   }
 });
 
@@ -1084,7 +1085,7 @@ $('botonCompartir').addEventListener('click', () => conBotonOcupado($('botonComp
   } catch (error) {
     if (error.name === 'AbortError') return; // la persona cerró el menú
     // Si armar el PDF tardó, el navegador ya no deja abrir el menú sin un toque nuevo.
-    mostrarError(error.name === 'NotAllowedError' ? t('compartir-reintentar') : t('error-compartir') + ': ' + (error.message || error.name));
+    mostrarError(error.name === 'NotAllowedError' ? t('compartir-reintentar') : t('error-compartir') + ': ' + (error.message ? detalleError(error) : error.name));
   }
 }));
 
@@ -1103,7 +1104,7 @@ $('botonCambiarCamara').addEventListener('click', async () => {
   if (!cam) return;
   deteccionPrevia = null;
   toqueCamara = null;
-  try { await cam.cambiar(); } catch (error) { aviso(t('error-camara') + (error.message || error.name), true); }
+  try { await cam.cambiar(); } catch (error) { aviso(t('error-camara') + (error.message ? detalleError(error) : error.name), true); }
 });
 window.addEventListener('pagehide', apagarCamara);
 estado('inicio');

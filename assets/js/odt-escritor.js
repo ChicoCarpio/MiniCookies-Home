@@ -29,7 +29,7 @@
   const MAX_TRABAJO = 4000000;         // bloques y celdas que se serializan en total (un encabezado grande no se multiplica sin freno por las páginas maestras)
   const MAX_XML_CABECERAS = 200000000; // caracteres de encabezados y pies en styles.xml, contando cada página maestra (las cadenas repetidas pesan igual que las distintas)
   const MAX_COLUMNAS = 63, MAX_COLUMNAS_TABLA = 1000;   // una combinación horizontal de millones de columnas pedía millones de celdas cubiertas
-  const ERROR_GRANDE = 'El documento es demasiado grande para guardarlo como .odt.';
+  const errorGrande = () => errorMC('odt-demasiado-grande-guardar', {}, 'El documento es demasiado grande para guardarlo como .odt.');
 
   const RESALTADO = sinProto({ yellow: 'FFFF00', green: '00FF00', cyan: '00FFFF', magenta: 'FF00FF', blue: '0000FF', red: 'FF0000', darkBlue: '000080', darkCyan: '008080', darkGreen: '008000', darkMagenta: '800080', darkRed: '800000', darkYellow: '808000', darkGray: '808080', lightGray: 'C0C0C0', black: '000000', white: 'FFFFFF' });
   const ALINEACION = sinProto({ izquierda: 'start', centro: 'center', derecha: 'end', justificado: 'justify' });
@@ -59,7 +59,7 @@
     let destinoAuto = { lista: estilosAuto, mapa: new Map() };
     const mapaCabeceras = new Map();
     let contador = 0, trabajo = 0;
-    const gastar = () => { if (++trabajo > MAX_TRABAJO) throw new Error(ERROR_GRANDE); };
+    const gastar = () => { if (++trabajo > MAX_TRABAJO) throw errorGrande(); };
     const nombreEstilo = (id) => (id === 'Normal' ? 'Standard' : String(id));
     const estilosPorId = new Map((contrato.estilos || []).map((e) => [e.id, e]));
 
@@ -495,7 +495,7 @@
         if (!/xml:id=|table:name=|draw:name=/.test(s)) cabecerasHechas[etiqueta].set(lista, s);
       }
       xmlCabeceras += s.length;
-      if (xmlCabeceras > MAX_XML_CABECERAS) throw new Error(ERROR_GRANDE);
+      if (xmlCabeceras > MAX_XML_CABECERAS) throw errorGrande();
       return s;
     };
     const maestrasXml = maestras.map((m) => `<style:master-page style:name="${m.nombre}" style:page-layout-name="${m.layout}">${hf('header', m.encabezado)}${hf('footer', m.pie)}</style:master-page>`).join('');

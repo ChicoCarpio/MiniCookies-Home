@@ -155,6 +155,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/xml-editar.js"></script>
 <script src="../assets/js/xlsx-formato.js"></script>
@@ -193,7 +194,7 @@ async function mostrarArchivo(archivo) {
     nombresHojas = lectorActual.libroMotor.hojas.filter((h) => h.tipo === 'hoja' || h.tipo === 'grafico').map((h) => h.nombre);
   } catch (error) {
     botonDividir.disabled = true;
-    alert(t('error-leer') + ': ' + error.message);
+    alert(t('error-leer') + ': ' + detalleError(error));
     return;
   }
   avisoFormato.style.display = esOoxml(archivo) ? 'none' : 'block';
@@ -241,7 +242,7 @@ botonDividir.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blobZip);
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-dividir') + ': ' + error.message);
+    alert(t('error-dividir') + ': ' + detalleError(error));
   } finally {
     botonDividir.disabled = false;
     botonDividir.textContent = t('boton-dividir');

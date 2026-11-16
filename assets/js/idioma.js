@@ -241,9 +241,15 @@ window.i18nComun = {
   // explicación clara (PDF protegido: pdf-lib tira "...is encrypted...") se
   // reemplaza por un mensaje traducido que dice qué hacer.
   window.detalleError = function (error) {
+    // Un error con código (errorMC, mensajes-error.js) se cuenta en el idioma de la página; sin texto en el catálogo, su mensaje.
+    var catalogo = window.MensajesError;
+    if (error && error.codigo && catalogo) {
+      var dic = catalogo[idiomaActual()] || {}, texto = dic['error-' + error.codigo];
+      if (texto) return catalogo.rellenar(texto, error.datos, dic);
+    }
     var mensaje = (error && error.message) || String(error);
     if (/encrypted|no password given|incorrect password/i.test(mensaje)) return t('pdf-protegido');   // pdf-lib y PDF.js
-    if (/no pdf header found|invalid pdf structure|failed to parse pdf document/i.test(mensaje)) return t('pdf-danado');
+    if (/no pdf header found|invalid pdf structure|failed to parse pdf document|the pdf file is empty/i.test(mensaje) || /reading 'Pages'/.test(mensaje)) return t('pdf-danado');
     if (/source image could not be decoded|source image cannot be decoded/i.test(mensaje)) return t('imagen-ilegible');
     return mensaje;
   };

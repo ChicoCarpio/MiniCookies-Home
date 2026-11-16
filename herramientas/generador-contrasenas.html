@@ -245,7 +245,7 @@ function actualizarYGenerar() {
     );
     contrasenaValida = true;
   } catch (error) {
-    elResultado.textContent = error.message;
+    elResultado.textContent = detalleError(error);
   }
 }
 

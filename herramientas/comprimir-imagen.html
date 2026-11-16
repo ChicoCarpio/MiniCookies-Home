@@ -265,7 +265,7 @@ botonComprimir.addEventListener('click', async () => {
 
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-comprimir') + error.message);
+    alert(t('error-comprimir') + detalleError(error));
   } finally {
     botonComprimir.disabled = false;
     botonComprimir.textContent = t('boton-comprimir');

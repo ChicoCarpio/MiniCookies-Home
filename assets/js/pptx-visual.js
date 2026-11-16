@@ -164,7 +164,7 @@ async function dibujarConMotorPropio(archivo, canvas, alAvanzar, { conImagenes =
     imagenes.push(imagen);
     if (alAvanzar) alAvanzar(i + 1, pres.cantidad);
   }
-  if (pres.cantidad && vacias === pres.cantidad) throw new Error('El renderizado no produjo contenido visible.');
+  if (pres.cantidad && vacias === pres.cantidad) throw errorMC('pptx-sin-contenido', {}, 'El renderizado no produjo contenido visible.');
   return imagenes;
 }
 

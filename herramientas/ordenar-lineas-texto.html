@@ -234,7 +234,7 @@ botonOrdenar.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-ordenar') + ': ' + error.message);
+    alert(t('error-ordenar') + ': ' + detalleError(error));
   }
 });
 </script>

@@ -145,8 +145,8 @@
     let cuenta = 0;
     recorrer(texto, {
       abrir(n, a) {
-        if (++cuenta > maxElementos) throw new Error('El documento tiene demasiados elementos y no se puede leer.');
-        if (pila.length > maxProfundidad) throw new Error('El documento tiene demasiados niveles anidados y no se puede leer.');
+        if (++cuenta > maxElementos) throw errorMC('xml-demasiados-elementos', {}, 'El documento tiene demasiados elementos y no se puede leer.');
+        if (pila.length > maxProfundidad) throw errorMC('xml-demasiados-niveles', {}, 'El documento tiene demasiados niveles anidados y no se puede leer.');
         const e = { n, a, h: [] };
         pila[pila.length - 1].h.push(e);
         pila.push(e);

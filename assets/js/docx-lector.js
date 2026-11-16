@@ -109,7 +109,7 @@
       this.prof = 0;
     }
 
-    entrar() { if (++this.prof > PROFUNDIDAD_MAXIMA) throw new Error('El documento tiene demasiados niveles anidados y no se puede leer.'); }
+    entrar() { if (++this.prof > PROFUNDIDAD_MAXIMA) throw errorMC('xml-demasiados-niveles', {}, 'El documento tiene demasiados niveles anidados y no se puede leer.'); }
 
     aviso(m) { if (!this.mensajes.some((x) => x.message === m)) this.mensajes.push({ type: 'warning', message: m }); }
 

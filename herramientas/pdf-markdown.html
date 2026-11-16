@@ -448,7 +448,7 @@ botonExtraer.addEventListener('click', async () => {
       }
     }
   } catch (error) {
-    alert(t('error-convertir') + ': ' + error.message);
+    alert(t('error-convertir') + ': ' + detalleError(error));
   } finally {
     botonExtraer.disabled = false;
     botonExtraer.textContent = t('boton-extraer');
@@ -536,7 +536,7 @@ botonConvertirPdf.addEventListener('click', async () => {
     }
     resultadoPdf.style.display = 'block';
   } catch (error) {
-    alert(t('error-convertir') + ': ' + error.message);
+    alert(t('error-convertir') + ': ' + detalleError(error));
   } finally {
     botonConvertirPdf.disabled = mdsActuales.length === 0;
     botonConvertirPdf.textContent = t('boton-convertir-pdf');

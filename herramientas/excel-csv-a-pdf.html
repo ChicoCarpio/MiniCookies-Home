@@ -624,6 +624,7 @@ window.i18nPagina = {
 
 <script src="../assets/js/vendor.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/xlsx-formato.js"></script>
 <script src="../assets/js/xlsx-estilos.js"></script>
@@ -824,7 +825,7 @@ async function crearRejilla() {
   try {
     await MotorHojas.cargarDibujo();
     if (idCarga !== secuenciaCargaArchivo) return;
-    const nueva = await RejillaHoja.crear(contenedorRejilla, { libro: libroLector, alError: error => mostrarAviso(error.message) });
+    const nueva = await RejillaHoja.crear(contenedorRejilla, { libro: libroLector, alError: error => mostrarAviso(detalleError(error)) });
     if (idCarga !== secuenciaCargaArchivo) { nueva.destruir(); return; }
     rejilla = nueva;
     rejilla.alCambiar(seleccion => {
@@ -841,7 +842,7 @@ async function crearRejilla() {
     const actual = Number(selectorHoja.value);
     if (!todasLasHojas() && rejilla.seleccion().hoja !== actual) rejilla.mostrarHoja(actual);
   } catch (error) {
-    mostrarAviso(error.message);
+    mostrarAviso(detalleError(error));
   }
 }
 
@@ -939,7 +940,7 @@ async function rehacerVista(secuencia) {
   try {
     opciones = opcionesImpresion();
   } catch (error) {
-    if (secuencia === secuenciaVista) mostrarMensaje(error.message);
+    if (secuencia === secuenciaVista) mostrarMensaje(detalleError(error));
     return;
   }
   if (opciones.areas && opciones.areas.length === 0) {
@@ -950,7 +951,7 @@ async function rehacerVista(secuencia) {
   try {
     nueva = await ExcelAPdfMotor.vistaPrevia(libroImpresion, opciones);
   } catch (error) {
-    if (secuencia === secuenciaVista) mostrarMensaje(t('error-vista') + ': ' + error.message);
+    if (secuencia === secuenciaVista) mostrarMensaje(t('error-vista') + ': ' + detalleError(error));
     return;
   }
   if (secuencia !== secuenciaVista) return; // llegó otra opción mientras se calculaba
@@ -1015,7 +1016,7 @@ async function pintarUnaVez() {
     await miVista.dibujar(n, lienzoPagina, { ancho, dpr: Math.min(2, window.devicePixelRatio || 1), margenes: verMargenes.checked });
     lienzoPagina.style.height = 'auto';
   } catch (error) {
-    if (mia === secuenciaPintado && miVista === vista) mostrarMensaje(t('error-vista') + ': ' + error.message);
+    if (mia === secuenciaPintado && miVista === vista) mostrarMensaje(t('error-vista') + ': ' + detalleError(error));
   }
 }
 
@@ -1150,7 +1151,7 @@ async function mostrarArchivo(archivo) {
     impresion = await ExcelAPdfMotor.libroDeMotor(lector);
   } catch (error) {
     if (idCarga !== secuenciaCargaArchivo) return;
-    alert(t('error-leer') + ': ' + error.message);
+    alert(t('error-leer') + ': ' + detalleError(error));
     return;
   }
   if (idCarga !== secuenciaCargaArchivo) return;
@@ -1243,7 +1244,7 @@ async function generarPdf() {
     enlaceDescarga.download = nombreArchivoActual + '.pdf';
     resultado.classList.add('visible');
   } catch (error) {
-    if (idCarga === secuenciaCargaArchivo) alert(t('error-generar') + ': ' + error.message);
+    if (idCarga === secuenciaCargaArchivo) alert(t('error-generar') + ': ' + detalleError(error));
   } finally {
     botonConvertir.disabled = false;
     botonConvertir.textContent = t('boton-convertir');
