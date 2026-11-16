@@ -9,13 +9,15 @@ Sitio en vivo: https://www.minicookies.net
 
 ## Qué hay
 
-Son 109 herramientas en 10 categorías: PDF, Word, Excel y CSV, PowerPoint, texto,
-Markdown, EPUB, imágenes, escáner de documentos y generales. Cada una está en español
-e inglés.
+Son 114 herramientas en 11 categorías: PDF, Word, Excel y CSV, PowerPoint, texto,
+Markdown, EPUB, imágenes, escáner de documentos, generales y Flujos (para encadenar
+herramientas). Cada una está en español e inglés, y hay una sección de guías con
+artículos prácticos agrupados por tema.
 
 Algunos ejemplos: unir o dividir PDF, convertir entre Word y PDF, convertir entre
-Excel y CSV, crear o leer archivos de PowerPoint, escanear un documento con la cámara,
-generar códigos QR y de barras, y un administrador de contraseñas.
+Excel y CSV, crear o leer archivos de PowerPoint, reconocer el texto de un escaneo
+(OCR), escanear un documento con la cámara, generar códigos QR y de barras, y un
+administrador de contraseñas.
 
 ## Cómo está hecho
 
@@ -28,9 +30,28 @@ de PowerPoint, el motor de Excel y la compresión ZIP. Las librerías de tercero
 todavía se usan están copiadas en `vendor/`, con su licencia al lado, y acreditadas en
 `creditos.html`.
 
-Las herramientas donde la seguridad pesa más, el administrador de contraseñas y el
-envío de archivos por QR, viven en otro origen: `seguro.minicookies.net`. Ese sitio no
-tiene publicidad ni scripts de terceros.
+## Inteligencia artificial propia
+
+El sitio tiene sus propios modelos de inteligencia artificial, diseñados y entrenados
+para este proyecto, sin pesos de terceros:
+
+- **Librarius** lee el texto de cada línea. Es el motor del OCR, que desde noviembre
+  de 2026 no usa ningún otro: hay un modelo para los seis idiomas principales y otros
+  para los demás idiomas latinos, los cirílicos y el chino, el japonés y el coreano.
+- **Versus** encuentra las líneas de texto de una página y su inclinación.
+- **Custos** encuentra las esquinas de un documento en una foto, en el escáner.
+
+Corren en el navegador con onnxruntime-web, así que los documentos tampoco salen de la
+computadora para eso. Los archivos de los modelos están en `assets/modelos/` y cada
+uno lleva dentro su autor, su licencia y sus datos de entrenamiento con las
+atribuciones; la misma lista está en `creditos.html`. Se pueden usar por medio de las
+herramientas del sitio, pero no copiar, redistribuir ni reentrenar (ver Licencia).
+
+## Sitio seguro
+
+Las herramientas donde la seguridad pesa más (el administrador de contraseñas, el
+envío de archivos por QR y tachar información de un PDF) viven en otro origen:
+`seguro.minicookies.net`. Ese sitio no tiene publicidad ni scripts de terceros.
 
 El envío por QR es la excepción a lo de que los archivos no salen de la computadora.
 El archivo va directo de un equipo al otro, cifrado, sin pasar por un servidor del
@@ -61,9 +82,12 @@ algo cambie, contalo en un issue.
 
 ## Licencia
 
-El código es de consulta pública, no de código abierto: se puede leer, estudiar y usar
-para entrenar modelos de IA, pero reutilizarlo en otros productos requiere autorización
-por escrito. Las condiciones están en [LICENSE.md](LICENSE.md).
+Licencia de Código Fuente y Modelos de Mini Cookies, versión 1.1. El código es de
+consulta pública, no de código abierto: se puede leer, estudiar y usar para entrenar
+modelos de IA, pero reutilizarlo en otros productos requiere autorización por escrito.
+Los modelos de IA propios, las guías y los textos del sitio no se pueden copiar ni usar
+para entrenar otros modelos sin permiso escrito. Las condiciones están en
+[LICENSE.md](LICENSE.md).
 
 ---
 
@@ -78,13 +102,14 @@ Live site: https://www.minicookies.net
 
 ## What's in it
 
-109 tools in 10 categories: PDF, Word, Excel and CSV, PowerPoint, text, Markdown,
-EPUB, images, document scanner and general. Each one is available in Spanish and
-English.
+114 tools in 11 categories: PDF, Word, Excel and CSV, PowerPoint, text, Markdown,
+EPUB, images, document scanner, general and Flows (to chain tools together). Each one
+is available in Spanish and English, and there is a guides section with practical
+articles grouped by topic.
 
 Some examples: merge or split PDFs, convert between Word and PDF, convert between
-Excel and CSV, create or read PowerPoint files, scan a document with the camera,
-create QR codes and barcodes, and a password manager.
+Excel and CSV, create or read PowerPoint files, recognize the text of a scan (OCR),
+scan a document with the camera, create QR codes and barcodes, and a password manager.
 
 ## How it's built
 
@@ -96,9 +121,28 @@ written for this project: the Word reader, the PowerPoint reader and writer, the
 engine, and ZIP compression. The third-party libraries still in use are copied into
 `vendor/`, with their license next to them, and credited in `creditos.html`.
 
-The tools where security matters most, the password manager and sending files by QR,
-live on a separate origin: `seguro.minicookies.net`. That site has no ads and no
-third-party scripts.
+## Our own artificial intelligence
+
+The site has its own AI models, designed and trained for this project, with no
+third-party weights:
+
+- **Librarius** reads the text of each line. It is the OCR engine, and since November
+  2026 the only one: there is a model for the six main languages and others for the
+  remaining Latin-alphabet languages, Cyrillic, and Chinese, Japanese and Korean.
+- **Versus** finds the text lines of a page and their skew.
+- **Custos** finds the corners of a document in a photo, in the scanner.
+
+They run in the browser with onnxruntime-web, so documents don't leave the computer
+for this either. The model files are in `assets/modelos/`, and each one carries its
+author, license and training data with attributions inside; the same list is in
+`creditos.html`. They may be used through the site's tools, but not copied,
+redistributed or retrained (see License).
+
+## Secure site
+
+The tools where security matters most (the password manager, sending files by QR and
+redacting a PDF) live on a separate origin: `seguro.minicookies.net`. That site has no
+ads and no third-party scripts.
 
 Sending files by QR is the exception to the rule that files stay on the computer. The
 file goes directly from one device to the other, encrypted, without passing through a
@@ -129,6 +173,8 @@ you'd like something changed, describe it in an issue.
 
 ## License
 
-The code is source-available, not open source: you can read it, study it and use it to
-train AI models, but reusing it in other products requires written permission. The terms
-are in [LICENSE.md](LICENSE.md) (in Spanish, with an English summary).
+Mini Cookies Source Code and Models License, version 1.1. The code is source-available,
+not open source: you can read it, study it and use it to train AI models, but reusing it
+in other products requires written permission. The site's own AI models, guides and
+texts may not be copied or used to train other models without written permission. The
+terms are in [LICENSE.md](LICENSE.md) (in Spanish, with an English summary).
