@@ -57,24 +57,15 @@ window.i18nPagina = {
     'idioma-lit': 'Lituano',
     'idioma-lav': 'Letón',
     'idioma-est': 'Estonio',
-    'idiomas-nota': 'Elegí solo los idiomas que aparecen en tu documento — cada uno agrega una descarga de varios MB la primera vez que se usa.',
-    'motor-titulo': 'Motor de reconocimiento',
-    'motor-tesseract': 'Tesseract (estándar, todos los idiomas)',
-    'motor-librarius': 'Librarius (Beta): IA propia de Mini Cookies, más precisa',
-    'motor-nota': 'En nuestras pruebas con escaneos reales de libros, Librarius leyó con menos errores que Tesseract, sobre todo en páginas torcidas, giradas o con letra gótica. Sigue siendo Beta: puede fallar con tablas, formularios o fotos con mucha sombra, y el texto invisible del PDF se ajusta a cada palabra de forma aproximada. Si no puede cargar en tu navegador, se usa Tesseract. Todo corre en tu equipo.',
-    'motor-nota-cjk': 'Librarius lee los idiomas de un solo grupo a la vez (más español, inglés, francés, alemán, italiano y portugués): del neerlandés al estonio, los cirílicos, o chino, japonés y coreano. Con una mezcla de grupos se usa Tesseract.',
+    'idiomas-nota': 'Marcá solo los idiomas que aparecen en tu documento: cada grupo (latinos, otros europeos, cirílicos u orientales) descarga un modelo de 3 a 5 MB la primera vez que se usa.',
+    'motor-ia': 'Reconoce el texto con Librarius, la inteligencia artificial propia de Mini Cookies.',
     'corregir-inclinacion': 'Enderezar automáticamente páginas/fotos torcidas (recomendado)',
-    'preproceso-titulo': 'Preprocesamiento antes del OCR',
-    'preproceso-ninguno': 'Ninguno (usar la imagen tal cual)',
-    'preproceso-contraste': 'Contraste automático (recomendado)',
-    'preproceso-otsu': 'Blanco y negro puro (Otsu)',
-    'preproceso-nota': '"Blanco y negro puro" calcula automáticamente el punto exacto de corte entre tinta y papel (método de Otsu) — puede rendir mejor que el contraste automático en escaneos muy limpios de un solo color, pero puede perder detalle en fotos con sombras irregulares o texto muy fino.',
     'zona-arrastre': '📄🖼️ Arrastrá tus PDFs y/o imágenes escaneadas acá o hacé clic para elegirlos',
     'boton-ocr': 'Reconocer texto (OCR)',
     'resultado-enlace-pdf': 'Descargar PDF con texto buscable',
     'resultado-enlace-txt': 'Descargar .txt',
     'limitaciones-titulo': 'Limitaciones',
-    'limitaciones-texto': 'El resultado se ve igual que el original (salvo si corregís la inclinación), pero el texto queda seleccionable y buscable — también podés descargar solo el texto reconocido como .txt. El OCR es más lento cuanto más páginas/imágenes e idiomas elijas, y funciona mejor con escaneos nítidos y derechos — texto borroso, manuscrito o una foto con sombras fuertes puede reconocerse mal o no reconocerse. El enderezado automático corrige inclinaciones chicas (hasta unos 9°); si tu documento ya viene bien derecho o querés conservarlo exactamente como está, podés destildar esa casilla. Sobre el preprocesamiento: "Contraste automático" funciona bien en la mayoría de los casos; "Blanco y negro puro (Otsu)" puede dar mejores resultados en escaneos muy limpios y parejos, pero en fotos con sombras irregulares o texto con resaltador de color puede perder información — si tu escaneo ya es nítido y a color, probá "Ninguno".',
+    'limitaciones-texto': 'El resultado se ve igual que el original (salvo si corregís la inclinación), pero el texto queda seleccionable y buscable — también podés descargar solo el texto reconocido como .txt. El OCR es más lento cuanto más páginas/imágenes e idiomas elijas, y funciona mejor con escaneos nítidos y derechos — texto borroso, manuscrito o una foto con sombras fuertes puede reconocerse mal o no reconocerse. El enderezado automático corrige inclinaciones chicas (hasta unos 9°); si tu documento ya viene bien derecho o querés conservarlo exactamente como está, podés destildar esa casilla.',
     'error-sin-idioma': 'Elegí al menos un idioma.',
     'progreso-cargando-motor': 'Cargando el motor de OCR (puede tardar la primera vez)...',
     'progreso-preparando': 'Preparando páginas (enderezando si hace falta)...',
@@ -86,16 +77,16 @@ window.i18nPagina = {
     'guia-titulo': 'Cómo hacer OCR a un PDF escaneado o a fotos de documentos',
     'guia-mas-link': 'Cómo convertir un PDF escaneado en texto que se pueda copiar (OCR)',
     'guia-intro': 'Un PDF escaneado es, en el fondo, una pila de fotos: se ve bien, pero no podés buscar una palabra, copiar un párrafo ni pegar su contenido en otro documento. El OCR (reconocimiento óptico de caracteres) lee esas imágenes y recupera el texto. Esta herramienta te devuelve un PDF con el mismo aspecto que el original pero con una capa de texto invisible, y además un archivo .txt con todo lo reconocido. Sirve para contratos escaneados, apuntes fotografiados o facturas en papel.',
-    'guia-paso-1': 'Marcá los idiomas que aparecen en tu documento en «Idiomas a reconocer». Vienen marcados español e inglés; sumá otro solo si hace falta, porque cada idioma agrega una descarga la primera vez.',
+    'guia-paso-1': 'Marcá los idiomas que aparecen en tu documento en «Idiomas a reconocer». Vienen marcados español e inglés; sumá otro solo si hace falta, porque cada grupo de idiomas agrega una descarga la primera vez.',
     'guia-paso-2': 'Dejá activado «Enderezar automáticamente páginas/fotos torcidas (recomendado)» si sacaste fotos con el celular; desactivalo si ya están derechas.',
-    'guia-paso-3': 'Elegí el preprocesamiento: «Contraste automático (recomendado)» funciona bien casi siempre, «Blanco y negro puro (Otsu)» ayuda con escaneos muy limpios y parejos, y «Ninguno (usar la imagen tal cual)» conviene si el escaneo ya es nítido y a color.',
+    'guia-paso-3': 'No hace falta preparar las páginas: el lector endereza las que vienen giradas o de cabeza, y lee igual las que tienen fondos de color o partes oscuras.',
     'guia-paso-4': 'Arrastrá uno o varios PDF e imágenes a la zona de carga. Podés combinarlos y reordenar las miniaturas: el resultado respeta ese orden.',
     'guia-paso-5': 'Pulsá «Reconocer texto (OCR)», esperá a que termine la barra de progreso y descargá el PDF con texto buscable o el .txt.',
     'guia-consejo-1': 'Escaneá a 200–300 ppp y con el texto derecho. Las imágenes sueltas de menos de 1800 px de ancho se agrandan antes de leerlas; las páginas de un PDF no.',
-    'guia-consejo-2': 'Si la lectura sale con errores, probá otro preprocesamiento: una foto con sombras suele leerse mejor con «Contraste automático (recomendado)» que con blanco y negro puro.',
+    'guia-consejo-2': 'Si el documento mezcla alfabetos (por ejemplo, español y ruso), marcá todos los idiomas: se lee con un modelo por grupo y cada línea se queda con la lectura más segura.',
     'guia-consejo-3': 'Cada página del PDF resultante se guarda como imagen JPEG con el texto encima, así que el peso puede cambiar y lo que era vectorial en el original deja de serlo. Conservá siempre el archivo original.',
     'guia-p1': '¿Cuánto tarda?',
-    'guia-r1': 'Depende de la cantidad de páginas y de idiomas. Las páginas se reconocen de a una, y la primera vez tarda más porque hay que cargar el motor y los datos de cada idioma.',
+    'guia-r1': 'Depende de la cantidad de páginas y de idiomas. Las páginas se reconocen de a una, y la primera vez tarda más porque hay que cargar el modelo de cada grupo de idiomas.',
     'guia-p2': '¿Reconoce letra manuscrita?',
     'guia-r2': 'No de forma confiable. El motor está pensado para texto impreso; la escritura a mano, el texto borroso o las fotos con sombras fuertes pueden salir con errores o no reconocerse.',
     'guia-p3': '¿Qué pasa si mi documento mezcla idiomas?',
@@ -141,24 +132,15 @@ window.i18nPagina = {
     'idioma-lit': 'Lithuanian',
     'idioma-lav': 'Latvian',
     'idioma-est': 'Estonian',
-    'idiomas-nota': 'Only pick the languages that appear in your document — each one adds a several-MB download the first time it’s used.',
-    'motor-titulo': 'Recognition engine',
-    'motor-tesseract': 'Tesseract (standard, all languages)',
-    'motor-librarius': 'Librarius (Beta): Mini Cookies’ own AI, more accurate',
-    'motor-nota': 'In our tests with real scans of books, Librarius read with fewer errors than Tesseract, especially on crooked, rotated or Gothic-type pages. It is still Beta: it can struggle with tables, forms or photos with heavy shadows, and the invisible text in the PDF is fitted to each word only approximately. If it cannot load in your browser, Tesseract is used. Everything runs on your device.',
-    'motor-nota-cjk': 'Librarius reads the languages of only one group at a time (plus Spanish, English, French, German, Italian and Portuguese): Dutch to Estonian, the Cyrillic ones, or Chinese, Japanese and Korean. With a mix of groups, Tesseract is used.',
+    'idiomas-nota': 'Only tick the languages that appear in your document: each group (Latin, other European, Cyrillic or East Asian) downloads a 3–5 MB model the first time it’s used.',
+    'motor-ia': 'Recognizes the text with Librarius, Mini Cookies’ own artificial intelligence.',
     'corregir-inclinacion': 'Automatically straighten tilted pages/photos (recommended)',
-    'preproceso-titulo': 'Preprocessing before OCR',
-    'preproceso-ninguno': 'None (use the image as is)',
-    'preproceso-contraste': 'Automatic contrast (recommended)',
-    'preproceso-otsu': 'Pure black and white (Otsu)',
-    'preproceso-nota': '"Pure black and white" automatically calculates the exact cutoff point between ink and paper (Otsu’s method) — it can perform better than automatic contrast on very clean, single-color scans, but may lose detail on photos with uneven shadows or very fine text.',
     'zona-arrastre': '📄🖼️ Drag your PDFs and/or scanned images here or click to choose them',
     'boton-ocr': 'Recognize text (OCR)',
     'resultado-enlace-pdf': 'Download PDF with searchable text',
     'resultado-enlace-txt': 'Download .txt',
     'limitaciones-titulo': 'Limitations',
-    'limitaciones-texto': 'The result looks the same as the original (unless you correct the tilt), but the text becomes selectable and searchable — you can also download just the recognized text as .txt. OCR gets slower the more pages/images and languages you pick, and it works best with sharp, straight scans — blurry or handwritten text, or a photo with strong shadows, may be recognized poorly or not at all. Automatic straightening fixes small tilts (up to about 9°); if your document is already straight or you want to keep it exactly as is, you can uncheck that box. About preprocessing: "Automatic contrast" works well in most cases; "Pure black and white (Otsu)" can give better results on very clean, even scans, but on photos with uneven shadows or highlighter-marked text it can lose information — if your scan is already sharp and in color, try "None".',
+    'limitaciones-texto': 'The result looks the same as the original (unless you correct the tilt), but the text becomes selectable and searchable — you can also download just the recognized text as .txt. OCR gets slower the more pages/images and languages you pick, and it works best with sharp, straight scans — blurry or handwritten text, or a photo with strong shadows, may be recognized poorly or not at all. Automatic straightening fixes small tilts (up to about 9°); if your document is already straight or you want to keep it exactly as is, you can uncheck that box.',
     'error-sin-idioma': 'Pick at least one language.',
     'progreso-cargando-motor': 'Loading the OCR engine (may take a while the first time)...',
     'progreso-preparando': 'Preparing pages (straightening if needed)...',
@@ -170,16 +152,16 @@ window.i18nPagina = {
     'guia-titulo': 'How to run OCR on a scanned PDF or on photos of documents',
     'guia-mas-link': 'How to Turn a Scanned PDF into Copyable Text (OCR)',
     'guia-intro': 'A scanned PDF is really a stack of pictures: it looks fine, but you can’t search for a word, copy a paragraph or paste its content into another document. OCR (optical character recognition) reads those images and recovers the text. This tool gives you back a PDF that looks like the original but carries an invisible text layer, plus a .txt file with everything it recognized. It works for scanned contracts, photographed notes or paper invoices.',
-    'guia-paso-1': 'Tick the languages that appear in your document under “Languages to recognize”. Spanish and English are ticked by default; add another only if you need it, because each language adds a download the first time.',
+    'guia-paso-1': 'Tick the languages that appear in your document under “Languages to recognize”. Spanish and English are ticked by default; add another only if you need it, because each group of languages adds a download the first time.',
     'guia-paso-2': 'Leave “Automatically straighten tilted pages/photos (recommended)” on if you took photos with your phone; turn it off if they’re already straight.',
-    'guia-paso-3': 'Choose the preprocessing: “Automatic contrast (recommended)” works well almost every time, “Pure black and white (Otsu)” helps with very clean, even scans, and “None (use the image as is)” is best when the scan is already sharp and in color.',
+    'guia-paso-3': 'No need to prepare the pages: the reader turns rotated or upside-down pages the right way, and reads pages with coloured backgrounds or dark parts too.',
     'guia-paso-4': 'Drag one or more PDFs and images onto the upload area. You can mix them and reorder the thumbnails: the result follows that order.',
     'guia-paso-5': 'Press “Recognize text (OCR)”, wait for the progress bar to finish and download the PDF with searchable text or the .txt.',
     'guia-consejo-1': 'Scan at 200–300 dpi with the text upright. Standalone images under 1800 px wide are enlarged before being read; PDF pages are not.',
-    'guia-consejo-2': 'If the reading has mistakes, try a different preprocessing: a photo with shadows usually reads better with “Automatic contrast (recommended)” than with pure black and white.',
+    'guia-consejo-2': 'If the document mixes alphabets (for example, Spanish and Russian), tick all the languages: it is read with one model per group and each line keeps the most confident reading.',
     'guia-consejo-3': 'Each page of the resulting PDF is stored as a JPEG image with the text on top, so the file size may change and anything that was vector in the original no longer is. Always keep the original file.',
     'guia-p1': 'How long does it take?',
-    'guia-r1': 'It depends on the number of pages and languages. Pages are recognized one at a time, and the first run takes longer because the engine and each language’s data have to load.',
+    'guia-r1': 'It depends on the number of pages and languages. Pages are recognized one at a time, and the first run takes longer because the model for each group of languages has to load.',
     'guia-p2': 'Does it recognize handwriting?',
     'guia-r2': 'Not reliably. The engine is designed for printed text; handwriting, blurry text or photos with strong shadows may come out with errors or not be recognized.',
     'guia-p3': 'What if my document mixes languages?',
@@ -239,28 +221,14 @@ window.i18nPagina = {
       <label><input type="checkbox" value="srp"> <span data-i18n="idioma-srp">Serbio (cirílico)</span></label>
       <label><input type="checkbox" value="mkd"> <span data-i18n="idioma-mkd">Macedonio</span></label>
     </div>
-    <p style="color:var(--texto-suave); font-size:0.9em; margin-top:-10px;" data-i18n="idiomas-nota">Elegí solo los idiomas que aparecen en tu documento — cada uno agrega una descarga de varios MB la primera vez que se usa.</p>
+    <p style="color:var(--texto-suave); font-size:0.9em; margin-top:-10px;" data-i18n="idiomas-nota">Marcá solo los idiomas que aparecen en tu documento: cada grupo (latinos, otros europeos, cirílicos u orientales) descarga un modelo de 3 a 5 MB la primera vez que se usa.</p>
 
-    <p style="margin:0 0 6px; font-weight:600;" data-i18n="motor-titulo">Motor de reconocimiento</p>
-    <div class="lista-idiomas" id="listaMotor" style="margin-top:0; margin-bottom:6px;">
-      <label><input type="radio" name="motorOcr" value="tesseract" checked> <span data-i18n="motor-tesseract">Tesseract (estándar, todos los idiomas)</span></label>
-      <label><input type="radio" name="motorOcr" value="librarius"> <span data-i18n="motor-librarius">Librarius (Beta): IA propia de Mini Cookies, más precisa</span></label>
-    </div>
-    <p style="color:var(--texto-suave); font-size:0.9em; margin-top:0; margin-bottom:6px;" data-i18n="motor-nota">En nuestras pruebas con escaneos reales de libros, Librarius leyó con menos errores que Tesseract.</p>
-    <p id="motorNotaCjk" style="color:var(--texto-suave); font-size:0.9em; margin-top:0; margin-bottom:20px; display:none;" data-i18n="motor-nota-cjk">Librarius lee los idiomas de un solo grupo a la vez (más español, inglés, francés, alemán, italiano y portugués): del neerlandés al estonio, los cirílicos, o chino, japonés y coreano. Con una mezcla de grupos se usa Tesseract.</p>
+    <p style="color:var(--texto-suave); font-size:0.9em; margin-top:0; margin-bottom:14px;" data-i18n="motor-ia">Reconoce el texto con Librarius, la inteligencia artificial propia de Mini Cookies.</p>
 
     <label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin-bottom:14px;">
       <input type="checkbox" id="corregirInclinacion" checked>
       <span data-i18n="corregir-inclinacion">Enderezar automáticamente páginas/fotos torcidas (recomendado)</span>
     </label>
-
-    <p style="margin:0 0 6px; font-weight:600;" data-i18n="preproceso-titulo">Preprocesamiento antes del OCR</p>
-    <div class="lista-idiomas" id="listaPreproceso" style="margin-top:0; margin-bottom:6px;">
-      <label><input type="radio" name="preprocesoOcr" value="ninguno"> <span data-i18n="preproceso-ninguno">Ninguno (usar la imagen tal cual)</span></label>
-      <label><input type="radio" name="preprocesoOcr" value="contraste" checked> <span data-i18n="preproceso-contraste">Contraste automático (recomendado)</span></label>
-      <label><input type="radio" name="preprocesoOcr" value="otsu"> <span data-i18n="preproceso-otsu">Blanco y negro puro (Otsu)</span></label>
-    </div>
-    <p style="color:var(--texto-suave); font-size:0.9em; margin-top:0; margin-bottom:20px;" data-i18n="preproceso-nota">"Blanco y negro puro" calcula automáticamente el punto exacto de corte entre tinta y papel (método de Otsu) — puede rendir mejor que el contraste automático en escaneos muy limpios de un solo color, pero puede perder detalle en fotos con sombras irregulares o texto muy fino.</p>
 
     <div class="zona-arrastre" id="zonaArrastre">
       <span data-i18n="zona-arrastre">📄🖼️ Arrastrá tus PDFs y/o imágenes escaneadas acá o hacé clic para elegirlos</span>
@@ -292,7 +260,7 @@ window.i18nPagina = {
 
   <div class="panel-herramienta">
     <h3 style="margin-top:0;" data-i18n="limitaciones-titulo">Limitaciones</h3>
-    <p style="color:var(--texto-suave);" data-i18n="limitaciones-texto">El resultado se ve igual que el original (salvo si corregís la inclinación), pero el texto queda seleccionable y buscable — también podés descargar solo el texto reconocido como .txt. El OCR es más lento cuanto más páginas/imágenes e idiomas elijas, y funciona mejor con escaneos nítidos y derechos — texto borroso, manuscrito o una foto con sombras fuertes puede reconocerse mal o no reconocerse. El enderezado automático corrige inclinaciones chicas (hasta unos 9°); si tu documento ya viene bien derecho o querés conservarlo exactamente como está, podés destildar esa casilla. Sobre el preprocesamiento: "Contraste automático" funciona bien en la mayoría de los casos; "Blanco y negro puro (Otsu)" puede dar mejores resultados en escaneos muy limpios y parejos, pero en fotos con sombras irregulares o texto con resaltador de color puede perder información — si tu escaneo ya es nítido y a color, probá "Ninguno".</p>
+    <p style="color:var(--texto-suave);" data-i18n="limitaciones-texto">El resultado se ve igual que el original (salvo si corregís la inclinación), pero el texto queda seleccionable y buscable — también podés descargar solo el texto reconocido como .txt. El OCR es más lento cuanto más páginas/imágenes e idiomas elijas, y funciona mejor con escaneos nítidos y derechos — texto borroso, manuscrito o una foto con sombras fuertes puede reconocerse mal o no reconocerse. El enderezado automático corrige inclinaciones chicas (hasta unos 9°); si tu documento ya viene bien derecho o querés conservarlo exactamente como está, podés destildar esa casilla.</p>
   </div>
 
   <section class="guia-uso">
@@ -300,22 +268,22 @@ window.i18nPagina = {
     <p data-i18n="guia-intro">Un PDF escaneado es, en el fondo, una pila de fotos: se ve bien, pero no podés buscar una palabra, copiar un párrafo ni pegar su contenido en otro documento. El OCR (reconocimiento óptico de caracteres) lee esas imágenes y recupera el texto. Esta herramienta te devuelve un PDF con el mismo aspecto que el original pero con una capa de texto invisible, y además un archivo .txt con todo lo reconocido. Sirve para contratos escaneados, apuntes fotografiados o facturas en papel.</p>
     <h3 data-i18n="guia-pasos">Paso a paso</h3>
     <ol>
-      <li data-i18n="guia-paso-1">Marcá los idiomas que aparecen en tu documento en «Idiomas a reconocer». Vienen marcados español e inglés; sumá otro solo si hace falta, porque cada idioma agrega una descarga la primera vez.</li>
+      <li data-i18n="guia-paso-1">Marcá los idiomas que aparecen en tu documento en «Idiomas a reconocer». Vienen marcados español e inglés; sumá otro solo si hace falta, porque cada grupo de idiomas agrega una descarga la primera vez.</li>
       <li data-i18n="guia-paso-2">Dejá activado «Enderezar automáticamente páginas/fotos torcidas (recomendado)» si sacaste fotos con el celular; desactivalo si ya están derechas.</li>
-      <li data-i18n="guia-paso-3">Elegí el preprocesamiento: «Contraste automático (recomendado)» funciona bien casi siempre, «Blanco y negro puro (Otsu)» ayuda con escaneos muy limpios y parejos, y «Ninguno (usar la imagen tal cual)» conviene si el escaneo ya es nítido y a color.</li>
+      <li data-i18n="guia-paso-3">No hace falta preparar las páginas: el lector endereza las que vienen giradas o de cabeza, y lee igual las que tienen fondos de color o partes oscuras.</li>
       <li data-i18n="guia-paso-4">Arrastrá uno o varios PDF e imágenes a la zona de carga. Podés combinarlos y reordenar las miniaturas: el resultado respeta ese orden.</li>
       <li data-i18n="guia-paso-5">Pulsá «Reconocer texto (OCR)», esperá a que termine la barra de progreso y descargá el PDF con texto buscable o el .txt.</li>
     </ol>
     <h3 data-i18n="guia-consejos">Consejos</h3>
     <ul>
       <li data-i18n="guia-consejo-1">Escaneá a 200–300 ppp y con el texto derecho. Las imágenes sueltas de menos de 1800 px de ancho se agrandan antes de leerlas; las páginas de un PDF no.</li>
-      <li data-i18n="guia-consejo-2">Si la lectura sale con errores, probá otro preprocesamiento: una foto con sombras suele leerse mejor con «Contraste automático (recomendado)» que con blanco y negro puro.</li>
+      <li data-i18n="guia-consejo-2">Si el documento mezcla alfabetos (por ejemplo, español y ruso), marcá todos los idiomas: se lee con un modelo por grupo y cada línea se queda con la lectura más segura.</li>
       <li data-i18n="guia-consejo-3">Cada página del PDF resultante se guarda como imagen JPEG con el texto encima, así que el peso puede cambiar y lo que era vectorial en el original deja de serlo. Conservá siempre el archivo original.</li>
     </ul>
     <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
     <details>
       <summary data-i18n="guia-p1">¿Cuánto tarda?</summary>
-      <p data-i18n="guia-r1">Depende de la cantidad de páginas y de idiomas. Las páginas se reconocen de a una, y la primera vez tarda más porque hay que cargar el motor y los datos de cada idioma.</p>
+      <p data-i18n="guia-r1">Depende de la cantidad de páginas y de idiomas. Las páginas se reconocen de a una, y la primera vez tarda más porque hay que cargar el modelo de cada grupo de idiomas.</p>
     </details>
     <details>
       <summary data-i18n="guia-p2">¿Reconoce letra manuscrita?</summary>
@@ -337,9 +305,8 @@ window.i18nPagina = {
 <script src="../assets/js/vendor.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="../vendor/tesseract.js/7.0.0/dist/tesseract.min.js?v=2"></script>
-<script src="../assets/js/ocr-librarius.js?v=8"></script>
-<script src="../assets/js/ocr.js"></script>
+<script src="../assets/js/ocr-librarius.js?v=9"></script>
+<script src="../assets/js/ocr.js?v=2"></script>
 <script src="../assets/js/reordenar-tactil.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
@@ -414,17 +381,6 @@ function idiomasElegidos() {
   return [...document.querySelectorAll('#listaIdiomas input:checked')].map(c => c.value);
 }
 
-// Librarius (Beta) lee una sola familia de idiomas a la vez (Librarius Phone E V1, Phone C V1 o Phone O V1): con una mezcla se vuelve a Tesseract y se avisa.
-function actualizarMotor() {
-  const posible = OcrLibrarius.soportaIdiomas(idiomasElegidos());
-  const radioLibrarius = document.querySelector('input[name="motorOcr"][value="librarius"]');
-  radioLibrarius.disabled = !posible;
-  if (!posible) document.querySelector('input[name="motorOcr"][value="tesseract"]').checked = true;
-  document.getElementById('motorNotaCjk').style.display = posible ? 'none' : 'block';
-}
-document.getElementById('listaIdiomas').addEventListener('change', actualizarMotor);
-actualizarMotor();
-
 // Las páginas de todos los archivos, en el orden final elegido por el usuario (la lógica está en assets/js/ocr.js).
 // Se cuentan primero (para el avance) y después se dibujan y reconocen de a una: todas las páginas de un PDF largo
 // dibujadas a la vez no entran en la memoria.
@@ -449,14 +405,9 @@ botonOcr.addEventListener('click', async () => {
   let worker = null;
   try {
     progreso.textContent = t('progreso-cargando-motor');
-    const motor = document.querySelector('input[name="motorOcr"]:checked').value;
-    worker = await Ocr.crearWorker(idiomas, (m) => {
-      if (m.progress != null) barraProgresoRelleno.style.width = `${Math.round(m.progress * 100)}%`;
-      if (m.status) progreso.textContent = `${m.status}...`;
-    }, motor);
+    worker = await Ocr.crearWorker(idiomas);
 
     const corregirInclinacion = document.getElementById('corregirInclinacion').checked;
-    const modoPreproceso = document.querySelector('input[name="preprocesoOcr"]:checked').value;
 
     progreso.textContent = t('progreso-preparando');
     const ordenIds = [...gridArchivos.children].map(el => parseInt(el.dataset.indiceOrden, 10));
@@ -469,7 +420,7 @@ botonOcr.addEventListener('click', async () => {
     for (const id of ordenIds) {
       await Ocr.recorrerPaginas(archivosPorId.get(id), corregirInclinacion, async (pagina) => {
         progreso.textContent = t('progreso-reconociendo').replace('{actual}', textosPorPagina.length + 1).replace('{total}', totalPaginas);
-        textosPorPagina.push(await Ocr.agregarPagina(pdfNuevo, worker, pagina, modoPreproceso));
+        textosPorPagina.push(await Ocr.agregarPagina(pdfNuevo, worker, pagina));
       });
     }
 

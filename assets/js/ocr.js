@@ -1,68 +1,37 @@
 /*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
-// OCR sin interfaz (sobre Tesseract.js, copia propia en vendor/): separado de ocr-pdf.html para que lo usen la
-// página y Flujos con el mismo código. Supone ya cargados vendor.js, pdf-lib, Tesseract.js y, para PDF, pdfjs.js.
+// OCR sin interfaz con Librarius, la IA propia de Mini Cookies (ocr-librarius.js): separado de ocr-pdf.html para que lo usen la
+// página y Flujos con el mismo código. Supone ya cargados vendor.js, pdf-lib, ocr-librarius.js y, para PDF, pdfjs.js.
 //
-//   const worker = await Ocr.crearWorker(['spa', 'eng'], logger, motor)  el motor y los idiomas (de vendor/); motor 'librarius' = Beta (ocr-librarius.js)
+//   const lector = await Ocr.crearWorker(['spa', 'eng'])          los idiomas (códigos de ocr-pdf.html); rechaza si el navegador no puede
 //   const paginas = await Ocr.paginasDeArchivo(archivo, enderezar)    [{ canvas, escala }] (PDF: una por página)
 //   await Ocr.recorrerPaginas(archivo, enderezar, async (pagina) => …)   lo mismo de a una página (suelta cada lienzo al terminar)
 //   const n = await Ocr.contarPaginas(archivo)
-//   const texto = await Ocr.agregarPagina(pdfNuevo, worker, pagina, preproceso)
+//   const texto = await Ocr.agregarPagina(pdfNuevo, lector, pagina)
 //        reconoce la página, la agrega a pdfNuevo (pdf-lib) con el texto invisible encima y devuelve el texto.
-//        preproceso: 'ninguno' | 'contraste' | 'otsu'
 //   Ocr.esPdf(archivo)
 (function () {
   // Escala a la que se renderiza cada página de un PDF antes del OCR. pdf.js
   // usa 72 puntos por pulgada como base, así que escala 3.5 equivale a ~250 DPI
-  // — Tesseract reconoce notablemente mejor a partir de ~200-300 DPI que a los
+  // — el OCR reconoce notablemente mejor a partir de ~200-300 DPI que a los
   // ~180 DPI que daba la escala anterior (2.5). Las imágenes sueltas ya vienen
   // con su propia resolución, así que no se les aplica esta escala (ver
   // ANCHO_MINIMO_IMAGEN más abajo para el caso de una foto chica).
   const ESCALA_RENDERIZADO_PDF = 3.5;
 
   // Si una imagen suelta viene más angosta que esto (fotos de baja resolución,
-  // capturas chicas), se agranda antes del OCR — Tesseract reconoce mucho peor
-  // texto pequeño cuando la imagen de origen ya es chica.
+  // capturas chicas), se agranda antes del OCR — el texto pequeño se reconoce
+  // mucho peor cuando la imagen de origen ya es chica.
   const ANCHO_MINIMO_IMAGEN = 1800;
 
   const esPdf = (archivo) => archivo.type === 'application/pdf' || /\.pdf$/i.test(archivo.name || '');
 
-  // Tesseract baja por su cuenta el worker, el motor (WebAssembly) y el
-  // diccionario de cada idioma; por defecto de cdn.jsdelivr.net. Se le
-  // indican las copias propias de /vendor/ para no depender de esa CDN.
-  // motor 'librarius' (Beta): el lector con IA propia (ocr-librarius.js), solo para idiomas latinos; si no puede cargar
-  // (navegador sin Workers o WebAssembly, o un idioma que no lee) se usa Tesseract. Devuelve un objeto con `terminate()`
-  // en los dos casos; el de Librarius lleva además `motor: 'librarius'` y `librarius` (el lector).
-  async function crearWorker(idiomas, logger, motor) {
-    if (motor === 'librarius' && window.OcrLibrarius && OcrLibrarius.soportaIdiomas(idiomas)) {
-      try {
-        const lector = await OcrLibrarius.crear(idiomas);
-        return { motor: 'librarius', librarius: lector, terminate: async () => lector.cerrar() };
-      } catch (error) {
-        console.warn('Librarius no cargó; se usa Tesseract.', error);
-      }
-    }
-    return Tesseract.createWorker(idiomas, 1, {
-      workerPath: rutaVendor('tesseract.js/7.0.0/dist/worker.min.js?v=2'),
-      corePath: rutaVendor('tesseract.js-core/7.0.0'),
-      langPath: rutaVendor('tesseract-data/4.0.0_best_int'),
-      logger: logger || (() => {}),
-    });
-  }
-
-  // Extrae una lista plana de palabras {text, bbox:{x0,y0,x1,y1}} sin importar
-  // si Tesseract.js devuelve blocks/paragraphs/lines/words anidados o data.words directo.
-  function palabrasDesdeResultado(data) {
-    if (Array.isArray(data.words) && data.words.length) return data.words;
-    const palabras = [];
-    const bloques = data.blocks || data.paragraphs || [];
-    const recorrer = (nodo) => {
-      if (!nodo) return;
-      if (Array.isArray(nodo.words)) { palabras.push(...nodo.words); return; }
-      if (Array.isArray(nodo.paragraphs)) nodo.paragraphs.forEach(recorrer);
-      if (Array.isArray(nodo.lines)) nodo.lines.forEach(recorrer);
-    };
-    bloques.forEach(recorrer);
-    return palabras;
+  // El lector es Librarius (ocr-librarius.js): lee los 32 idiomas, y una mezcla de grupos (p. ej. ruso y polaco) con varios modelos a
+  // la vez. Rechaza con un mensaje claro si el navegador no puede correrlo (sin hilos de trabajo o sin WebAssembly). Devuelve un objeto
+  // con `terminate()` (el nombre viene de cuando el motor era otro: Flujos y la página lo usan así).
+  async function crearWorker(idiomas) {
+    if (!window.OcrLibrarius) throw new Error('OcrLibrarius no está cargado');
+    const lector = await OcrLibrarius.crear(idiomas);
+    return { librarius: lector, terminate: async () => lector.cerrar() };
   }
 
   function cargarImagen(archivo) {
@@ -255,155 +224,61 @@
     try { return pdfjsDoc.numPages; } finally { try { await pdfjsDoc.destroy(); } catch (e) { /* ya cerrado */ } }
   }
 
-  // Escala de grises + estiramiento de contraste (histograma) sobre una copia
-  // del canvas, solo para que Tesseract reconozca mejor letras sobre fondos con
-  // sombras o poco contraste — el canvas original (a color) es el que se
-  // incrusta en el PDF final, este solo se usa para el reconocimiento.
-  function prepararParaOcr(canvasOriginal) {
-    const canvas = document.createElement('canvas');
-    canvas.width = canvasOriginal.width;
-    canvas.height = canvasOriginal.height;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(canvasOriginal, 0, 0);
-    const imagenData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const datos = imagenData.data;
-
-    const grises = new Uint8ClampedArray(datos.length / 4);
-    let minimo = 255;
-    let maximo = 0;
-    for (let i = 0, j = 0; i < datos.length; i += 4, j++) {
-      const g = 0.299 * datos[i] + 0.587 * datos[i + 1] + 0.114 * datos[i + 2];
-      grises[j] = g;
-      if (g < minimo) minimo = g;
-      if (g > maximo) maximo = g;
+  // La fuente estándar del PDF (Helvetica, WinAnsi) no tiene cirílico ni griego: esas palabras van con Noto Sans (copia propia en
+  // vendor/, la misma de html-a-pdf.js), que se carga solo si una página la necesita. Chino, japonés y coreano no tienen fuente en el
+  // sitio: esas palabras quedan en el .txt pero no en la capa de texto del PDF.
+  const CJK = /[぀-ヿ㐀-鿿豈-﫿가-힯]/;
+  let bytesNoto = null, cargaFontkit = null;
+  function cargarScriptOcr(src) {
+    return new Promise((ok, mal) => {
+      const s = document.createElement('script');
+      s.src = src; s.onload = ok; s.onerror = () => mal(new Error('No cargó ' + src));
+      document.head.appendChild(s);
+    });
+  }
+  async function fuenteUnicode(pdfNuevo) {
+    if (!pdfNuevo._fuenteOcrUnicode) {
+      if (!window.fontkit) cargaFontkit = cargaFontkit || cargarScriptOcr(rutaVendor('@pdf-lib/fontkit/1.1.1/dist/fontkit.umd.min.js?v=2'));
+      await cargaFontkit;
+      if (!bytesNoto) bytesNoto = await (await fetch(rutaVendor('noto-sans/2.015/NotoSans-VF.ttf'))).arrayBuffer();
+      pdfNuevo.registerFontkit(window.fontkit);
+      pdfNuevo._fuenteOcrUnicode = await pdfNuevo.embedFont(bytesNoto, { subset: false });
     }
-
-    const rango = maximo - minimo || 1;
-    for (let i = 0, j = 0; i < datos.length; i += 4, j++) {
-      const valor = ((grises[j] - minimo) * 255) / rango;
-      datos[i] = datos[i + 1] = datos[i + 2] = valor;
-    }
-
-    ctx.putImageData(imagenData, 0, 0);
-    return canvas;
+    return pdfNuevo._fuenteOcrUnicode;
   }
 
-  // Blanco y negro puro con el método de Otsu: en vez de un umbral fijo (como
-  // el 85% del promedio que usa el deskew solo para detectar líneas), calcula
-  // el punto de corte que mejor separa dos grupos de píxeles (tinta vs. papel)
-  // a partir del histograma real de grises de la imagen — el umbral clásico
-  // para binarización de documentos, sin necesidad de ajustarlo a mano.
-  function binarizarOtsu(canvasOriginal) {
-    const canvas = document.createElement('canvas');
-    canvas.width = canvasOriginal.width;
-    canvas.height = canvasOriginal.height;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(canvasOriginal, 0, 0);
-    const imagenData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const datos = imagenData.data;
-    const totalPixeles = canvas.width * canvas.height;
-
-    const grises = new Uint8ClampedArray(totalPixeles);
-    const histograma = new Uint32Array(256);
-    for (let i = 0, j = 0; i < datos.length; i += 4, j++) {
-      const g = Math.round(0.299 * datos[i] + 0.587 * datos[i + 1] + 0.114 * datos[i + 2]);
-      grises[j] = g;
-      histograma[g]++;
-    }
-
-    let sumaTotal = 0;
-    for (let nivel = 0; nivel < 256; nivel++) sumaTotal += nivel * histograma[nivel];
-
-    let pesoFondo = 0;
-    let sumaFondo = 0;
-    let mejorVarianza = -1;
-    let mejorUmbral = 128;
-    for (let nivel = 0; nivel < 256; nivel++) {
-      pesoFondo += histograma[nivel];
-      if (pesoFondo === 0) continue;
-      const pesoObjeto = totalPixeles - pesoFondo;
-      if (pesoObjeto === 0) break;
-      sumaFondo += nivel * histograma[nivel];
-      const mediaFondo = sumaFondo / pesoFondo;
-      const mediaObjeto = (sumaTotal - sumaFondo) / pesoObjeto;
-      const varianzaEntreClases = pesoFondo * pesoObjeto * (mediaFondo - mediaObjeto) ** 2;
-      if (varianzaEntreClases > mejorVarianza) {
-        mejorVarianza = varianzaEntreClases;
-        mejorUmbral = nivel;
-      }
-    }
-
-    for (let i = 0, j = 0; i < datos.length; i += 4, j++) {
-      const v = grises[j] > mejorUmbral ? 255 : 0;
-      datos[i] = datos[i + 1] = datos[i + 2] = v;
-    }
-    ctx.putImageData(imagenData, 0, 0);
-    return canvas;
-  }
-
-  // Reconoce una página, la agrega a pdfNuevo con la imagen y el texto invisible
-  // encima (seleccionable y buscable) y devuelve el texto reconocido.
-  async function agregarPagina(pdfNuevo, worker, { canvas, escala }, preproceso) {
-    if (worker.motor === 'librarius') return agregarPaginaLibrarius(pdfNuevo, worker, { canvas, escala });
-    let canvasParaOcr = canvas;
-    if (preproceso === 'contraste') canvasParaOcr = prepararParaOcr(canvas);
-    else if (preproceso === 'otsu') canvasParaOcr = binarizarOtsu(canvas);
-    const { data } = await worker.recognize(canvasParaOcr, {}, { blocks: true });
-
-    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.9));
-    const imagenEmbebida = await pdfNuevo.embedJpg(new Uint8Array(await blob.arrayBuffer()));
-
-    // El punto PDF de la página final es 1/escala respecto al canvas, así la
-    // imagen queda a mayor densidad (nítida) que el tamaño de despliegue
-    // cuando viene de un PDF (escala > 1); para imágenes sueltas (escala 1)
-    // el punto PDF coincide 1:1 con el píxel, igual que en "Unir PDF".
-    const anchoPagina = canvas.width / escala;
-    const altoPagina = canvas.height / escala;
-    const paginaNueva = pdfNuevo.addPage([anchoPagina, altoPagina]);
-    paginaNueva.drawImage(imagenEmbebida, { x: 0, y: 0, width: anchoPagina, height: altoPagina });
-
-    for (const palabra of palabrasDesdeResultado(data)) {
-      const texto = (palabra.text || '').trim();
-      if (!texto || !palabra.bbox) continue;
-      const { x0, y0, y1 } = palabra.bbox;
-      const altoPalabra = (y1 - y0) / escala;
-      if (altoPalabra <= 0) continue;
-      try {
-        paginaNueva.drawText(texto, {
-          x: x0 / escala,
-          y: altoPagina - (y1 / escala),
-          size: altoPalabra,
-          color: PDFLib.rgb(0, 0, 0),
-          opacity: 0, // invisible: se ve la imagen, pero el texto queda seleccionable/buscable
-        });
-      } catch (errorTexto) {
-        // Un carácter fuera del set estándar (WinAnsi) puede fallar al dibujarse; se ignora esa palabra sin romper el resto.
-        console.warn('No se pudo dibujar una palabra del OCR:', texto, errorTexto);
-      }
-    }
-    return data.text || '';
-  }
-
-  // Lo mismo que agregarPagina, con Librarius: la imagen más el texto invisible, una palabra por vez, con la caja
-  // repartida dentro de su línea y la inclinación de la línea. El preproceso no se usa (Librarius trabaja en grises).
-  async function agregarPaginaLibrarius(pdfNuevo, worker, { canvas, escala }) {
+  // Reconoce una página y la agrega a pdfNuevo: la imagen y encima el texto invisible (seleccionable y buscable), una palabra por vez,
+  // con la caja repartida dentro de su línea y la inclinación de la línea. Devuelve el texto reconocido.
+  async function agregarPagina(pdfNuevo, worker, { canvas, escala }) {
     const r = await worker.librarius.leerPagina(canvas);
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.9));
     const imagenEmbebida = await pdfNuevo.embedJpg(new Uint8Array(await blob.arrayBuffer()));
+    // El punto PDF de la página final es 1/escala respecto al canvas: la imagen queda a mayor densidad que el tamaño de despliegue
+    // cuando viene de un PDF (escala > 1); para imágenes sueltas (escala 1) el punto PDF coincide con el píxel, como en «Unir PDF».
     const anchoPagina = canvas.width / escala;
     const altoPagina = canvas.height / escala;
     const paginaNueva = pdfNuevo.addPage([anchoPagina, altoPagina]);
     paginaNueva.drawImage(imagenEmbebida, { x: 0, y: 0, width: anchoPagina, height: altoPagina });
     if (!pdfNuevo._fuenteOcr) pdfNuevo._fuenteOcr = await pdfNuevo.embedFont(PDFLib.StandardFonts.Helvetica);
-    const fuente = pdfNuevo._fuenteOcr;
     for (const p of r.palabras) {
-      // La fuente estándar solo cubre WinAnsi: lo que no entra (griego, góticas…) se cambia por su letra base o se omite.
-      let texto = p.texto;
-      let ancho1;
+      if (CJK.test(p.texto)) continue;
+      let fuente = pdfNuevo._fuenteOcr, texto = p.texto, ancho1;
       try { ancho1 = fuente.widthOfTextAtSize(texto, 1); } catch (e) {
-        texto = texto.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^ -~]/g, '');
-        if (!texto) continue;
-        try { ancho1 = fuente.widthOfTextAtSize(texto, 1); } catch (e2) { continue; }
+        // Fuera de WinAnsi (cirílico, griego, signos): Noto Sans; si tampoco puede, la letra base o se omite.
+        try {
+          fuente = await fuenteUnicode(pdfNuevo);
+          // Noto Sans tampoco trae todos los signos (casillas, estrellas…): esos se quitan de la capa de texto (quedan en el .txt);
+          // si no, el PDF guarda un carácter vacío en su lugar.
+          if (!pdfNuevo._letrasNoto) pdfNuevo._letrasNoto = new Set(fuente.getCharacterSet());
+          texto = [...texto].filter((c) => pdfNuevo._letrasNoto.has(c.codePointAt(0))).join('');
+          if (!texto) continue;
+          ancho1 = fuente.widthOfTextAtSize(texto, 1);
+        } catch (e2) {
+          fuente = pdfNuevo._fuenteOcr;
+          texto = texto.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^ -~]/g, '');
+          if (!texto) continue;
+          try { ancho1 = fuente.widthOfTextAtSize(texto, 1); } catch (e3) { continue; }
+        }
       }
       if (!(ancho1 > 0)) continue;
       // Tamaño que hace que el texto invisible mida lo mismo de ancho que la palabra de la imagen (sin pasar de su alto).
