@@ -8,11 +8,14 @@
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <script>
 window.i18nPagina = {
   es: {
     'archivo-libro-editado-epub': 'libro-editado.epub',
+    'aviso-autor': 'El nombre del autor y el aviso de copyright pueden estar protegidos: conservalos salvo que el archivo sea tuyo.',
+    'ayuda-autor': 'Usalo con tus propios archivos. Quitar o cambiar el nombre del autor o el aviso de copyright de una obra ajena, sin permiso, es ilegal.',
     'titulo-pagina': 'Editar metadatos de un EPUB gratis — Mini Cookies',
     'meta-descripcion': 'Editar EPUB: cambiá el título, autor e idioma de un libro sin tocar el contenido, gratis y sin subir tu archivo a ningún servidor.',
     'zona-arrastre': '📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo',
@@ -55,6 +58,8 @@ window.i18nPagina = {
   },
   en: {
     'archivo-libro-editado-epub': 'edited-book.epub',
+    'aviso-autor': 'The author’s name and the copyright notice may be protected: keep them unless the file is yours.',
+    'ayuda-autor': 'Use it on your own files. Removing or changing the author’s name or the copyright notice of someone else’s work without permission is illegal.',
     'titulo-pagina': 'Edit EPUB Metadata Free — Mini Cookies',
     'meta-descripcion': 'Edit an EPUB: change the title, author and language of a book without touching its content, free and without uploading your file anywhere.',
     'zona-arrastre': '📚 Drag your .epub file here or click to choose it',
@@ -112,6 +117,12 @@ window.i18nPagina = {
 <main>
   <h1 data-i18n="h1">Editar metadatos de un EPUB</h1>
   <p data-i18n="intro">Elegí un libro .epub y editá su título, autor e idioma, sin tocar el contenido de los capítulos.</p>
+  <p class="texto-actualizacion"><span data-i18n="aviso-autor">El nombre del autor y el aviso de copyright pueden estar protegidos: conservalos salvo que el archivo sea tuyo.</span>
+    <span class="ayuda-tip">
+      <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+      <span class="ayuda-burbuja" data-i18n="ayuda-autor">Usalo con tus propios archivos. Quitar o cambiar el nombre del autor o el aviso de copyright de una obra ajena, sin permiso, es ilegal.</span>
+    </span>
+  </p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
@@ -336,6 +347,7 @@ botonGuardar.addEventListener('click', async () => {
   }
 });
 </script>
+<script src="../assets/js/ayuda-tip.js"></script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
 <script src="../assets/js/idioma.js"></script>

@@ -35,6 +35,8 @@ window.i18nPagina = {
     'meta-fecha': 'Fecha',
     'meta-gps': 'Ubicación GPS',
     'ayuda-metadatos': 'Se quitan todos los bloques de metadatos, no solo los que se muestran arriba: EXIF (cámara, fecha, GPS y la miniatura que guardan los celulares), XMP, IPTC, comentarios y los datos que algunos celulares agregan después de la imagen. En JPEG sin rotar, la imagen no se vuelve a comprimir: sus píxeles quedan iguales. Se conservan el perfil de color (ICC) y la orientación de píxeles. PNG y WebP se redibujan y se exportan de nuevo, así que tampoco conservan ningún metadato. El WebP se vuelve a comprimir con pérdida (calidad 0,95), y un JPEG sin rotar también se redibuja con esa calidad si no se pudo copiar sin recomprimir.',
+    'aviso-autor': 'El nombre del autor y el aviso de copyright pueden estar protegidos: conservalos salvo que el archivo sea tuyo.',
+    'ayuda-autor': 'Usalo con tus propios archivos. Quitar o cambiar el nombre del autor o el aviso de copyright de una obra ajena, sin permiso, es ilegal.',
     'titulo-pagina': 'Quitar metadatos EXIF de una foto gratis — Mini Cookies',
     'meta-descripcion': 'Sacá los metadatos EXIF (cámara, fecha, ubicación GPS) de una foto antes de compartirla, gratis y sin subirla a ningún servidor.',
     'guia-titulo': 'Cómo quitar los metadatos EXIF de una foto',
@@ -70,6 +72,8 @@ window.i18nPagina = {
     'meta-fecha': 'Date',
     'meta-gps': 'GPS location',
     'ayuda-metadatos': 'Every metadata block is removed, not only the ones listed above: EXIF (camera, date, GPS and the thumbnail phones store), XMP, IPTC, comments and any data some phones append after the image. For a JPEG that isn’t rotated, the image is not recompressed: its pixels stay exactly the same. The colour profile (ICC) and the pixel orientation are kept. PNG and WebP are redrawn and exported again, so they carry no metadata either. WebP is recompressed with loss (quality 0.95), and a JPEG that isn’t rotated is also redrawn at that quality if it could not be copied without recompression.',
+    'aviso-autor': 'The author’s name and the copyright notice may be protected: keep them unless the file is yours.',
+    'ayuda-autor': 'Use it on your own files. Removing or changing the author’s name or the copyright notice of someone else’s work without permission is illegal.',
     'titulo-pagina': 'Remove EXIF metadata from a photo, free — Mini Cookies',
     'meta-descripcion': 'Strip the EXIF metadata (camera, date, GPS location) from a photo before you share it — free, and nothing is uploaded to a server.',
     'guia-titulo': 'How to remove EXIF metadata from a photo',
@@ -110,6 +114,12 @@ window.i18nPagina = {
 <main>
   <h1 data-i18n="hero-titulo">Quitar metadatos EXIF de una foto</h1>
   <p data-i18n="intro">Elegí una foto, mirá qué metadatos tiene (cámara, fecha, ubicación GPS) y descargala sin ellos antes de compartirla.</p>
+  <p class="texto-actualizacion"><span data-i18n="aviso-autor">El nombre del autor y el aviso de copyright pueden estar protegidos: conservalos salvo que el archivo sea tuyo.</span>
+    <span class="ayuda-tip">
+      <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+      <span class="ayuda-burbuja" data-i18n="ayuda-autor">Usalo con tus propios archivos. Quitar o cambiar el nombre del autor o el aviso de copyright de una obra ajena, sin permiso, es ilegal.</span>
+    </span>
+  </p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
