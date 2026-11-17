@@ -51,26 +51,29 @@ window.i18nPagina = {
     'b8-4': 'Tocá «Descargar» en cada una que necesites. Cada archivo se baja por separado.',
     'b9': 'El recorte centrado es lo que más sorprende. Un logo horizontal con el nombre a los costados pierde letras. En ese caso, recortá solo el símbolo con <a href="../herramientas/recortar-imagen.html">Recortar imagen</a> antes de subirlo.',
     'b10': 'Para el icono de 512 px, partí de una imagen de al menos 512 píxeles de lado. Si es más chica, la herramienta la estira y el icono sale borroso.',
-    'b11': 'Cómo ponerlo en tu sitio',
-    'b12': 'Subí los archivos a la raíz de tu sitio, la carpeta donde está la portada, y declaralos dentro de la etiqueta <code>&lt;head&gt;</code> de cada página. Con los archivos en la raíz, sirve esta configuración:',
-    'b13': '<code>&lt;link rel="icon" href="/favicon.ico" sizes="48x48"&gt;\n&lt;link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"&gt;\n&lt;link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"&gt;\n&lt;link rel="apple-touch-icon" href="/apple-touch-icon.png"&gt;</code>',
-    'b14': 'Muchos navegadores piden <code>/favicon.ico</code> por su cuenta aunque no lo declares, así que conviene dejarlo ahí. Los iconos de 192 y 512 px sirven para una aplicación web instalable. Se enlazan desde un archivo de manifiesto (<code>site.webmanifest</code>) que escribís vos: la herramienta no lo crea. Si tu sitio usa un gestor como WordPress, busca en sus ajustes la opción de icono del sitio y subí ahí el PNG de 512 px.',
-    'b15': 'Google pide que el favicon sea cuadrado y múltiplo de 48 píxeles (48, 96, 144…) para mostrarlo en sus resultados. Es una regla de Google que puede cambiar, así que conviene revisarla en su documentación.',
-    'b16': 'Si cambiaste el icono y la pestaña sigue mostrando el viejo, el navegador guarda el favicon aparte de la página, así que un recargar no siempre alcanza. Probá en una ventana privada o cerrá la pestaña y abrila de nuevo. Los buscadores lo actualizan más tarde, sin un plazo fijo.',
-    'b17': 'Diseñar para 16 píxeles',
-    'b18': 'A 16 píxeles hay 256 puntos en total. Una letra, una forma simple o un símbolo de dos colores se entiende. Un dibujo con detalle se vuelve una mancha, y una palabra completa no se lee. Dos letras, como iniciales, todavía funcionan.',
-    'b19': 'El contraste pesa más que el color. La barra de pestañas cambia de color con el modo oscuro, y un icono de grises puede desaparecer en una de las dos. Un fondo sólido y de color fuerte se ve en ambos casos.',
-    'b20': 'El fondo transparente queda bien en la pestaña. Para el icono de iPhone y iPad conviene un fondo sólido, porque sus zonas transparentes pueden verse negras.',
-    'b21': 'Mirá el resultado a su tamaño real. Las tarjetas de la herramienta muestran cada icono a su medida, hasta 80 píxeles, así que la de 16 se ve como en la pestaña.',
-    'b22': 'Preguntas frecuentes',
-    'b23': '¿Qué imagen me conviene subir?',
-    'b24': 'Una imagen cuadrada, simple y de 512 píxeles o más. Si tu logo tiene mucho detalle o texto, hacé una versión solo con el símbolo para el favicon.',
-    'b25': '¿El favicon.ico es obligatorio?',
-    'b26': 'No, pero conviene tenerlo en la raíz, porque muchos navegadores y herramientas lo piden por su cuenta.',
-    'b27': '¿Mi imagen está en otro formato?',
-    'b28': 'Si el navegador la abre, la herramienta la acepta. Si el archivo no tiene un tipo de imagen que el navegador reconoce, la herramienta no reacciona y no avisa. Si lo reconoce pero no puede abrirlo, aparece un aviso. Las fotos HEIC de iPhone suelen fallar: exportalas como JPG o PNG desde la app de fotos, o convertilas con <a href="../herramientas/convertir-formato-imagen.html">Convertir formato de imagen</a> si el navegador las abre.',
-    'b29': 'Resumen',
-    'b30': 'Un favicon necesita varios tamaños. Subí una imagen cuadrada y simple a <a href="../herramientas/generar-favicon.html">Generar favicon</a>, descargá los PNG y el favicon.ico, subilos a la raíz de tu sitio y declaralos con etiquetas <code>link</code> en el <code>&lt;head&gt;</code>. Diseñá pensando en 16 píxeles y revisalo a ese tamaño.',
+    'b11': 'Un logo de ejemplo cargado: la herramienta genera el favicon.ico y los tamaños en PNG, cada uno con su descarga.',
+    'b11-src': '/guias/img/favicon-1.es.webp',
+    'b11-srco': '/guias/img/favicon-1.oscuro.es.webp',
+    'b12': 'Cómo ponerlo en tu sitio',
+    'b13': 'Subí los archivos a la raíz de tu sitio, la carpeta donde está la portada, y declaralos dentro de la etiqueta <code>&lt;head&gt;</code> de cada página. Con los archivos en la raíz, sirve esta configuración:',
+    'b14': '<code>&lt;link rel="icon" href="/favicon.ico" sizes="48x48"&gt;\n&lt;link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"&gt;\n&lt;link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"&gt;\n&lt;link rel="apple-touch-icon" href="/apple-touch-icon.png"&gt;</code>',
+    'b15': 'Muchos navegadores piden <code>/favicon.ico</code> por su cuenta aunque no lo declares, así que conviene dejarlo ahí. Los iconos de 192 y 512 px sirven para una aplicación web instalable. Se enlazan desde un archivo de manifiesto (<code>site.webmanifest</code>) que escribís vos: la herramienta no lo crea. Si tu sitio usa un gestor como WordPress, busca en sus ajustes la opción de icono del sitio y subí ahí el PNG de 512 px.',
+    'b16': 'Google pide que el favicon sea cuadrado y múltiplo de 48 píxeles (48, 96, 144…) para mostrarlo en sus resultados. Es una regla de Google que puede cambiar, así que conviene revisarla en su documentación.',
+    'b17': 'Si cambiaste el icono y la pestaña sigue mostrando el viejo, el navegador guarda el favicon aparte de la página, así que un recargar no siempre alcanza. Probá en una ventana privada o cerrá la pestaña y abrila de nuevo. Los buscadores lo actualizan más tarde, sin un plazo fijo.',
+    'b18': 'Diseñar para 16 píxeles',
+    'b19': 'A 16 píxeles hay 256 puntos en total. Una letra, una forma simple o un símbolo de dos colores se entiende. Un dibujo con detalle se vuelve una mancha, y una palabra completa no se lee. Dos letras, como iniciales, todavía funcionan.',
+    'b20': 'El contraste pesa más que el color. La barra de pestañas cambia de color con el modo oscuro, y un icono de grises puede desaparecer en una de las dos. Un fondo sólido y de color fuerte se ve en ambos casos.',
+    'b21': 'El fondo transparente queda bien en la pestaña. Para el icono de iPhone y iPad conviene un fondo sólido, porque sus zonas transparentes pueden verse negras.',
+    'b22': 'Mirá el resultado a su tamaño real. Las tarjetas de la herramienta muestran cada icono a su medida, hasta 80 píxeles, así que la de 16 se ve como en la pestaña.',
+    'b23': 'Preguntas frecuentes',
+    'b24': '¿Qué imagen me conviene subir?',
+    'b25': 'Una imagen cuadrada, simple y de 512 píxeles o más. Si tu logo tiene mucho detalle o texto, hacé una versión solo con el símbolo para el favicon.',
+    'b26': '¿El favicon.ico es obligatorio?',
+    'b27': 'No, pero conviene tenerlo en la raíz, porque muchos navegadores y herramientas lo piden por su cuenta.',
+    'b28': '¿Mi imagen está en otro formato?',
+    'b29': 'Si el navegador la abre, la herramienta la acepta. Si el archivo no tiene un tipo de imagen que el navegador reconoce, la herramienta no reacciona y no avisa. Si lo reconoce pero no puede abrirlo, aparece un aviso. Las fotos HEIC de iPhone suelen fallar: exportalas como JPG o PNG desde la app de fotos, o convertilas con <a href="../herramientas/convertir-formato-imagen.html">Convertir formato de imagen</a> si el navegador las abre.',
+    'b30': 'Resumen',
+    'b31': 'Un favicon necesita varios tamaños. Subí una imagen cuadrada y simple a <a href="../herramientas/generar-favicon.html">Generar favicon</a>, descargá los PNG y el favicon.ico, subilos a la raíz de tu sitio y declaralos con etiquetas <code>link</code> en el <code>&lt;head&gt;</code>. Diseñá pensando en 16 píxeles y revisalo a ese tamaño.',
     'rel1': 'Generar favicon',
     'rel2': 'Recortar imagen',
     'rel3': 'Redimensionar imagen',
@@ -116,26 +119,29 @@ window.i18nPagina = {
     'b8-4': 'Tap “Download” on each one you need. Each file downloads separately.',
     'b9': 'Center cropping is the part that surprises people most. A horizontal logo with the name at the sides loses letters. In that case, crop just the symbol with <a href="../herramientas/recortar-imagen.html">Crop an image</a> before uploading it.',
     'b10': 'For the 512 px icon, start from an image at least 512 pixels on a side. If yours is smaller, the tool stretches it and the icon turns blurry.',
-    'b11': 'How to add it to your site',
-    'b12': 'Upload the files to the root of your site, the folder where the home page is, and declare them inside the <code>&lt;head&gt;</code> tag of each page. With the files in the root, this setup works:',
-    'b13': '<code>&lt;link rel="icon" href="/favicon.ico" sizes="48x48"&gt;\n&lt;link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"&gt;\n&lt;link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"&gt;\n&lt;link rel="apple-touch-icon" href="/apple-touch-icon.png"&gt;</code>',
-    'b14': 'Many browsers request <code>/favicon.ico</code> on their own even if you don’t declare it, so keep it there. The 192 and 512 px icons are for an installable web app. They are linked from a manifest file (<code>site.webmanifest</code>) that you write yourself: the tool doesn’t create it. If your site runs on a builder such as WordPress, look for a site icon option in its settings and upload the 512 px PNG there.',
-    'b15': 'Google asks for a favicon that is square and a multiple of 48 pixels (48, 96, 144…) to show it in its results. That is a Google rule that can change, so check its documentation.',
-    'b16': 'If you changed the icon and the tab still shows the old one, the browser keeps the favicon apart from the page, so a normal reload doesn’t always help. Try a private window, or close the tab and open it again. Search engines update it later, with no fixed schedule.',
-    'b17': 'Designing for 16 pixels',
-    'b18': 'At 16 pixels you have 256 dots in total. A letter, a simple shape or a symbol in two colors reads well. A detailed drawing turns into a blur, and a whole word can’t be read. Two letters, such as initials, still work.',
-    'b19': 'Contrast matters more than color. The tab bar changes color with dark mode, and a gray icon can disappear on one of them. A solid, strongly colored background works in both.',
-    'b20': 'A transparent background looks fine in the tab. For the iPhone and iPad icon, use a solid background instead, because its transparent areas can show up black.',
-    'b21': 'Check the result at its real size. The tool’s cards show each icon at its own size, up to 80 pixels, so the 16 px one looks as it does in the tab.',
-    'b22': 'Frequently asked questions',
-    'b23': 'Which image should I upload?',
-    'b24': 'A square, simple image of 512 pixels or more. If your logo has a lot of detail or text, make a version with only the symbol for the favicon.',
-    'b25': 'Is favicon.ico required?',
-    'b26': 'No, but keep it in the root, because many browsers and tools request it on their own.',
-    'b27': 'My image is in another format. Will it work?',
-    'b28': 'If the browser can open it, the tool accepts it. If the file doesn’t have an image type the browser recognizes, the tool doesn’t react and doesn’t warn you. If the browser recognizes it but can’t open it, a notice appears. HEIC photos from iPhone often fail: export them as JPG or PNG from the photo app, or convert them with <a href="../herramientas/convertir-formato-imagen.html">Convert image format</a> if the browser opens them.',
-    'b29': 'Summary',
-    'b30': 'A favicon needs several sizes. Upload a square, simple image to <a href="../herramientas/generar-favicon.html">Generate a favicon</a>, download the PNGs and the favicon.ico, upload them to the root of your site and declare them with <code>link</code> tags in the <code>&lt;head&gt;</code>. Design for 16 pixels and check it at that size.',
+    'b11': 'A sample logo loaded: the tool generates favicon.ico and the PNG sizes, each with its own download.',
+    'b11-src': '/guias/img/favicon-1.en.webp',
+    'b11-srco': '/guias/img/favicon-1.oscuro.en.webp',
+    'b12': 'How to add it to your site',
+    'b13': 'Upload the files to the root of your site, the folder where the home page is, and declare them inside the <code>&lt;head&gt;</code> tag of each page. With the files in the root, this setup works:',
+    'b14': '<code>&lt;link rel="icon" href="/favicon.ico" sizes="48x48"&gt;\n&lt;link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"&gt;\n&lt;link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"&gt;\n&lt;link rel="apple-touch-icon" href="/apple-touch-icon.png"&gt;</code>',
+    'b15': 'Many browsers request <code>/favicon.ico</code> on their own even if you don’t declare it, so keep it there. The 192 and 512 px icons are for an installable web app. They are linked from a manifest file (<code>site.webmanifest</code>) that you write yourself: the tool doesn’t create it. If your site runs on a builder such as WordPress, look for a site icon option in its settings and upload the 512 px PNG there.',
+    'b16': 'Google asks for a favicon that is square and a multiple of 48 pixels (48, 96, 144…) to show it in its results. That is a Google rule that can change, so check its documentation.',
+    'b17': 'If you changed the icon and the tab still shows the old one, the browser keeps the favicon apart from the page, so a normal reload doesn’t always help. Try a private window, or close the tab and open it again. Search engines update it later, with no fixed schedule.',
+    'b18': 'Designing for 16 pixels',
+    'b19': 'At 16 pixels you have 256 dots in total. A letter, a simple shape or a symbol in two colors reads well. A detailed drawing turns into a blur, and a whole word can’t be read. Two letters, such as initials, still work.',
+    'b20': 'Contrast matters more than color. The tab bar changes color with dark mode, and a gray icon can disappear on one of them. A solid, strongly colored background works in both.',
+    'b21': 'A transparent background looks fine in the tab. For the iPhone and iPad icon, use a solid background instead, because its transparent areas can show up black.',
+    'b22': 'Check the result at its real size. The tool’s cards show each icon at its own size, up to 80 pixels, so the 16 px one looks as it does in the tab.',
+    'b23': 'Frequently asked questions',
+    'b24': 'Which image should I upload?',
+    'b25': 'A square, simple image of 512 pixels or more. If your logo has a lot of detail or text, make a version with only the symbol for the favicon.',
+    'b26': 'Is favicon.ico required?',
+    'b27': 'No, but keep it in the root, because many browsers and tools request it on their own.',
+    'b28': 'My image is in another format. Will it work?',
+    'b29': 'If the browser can open it, the tool accepts it. If the file doesn’t have an image type the browser recognizes, the tool doesn’t react and doesn’t warn you. If the browser recognizes it but can’t open it, a notice appears. HEIC photos from iPhone often fail: export them as JPG or PNG from the photo app, or convert them with <a href="../herramientas/convertir-formato-imagen.html">Convert image format</a> if the browser opens them.',
+    'b30': 'Summary',
+    'b31': 'A favicon needs several sizes. Upload a square, simple image to <a href="../herramientas/generar-favicon.html">Generate a favicon</a>, download the PNGs and the favicon.ico, upload them to the root of your site and declare them with <code>link</code> tags in the <code>&lt;head&gt;</code>. Design for 16 pixels and check it at that size.',
     'rel1': 'Generate a favicon',
     'rel2': 'Crop an image',
     'rel3': 'Resize an image',
@@ -189,29 +195,34 @@ window.i18nPagina = {
     </ol>
     <p data-i18n-html="b9">El recorte centrado es lo que más sorprende. Un logo horizontal con el nombre a los costados pierde letras. En ese caso, recortá solo el símbolo con <a href="../herramientas/recortar-imagen.html">Recortar imagen</a> antes de subirlo.</p>
     <p data-i18n-html="b10">Para el icono de 512 px, partí de una imagen de al menos 512 píxeles de lado. Si es más chica, la herramienta la estira y el icono sale borroso.</p>
-    <h2 data-i18n="b11">Cómo ponerlo en tu sitio</h2>
-    <p data-i18n-html="b12">Subí los archivos a la raíz de tu sitio, la carpeta donde está la portada, y declaralos dentro de la etiqueta <code>&lt;head&gt;</code> de cada página. Con los archivos en la raíz, sirve esta configuración:</p>
-    <pre data-i18n-html="b13"><code>&lt;link rel="icon" href="/favicon.ico" sizes="48x48"&gt;
+    <figure class="guia-figura">
+      <img class="img-clara" src="/guias/img/favicon-1.es.webp" alt="Un logo de ejemplo cargado: la herramienta genera el favicon.ico y los tamaños en PNG, cada uno con su descarga." width="520" height="922" loading="lazy" decoding="async" data-i18n-attr="alt:b11;src:b11-src">
+      <img class="img-oscura" src="/guias/img/favicon-1.oscuro.es.webp" alt="Un logo de ejemplo cargado: la herramienta genera el favicon.ico y los tamaños en PNG, cada uno con su descarga." width="520" height="922" loading="lazy" decoding="async" data-i18n-attr="alt:b11;src:b11-srco">
+      <figcaption data-i18n="b11">Un logo de ejemplo cargado: la herramienta genera el favicon.ico y los tamaños en PNG, cada uno con su descarga.</figcaption>
+    </figure>
+    <h2 data-i18n="b12">Cómo ponerlo en tu sitio</h2>
+    <p data-i18n-html="b13">Subí los archivos a la raíz de tu sitio, la carpeta donde está la portada, y declaralos dentro de la etiqueta <code>&lt;head&gt;</code> de cada página. Con los archivos en la raíz, sirve esta configuración:</p>
+    <pre data-i18n-html="b14"><code>&lt;link rel="icon" href="/favicon.ico" sizes="48x48"&gt;
 &lt;link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"&gt;
 &lt;link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"&gt;
 &lt;link rel="apple-touch-icon" href="/apple-touch-icon.png"&gt;</code></pre>
-    <p data-i18n-html="b14">Muchos navegadores piden <code>/favicon.ico</code> por su cuenta aunque no lo declares, así que conviene dejarlo ahí. Los iconos de 192 y 512 px sirven para una aplicación web instalable. Se enlazan desde un archivo de manifiesto (<code>site.webmanifest</code>) que escribís vos: la herramienta no lo crea. Si tu sitio usa un gestor como WordPress, busca en sus ajustes la opción de icono del sitio y subí ahí el PNG de 512 px.</p>
-    <p data-i18n-html="b15">Google pide que el favicon sea cuadrado y múltiplo de 48 píxeles (48, 96, 144…) para mostrarlo en sus resultados. Es una regla de Google que puede cambiar, así que conviene revisarla en su documentación.</p>
-    <p data-i18n-html="b16">Si cambiaste el icono y la pestaña sigue mostrando el viejo, el navegador guarda el favicon aparte de la página, así que un recargar no siempre alcanza. Probá en una ventana privada o cerrá la pestaña y abrila de nuevo. Los buscadores lo actualizan más tarde, sin un plazo fijo.</p>
-    <h2 data-i18n="b17">Diseñar para 16 píxeles</h2>
-    <p data-i18n-html="b18">A 16 píxeles hay 256 puntos en total. Una letra, una forma simple o un símbolo de dos colores se entiende. Un dibujo con detalle se vuelve una mancha, y una palabra completa no se lee. Dos letras, como iniciales, todavía funcionan.</p>
-    <p data-i18n-html="b19">El contraste pesa más que el color. La barra de pestañas cambia de color con el modo oscuro, y un icono de grises puede desaparecer en una de las dos. Un fondo sólido y de color fuerte se ve en ambos casos.</p>
-    <p data-i18n-html="b20">El fondo transparente queda bien en la pestaña. Para el icono de iPhone y iPad conviene un fondo sólido, porque sus zonas transparentes pueden verse negras.</p>
-    <p data-i18n-html="b21">Mirá el resultado a su tamaño real. Las tarjetas de la herramienta muestran cada icono a su medida, hasta 80 píxeles, así que la de 16 se ve como en la pestaña.</p>
-    <h2 data-i18n="b22">Preguntas frecuentes</h2>
-    <h3 data-i18n="b23">¿Qué imagen me conviene subir?</h3>
-    <p data-i18n-html="b24">Una imagen cuadrada, simple y de 512 píxeles o más. Si tu logo tiene mucho detalle o texto, hacé una versión solo con el símbolo para el favicon.</p>
-    <h3 data-i18n="b25">¿El favicon.ico es obligatorio?</h3>
-    <p data-i18n-html="b26">No, pero conviene tenerlo en la raíz, porque muchos navegadores y herramientas lo piden por su cuenta.</p>
-    <h3 data-i18n="b27">¿Mi imagen está en otro formato?</h3>
-    <p data-i18n-html="b28">Si el navegador la abre, la herramienta la acepta. Si el archivo no tiene un tipo de imagen que el navegador reconoce, la herramienta no reacciona y no avisa. Si lo reconoce pero no puede abrirlo, aparece un aviso. Las fotos HEIC de iPhone suelen fallar: exportalas como JPG o PNG desde la app de fotos, o convertilas con <a href="../herramientas/convertir-formato-imagen.html">Convertir formato de imagen</a> si el navegador las abre.</p>
-    <h2 data-i18n="b29">Resumen</h2>
-    <p data-i18n-html="b30">Un favicon necesita varios tamaños. Subí una imagen cuadrada y simple a <a href="../herramientas/generar-favicon.html">Generar favicon</a>, descargá los PNG y el favicon.ico, subilos a la raíz de tu sitio y declaralos con etiquetas <code>link</code> en el <code>&lt;head&gt;</code>. Diseñá pensando en 16 píxeles y revisalo a ese tamaño.</p>
+    <p data-i18n-html="b15">Muchos navegadores piden <code>/favicon.ico</code> por su cuenta aunque no lo declares, así que conviene dejarlo ahí. Los iconos de 192 y 512 px sirven para una aplicación web instalable. Se enlazan desde un archivo de manifiesto (<code>site.webmanifest</code>) que escribís vos: la herramienta no lo crea. Si tu sitio usa un gestor como WordPress, busca en sus ajustes la opción de icono del sitio y subí ahí el PNG de 512 px.</p>
+    <p data-i18n-html="b16">Google pide que el favicon sea cuadrado y múltiplo de 48 píxeles (48, 96, 144…) para mostrarlo en sus resultados. Es una regla de Google que puede cambiar, así que conviene revisarla en su documentación.</p>
+    <p data-i18n-html="b17">Si cambiaste el icono y la pestaña sigue mostrando el viejo, el navegador guarda el favicon aparte de la página, así que un recargar no siempre alcanza. Probá en una ventana privada o cerrá la pestaña y abrila de nuevo. Los buscadores lo actualizan más tarde, sin un plazo fijo.</p>
+    <h2 data-i18n="b18">Diseñar para 16 píxeles</h2>
+    <p data-i18n-html="b19">A 16 píxeles hay 256 puntos en total. Una letra, una forma simple o un símbolo de dos colores se entiende. Un dibujo con detalle se vuelve una mancha, y una palabra completa no se lee. Dos letras, como iniciales, todavía funcionan.</p>
+    <p data-i18n-html="b20">El contraste pesa más que el color. La barra de pestañas cambia de color con el modo oscuro, y un icono de grises puede desaparecer en una de las dos. Un fondo sólido y de color fuerte se ve en ambos casos.</p>
+    <p data-i18n-html="b21">El fondo transparente queda bien en la pestaña. Para el icono de iPhone y iPad conviene un fondo sólido, porque sus zonas transparentes pueden verse negras.</p>
+    <p data-i18n-html="b22">Mirá el resultado a su tamaño real. Las tarjetas de la herramienta muestran cada icono a su medida, hasta 80 píxeles, así que la de 16 se ve como en la pestaña.</p>
+    <h2 data-i18n="b23">Preguntas frecuentes</h2>
+    <h3 data-i18n="b24">¿Qué imagen me conviene subir?</h3>
+    <p data-i18n-html="b25">Una imagen cuadrada, simple y de 512 píxeles o más. Si tu logo tiene mucho detalle o texto, hacé una versión solo con el símbolo para el favicon.</p>
+    <h3 data-i18n="b26">¿El favicon.ico es obligatorio?</h3>
+    <p data-i18n-html="b27">No, pero conviene tenerlo en la raíz, porque muchos navegadores y herramientas lo piden por su cuenta.</p>
+    <h3 data-i18n="b28">¿Mi imagen está en otro formato?</h3>
+    <p data-i18n-html="b29">Si el navegador la abre, la herramienta la acepta. Si el archivo no tiene un tipo de imagen que el navegador reconoce, la herramienta no reacciona y no avisa. Si lo reconoce pero no puede abrirlo, aparece un aviso. Las fotos HEIC de iPhone suelen fallar: exportalas como JPG o PNG desde la app de fotos, o convertilas con <a href="../herramientas/convertir-formato-imagen.html">Convertir formato de imagen</a> si el navegador las abre.</p>
+    <h2 data-i18n="b30">Resumen</h2>
+    <p data-i18n-html="b31">Un favicon necesita varios tamaños. Subí una imagen cuadrada y simple a <a href="../herramientas/generar-favicon.html">Generar favicon</a>, descargá los PNG y el favicon.ico, subilos a la raíz de tu sitio y declaralos con etiquetas <code>link</code> en el <code>&lt;head&gt;</code>. Diseñá pensando en 16 píxeles y revisalo a ese tamaño.</p>
   </article>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
