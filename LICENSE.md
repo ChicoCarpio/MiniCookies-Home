@@ -85,9 +85,13 @@ Cualquier persona puede:
   indicando la fuente y el autor, en la medida que permite el artículo 70 de la
   Ley N.º 6683.
 
-Estos permisos se conceden de forma expresa porque la ley no permite reproducir programas
-de cómputo para uso personal sin autorización (Ley N.º 6683, artículo 74). No autorizan a
-reutilizar el código en otros productos o servicios.
+Estos permisos se conceden de forma expresa porque la reproducción de la obra es un
+derecho exclusivo del titular (Ley N.º 6683, artículo 16) y la excepción de copia personal
+de esa ley no se aplica a los programas de cómputo (artículo 74). La única copia que la
+ley permite sin autorización es una de resguardo o seguridad y la carga del programa en la
+memoria del equipo para usarlo, salvo que la licencia disponga otra cosa (Decreto
+Ejecutivo N.º 24611-J, artículo 9). Estos permisos no autorizan a reutilizar el código en
+otros productos o servicios.
 
 ## 5. Usos que requieren autorización
 
@@ -185,8 +189,8 @@ Derechos de Propiedad Intelectual (artículo 1). Entre ellas están:
 - Las sanciones penales por reproducir, modificar, distribuir o poner a disposición del
   público la obra sin autorización, o por suprimir o alterar los avisos de derechos
   (artículos 51, 54, 58, 59 y 63 de la Ley N.º 8039), cuando se cumplan los requisitos
-  de esos artículos, incluidos el perjuicio y la escala comercial que exige su
-  artículo 70.
+  de esos artículos. El artículo 70 de esa ley prevé sanciones penales al menos para los
+  casos de piratería a escala comercial.
 
 ## 10. Sin garantías
 
