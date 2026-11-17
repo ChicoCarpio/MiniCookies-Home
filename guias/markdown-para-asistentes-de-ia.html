@@ -24,37 +24,40 @@ window.i18nPagina = {
     'b7': 'En <a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a>, elegí «PDF → Markdown», arrastrá el archivo y tocá «Convertir a Markdown». Con un PDF, el resultado aparece en un cuadro para copiarlo, o podés «Descargar .md» con el nombre del PDF. Con varios, la descarga es un .zip, markdown-desde-pdf.zip, con un .md por PDF.',
     'b8': 'La herramienta marca un título cuando la letra es más grande que el texto normal, con #, ## o ### según cuánto más grande sea. Para contar como título, el texto tiene que ser corto (hasta 150 caracteres) y no terminar en punto, dos puntos, punto y coma o coma. También reconoce listas con viñeta o número, tablas sencillas, y une las palabras cortadas al final de un renglón. Cada página queda separada por una línea ---. Un texto que se repite en tres o más páginas, como un encabezado corrido o la numeración, no se marca como título, pero sigue en el texto.',
     'b9': 'No salen las negritas, las cursivas ni las imágenes. El texto sigue el orden en que el PDF lo guarda, que no siempre es el orden de lectura: en una página de dos columnas, las líneas pueden mezclarse.',
-    'b10': 'De PDF escaneado',
-    'b11': 'Si la herramienta responde «No se encontró texto en el PDF (¿es un escaneo?)», el archivo es una imagen. Pasalo primero por <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a>: devuelve un PDF con texto seleccionable y un .txt («texto-ocr.txt») con lo reconocido. Ese .txt es texto corrido, sin marcas de título ni de lista, así que revisalo a mano. El OCR no es confiable con letra manuscrita, texto borroso ni sombras fuertes.',
-    'b12': 'De Word a Markdown',
-    'b13': 'En <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a>, elegí «Word → Markdown» y arrastrá tus .docx. Solo acepta .docx. Si tenés un .doc antiguo, guardalo como .docx en Word: al arrastrarlo, la página no muestra ningún aviso. Se conservan títulos, negrita, cursiva, listas, enlaces, tablas e imágenes. Los cuadros de texto salen justo después del párrafo que los contiene, y las notas al pie van al final, numeradas.',
-    'b14': 'No pasan los encabezados y pies de página, los comentarios ni el texto de SmartArt y gráficos. Una celda que abarcaba varias columnas deja vacías a las de al lado, porque Markdown no tiene celdas combinadas. Las imágenes se guardan en una carpeta junto al .md, y la descarga es un .zip. Si el asistente solo lee texto, esas imágenes no le llegan: si su contenido importa, describilo en el texto.',
-    'b15': 'De EPUB a Markdown',
-    'b16': 'En <a href="../herramientas/epub-markdown.html">EPUB ↔ Markdown</a>, elegí «EPUB → Markdown» y tocá «Convertir a Markdown». Funciona con libros sin DRM; si el libro lo tiene, la página lo dice. Cada capítulo queda separado por una línea ---, y las tablas pasan a tablas de Markdown.',
-    'b17': 'Las imágenes son lo que hay que revisar. La herramienta no las guarda como archivos aparte: las escribe dentro del texto en base64, en líneas muy largas que empiezan con ![ y contienen data:image. Eso puede hacer el .md mucho más pesado que el texto del libro, y para un asistente de texto es puro ruido. Antes de pegarlo, buscá «data:image» en tu editor y borrá cada imagen.',
-    'b18': 'Revisar antes de pegar',
-    'b19': 'La conversión es automática y puede equivocarse. Antes de pegar el texto, mirá:',
-    'b20-1': 'Títulos. Una sección importante puede haber quedado como texto corriente si su letra no era más grande que el resto, o si es larga o termina en dos puntos. Marcala a mano con #.',
-    'b20-2': 'Párrafos y columnas. Una frase cortada a mitad o dos columnas mezcladas confunden al asistente.',
-    'b20-3': 'Tablas. Revisá que cada fila tenga sus celdas. Si una tabla de PDF no se detecta, sale como renglones de texto.',
-    'b20-4': 'Restos del diseño. Números de página, encabezados corridos y pies de foto siguen en el texto, porque la herramienta solo evita marcarlos como títulos. Borralos.',
-    'b21': 'Partir un documento largo',
-    'b22': 'Cada asistente acepta una cantidad limitada de texto por conversación, y el límite cambia según el servicio. Si el documento no entra, o si solo necesitás una parte, partilo:',
-    'b23-1': '<a href="../herramientas/dividir-markdown.html">Dividir Markdown</a> corta el archivo en cada encabezado de «Primer nivel (#)» o de «Segundo nivel (##)» y descarga un .zip con un .md por sección, numerados, como 01-Instalación.md. Lo que va antes del primer encabezado queda en un archivo aparte, 01-introduccion.md. Los # dentro de bloques de código no cortan. Los enlaces y las imágenes se copian tal cual, así que un enlace a otra sección puede apuntar a un archivo que ya no está allí.',
-    'b23-2': '<a href="../herramientas/administrar-markdown.html">Administrar / reordenar secciones de Markdown</a> muestra una fila por cada sección de primer nivel. Podés arrastrarlas para reordenarlas, quitar las que no sirven, como un anexo o una licencia, y descargar documento-reordenado.md. Los subtítulos viajan con su sección.',
-    'b23-3': '<a href="../herramientas/tabla-contenidos-markdown.html">Tabla de contenidos de Markdown</a> agrega al principio un índice con un enlace a cada encabezado. Sirve para ubicar la parte que necesitás antes de partir el archivo.',
-    'b24': 'Pedir bien',
-    'b25': 'Decile al asistente qué querés antes de pegar el texto, y de qué parte se trata. Por ejemplo: «Te paso la sección 3 de un manual de instalación. Hacé un resumen de cinco puntos y listá las decisiones que requieren aprobación.»',
-    'b26': 'Si son varias partes, decí cuántas son y pedile que espere a tenerlas todas antes de responder. También podés mandarlas una por una, cada una con su título.',
-    'b27': 'Límites y precauciones',
-    'b28': 'Convertir no garantiza que el asistente entienda bien. Puede leer mal una cifra, mezclar secciones o inventar una respuesta. Compará los datos importantes, como números, fechas, nombres y cláusulas, con el original.',
-    'b29': 'Las herramientas de esta guía convierten en tu navegador y no envían el archivo a ningún servidor. Lo que pegás en el asistente sí sale de tu computadora. Antes, pensá qué servicio lo recibe, qué dicen sus condiciones de uso y si el documento tiene datos personales o confidenciales.',
-    'b30': 'Preguntas frecuentes',
-    'b31': '<strong>¿Se pierde el formato al convertir a Markdown?</strong> Lo que Markdown no puede expresar se pierde: colores, tipografías, columnas y posiciones. Desde un PDF, además, no se conservan las negritas ni las cursivas.',
-    'b32': '<strong>¿Puedo convertir varios archivos a la vez?</strong> Sí. <a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a>, <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a> y <a href="../herramientas/epub-markdown.html">EPUB ↔ Markdown</a> aceptan varios archivos y devuelven un .zip con un .md por cada uno.',
-    'b33': '<strong>¿Cómo vuelvo de Markdown a Word o a PDF?</strong> Las mismas herramientas funcionan en los dos sentidos. El PDF que sale de un .md es sencillo: títulos en negrita, listas y párrafos. Las tablas y los bloques de código salen como texto plano.',
-    'b34': 'Resumen',
-    'b35': 'Si el documento es largo o necesitás controlar lo que llega al asistente, convertilo a Markdown con las herramientas del sitio. Revisá títulos, tablas y restos del diseño, borrá las imágenes en base64 de un EPUB, partí el texto por secciones si hace falta y pegalo con una instrucción clara.',
+    'b10': 'Un PDF de ejemplo convertido a Markdown: los títulos pasan a «#» y las listas conservan sus guiones.',
+    'b10-src': '/guias/img/pdf-markdown-1.es.webp',
+    'b10-srco': '/guias/img/pdf-markdown-1.oscuro.es.webp',
+    'b11': 'De PDF escaneado',
+    'b12': 'Si la herramienta responde «No se encontró texto en el PDF (¿es un escaneo?)», el archivo es una imagen. Pasalo primero por <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a>: devuelve un PDF con texto seleccionable y un .txt («texto-ocr.txt») con lo reconocido. Ese .txt es texto corrido, sin marcas de título ni de lista, así que revisalo a mano. El OCR no es confiable con letra manuscrita, texto borroso ni sombras fuertes.',
+    'b13': 'De Word a Markdown',
+    'b14': 'En <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a>, elegí «Word → Markdown» y arrastrá tus .docx. Solo acepta .docx. Si tenés un .doc antiguo, guardalo como .docx en Word: al arrastrarlo, la página no muestra ningún aviso. Se conservan títulos, negrita, cursiva, listas, enlaces, tablas e imágenes. Los cuadros de texto salen justo después del párrafo que los contiene, y las notas al pie van al final, numeradas.',
+    'b15': 'No pasan los encabezados y pies de página, los comentarios ni el texto de SmartArt y gráficos. Una celda que abarcaba varias columnas deja vacías a las de al lado, porque Markdown no tiene celdas combinadas. Las imágenes se guardan en una carpeta junto al .md, y la descarga es un .zip. Si el asistente solo lee texto, esas imágenes no le llegan: si su contenido importa, describilo en el texto.',
+    'b16': 'De EPUB a Markdown',
+    'b17': 'En <a href="../herramientas/epub-markdown.html">EPUB ↔ Markdown</a>, elegí «EPUB → Markdown» y tocá «Convertir a Markdown». Funciona con libros sin DRM; si el libro lo tiene, la página lo dice. Cada capítulo queda separado por una línea ---, y las tablas pasan a tablas de Markdown.',
+    'b18': 'Las imágenes son lo que hay que revisar. La herramienta no las guarda como archivos aparte: las escribe dentro del texto en base64, en líneas muy largas que empiezan con ![ y contienen data:image. Eso puede hacer el .md mucho más pesado que el texto del libro, y para un asistente de texto es puro ruido. Antes de pegarlo, buscá «data:image» en tu editor y borrá cada imagen.',
+    'b19': 'Revisar antes de pegar',
+    'b20': 'La conversión es automática y puede equivocarse. Antes de pegar el texto, mirá:',
+    'b21-1': 'Títulos. Una sección importante puede haber quedado como texto corriente si su letra no era más grande que el resto, o si es larga o termina en dos puntos. Marcala a mano con #.',
+    'b21-2': 'Párrafos y columnas. Una frase cortada a mitad o dos columnas mezcladas confunden al asistente.',
+    'b21-3': 'Tablas. Revisá que cada fila tenga sus celdas. Si una tabla de PDF no se detecta, sale como renglones de texto.',
+    'b21-4': 'Restos del diseño. Números de página, encabezados corridos y pies de foto siguen en el texto, porque la herramienta solo evita marcarlos como títulos. Borralos.',
+    'b22': 'Partir un documento largo',
+    'b23': 'Cada asistente acepta una cantidad limitada de texto por conversación, y el límite cambia según el servicio. Si el documento no entra, o si solo necesitás una parte, partilo:',
+    'b24-1': '<a href="../herramientas/dividir-markdown.html">Dividir Markdown</a> corta el archivo en cada encabezado de «Primer nivel (#)» o de «Segundo nivel (##)» y descarga un .zip con un .md por sección, numerados, como 01-Instalación.md. Lo que va antes del primer encabezado queda en un archivo aparte, 01-introduccion.md. Los # dentro de bloques de código no cortan. Los enlaces y las imágenes se copian tal cual, así que un enlace a otra sección puede apuntar a un archivo que ya no está allí.',
+    'b24-2': '<a href="../herramientas/administrar-markdown.html">Administrar / reordenar secciones de Markdown</a> muestra una fila por cada sección de primer nivel. Podés arrastrarlas para reordenarlas, quitar las que no sirven, como un anexo o una licencia, y descargar documento-reordenado.md. Los subtítulos viajan con su sección.',
+    'b24-3': '<a href="../herramientas/tabla-contenidos-markdown.html">Tabla de contenidos de Markdown</a> agrega al principio un índice con un enlace a cada encabezado. Sirve para ubicar la parte que necesitás antes de partir el archivo.',
+    'b25': 'Pedir bien',
+    'b26': 'Decile al asistente qué querés antes de pegar el texto, y de qué parte se trata. Por ejemplo: «Te paso la sección 3 de un manual de instalación. Hacé un resumen de cinco puntos y listá las decisiones que requieren aprobación.»',
+    'b27': 'Si son varias partes, decí cuántas son y pedile que espere a tenerlas todas antes de responder. También podés mandarlas una por una, cada una con su título.',
+    'b28': 'Límites y precauciones',
+    'b29': 'Convertir no garantiza que el asistente entienda bien. Puede leer mal una cifra, mezclar secciones o inventar una respuesta. Compará los datos importantes, como números, fechas, nombres y cláusulas, con el original.',
+    'b30': 'Las herramientas de esta guía convierten en tu navegador y no envían el archivo a ningún servidor. Lo que pegás en el asistente sí sale de tu computadora. Antes, pensá qué servicio lo recibe, qué dicen sus condiciones de uso y si el documento tiene datos personales o confidenciales.',
+    'b31': 'Preguntas frecuentes',
+    'b32': '<strong>¿Se pierde el formato al convertir a Markdown?</strong> Lo que Markdown no puede expresar se pierde: colores, tipografías, columnas y posiciones. Desde un PDF, además, no se conservan las negritas ni las cursivas.',
+    'b33': '<strong>¿Puedo convertir varios archivos a la vez?</strong> Sí. <a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a>, <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a> y <a href="../herramientas/epub-markdown.html">EPUB ↔ Markdown</a> aceptan varios archivos y devuelven un .zip con un .md por cada uno.',
+    'b34': '<strong>¿Cómo vuelvo de Markdown a Word o a PDF?</strong> Las mismas herramientas funcionan en los dos sentidos. El PDF que sale de un .md es sencillo: títulos en negrita, listas y párrafos. Las tablas y los bloques de código salen como texto plano.',
+    'b35': 'Resumen',
+    'b36': 'Si el documento es largo o necesitás controlar lo que llega al asistente, convertilo a Markdown con las herramientas del sitio. Revisá títulos, tablas y restos del diseño, borrá las imágenes en base64 de un EPUB, partí el texto por secciones si hace falta y pegalo con una instrucción clara.',
     'rel1': 'PDF ↔ Markdown',
     'rel2': 'Markdown ↔ Word',
     'rel3': 'EPUB ↔ Markdown',
@@ -74,37 +77,40 @@ window.i18nPagina = {
     'b7': 'In <a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a>, choose “PDF → Markdown”, drag in the file and tap “Convert to Markdown”. With one PDF, the result appears in a box you can copy, or you can “Download .md” under the PDF’s name. With several, the download is a .zip, markdown-from-pdf.zip, with one .md per PDF.',
     'b8': 'The tool marks a heading when the type is larger than the normal text, with #, ## or ### depending on how much larger it is. To count as a heading, the text has to be short (up to 150 characters) and must not end in a period, a colon, a semicolon or a comma. It also recognizes lists with bullets or numbers and simple tables, and it joins words that were split at the end of a line. Each page is separated by a --- line. Text that repeats on three or more pages, such as a running header or the page numbers, is not marked as a heading, but it stays in the text.',
     'b9': 'Bold, italics and images don’t come through. The text follows the order in which the PDF stores it, which is not always the reading order: on a two-column page, lines can get mixed.',
-    'b10': 'From a scanned PDF',
-    'b11': 'If the tool answers “No text was found in the PDF (is it a scan?)”, the file is an image. Run it first through <a href="../herramientas/ocr-pdf.html">OCR for scanned PDFs and images</a>: it returns a PDF with selectable text and a .txt file (ocr-text.txt) with everything it recognized. That .txt is running text, with no heading or list marks, so check it by hand. OCR is not reliable with handwriting, blurry text or strong shadows.',
-    'b12': 'From Word to Markdown',
-    'b13': 'In <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a>, choose “Word → Markdown” and drag in your .docx files. It only accepts .docx. For an old .doc, save it as .docx in Word first, because when you drag one in, the page shows no notice. Headings, bold, italics, lists, links, tables and images are kept. Text boxes come out right after the paragraph that contains them, and footnotes go at the end, numbered.',
-    'b14': 'Headers and footers, comments, and the text of SmartArt and charts don’t come through. A cell that spanned several columns leaves the neighbouring ones empty, because Markdown has no merged cells. Images are saved in a folder next to the .md, and the download is a .zip. If the assistant reads only text, those images don’t reach it, so describe their content in the text if it matters.',
-    'b15': 'From EPUB to Markdown',
-    'b16': 'In <a href="../herramientas/epub-markdown.html">EPUB ↔ Markdown</a>, choose “EPUB → Markdown” and tap “Convert to Markdown”. It works with books that have no DRM; if the book has DRM, the page says so. Each chapter is separated by a --- line, and tables become Markdown tables.',
-    'b17': 'Images are the thing to check. The tool doesn’t save them as separate files: it writes them into the text as base64 data, on very long lines that start with ![ and contain data:image. That can make the .md much heavier than the book’s text, and for a text-only assistant it is just noise. Before you paste it, search your editor for “data:image” and delete each image.',
-    'b18': 'Check before you paste',
-    'b19': 'The conversion is automatic and can make mistakes. Before you paste the text, look at:',
-    'b20-1': 'Headings. An important section may have come out as ordinary text, if its type was no larger than the rest, or if it is long or ends in a colon. Mark it by hand with #.',
-    'b20-2': 'Paragraphs and columns. A sentence cut in the middle, or two columns mixed together, confuses the assistant.',
-    'b20-3': 'Tables. Check that every row has its cells. If a PDF table isn’t detected, it comes out as lines of text.',
-    'b20-4': 'Leftovers from the layout. Page numbers, running headers and photo captions stay in the text, because the tool only stops them from being marked as headings. Delete them.',
-    'b21': 'Split a long document',
-    'b22': 'Each assistant accepts a limited amount of text per conversation, and the limit depends on the service. If the document doesn’t fit, or you only need one part, split it:',
-    'b23-1': '<a href="../herramientas/dividir-markdown.html">Split Markdown</a> cuts the file at each heading of “First level (#)” or “Second level (##)”, and downloads a .zip with one .md per section, numbered, such as 01-Instalación.md. Anything before the first heading goes into a separate file, 01-introduccion.md. A # inside a code block doesn’t cut the document. Links and images are copied as they are, so a link to another section may point to a file that is no longer there.',
-    'b23-2': '<a href="../herramientas/administrar-markdown.html">Manage / reorder Markdown sections</a> shows one row per top-level section. You can drag them into a new order, remove the ones you don’t need, such as an appendix or a license, and download reordered-document.md. Subheadings travel with their section.',
-    'b23-3': '<a href="../herramientas/tabla-contenidos-markdown.html">Markdown table of contents</a> adds an index at the top, with a link to each heading. It helps you find the part you need before you split the file.',
-    'b24': 'Ask well',
-    'b25': 'Tell the assistant what you want before you paste the text, and say which part it is. For example: “Below is section 3 of an installation manual. Write a five-point summary and list the decisions that need approval.”',
-    'b26': 'If there are several parts, say how many there are and ask it to wait until it has them all before answering. You can also send them one at a time, each with its title.',
-    'b27': 'Limits and precautions',
-    'b28': 'Converting doesn’t guarantee that the assistant will understand the content. It can misread a figure, mix up sections or make up an answer. Check the important data, such as numbers, dates, names and clauses, against the original.',
-    'b29': 'The tools in this guide convert in your browser and don’t send the file to any server. What you paste into the assistant does leave your computer, though. Before that, consider which service receives it, what its terms of use say, and whether the document contains personal or confidential data.',
-    'b30': 'Frequently asked questions',
-    'b31': '<strong>Is formatting lost when converting to Markdown?</strong> What Markdown can’t express is lost: colours, typefaces, columns and positions. From a PDF, bold and italics are not kept either.',
-    'b32': '<strong>Can I convert several files at once?</strong> Yes. <a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a>, <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a> and <a href="../herramientas/epub-markdown.html">EPUB ↔ Markdown</a> accept several files and return a .zip with one .md per file.',
-    'b33': '<strong>How do I go back from Markdown to Word or PDF?</strong> The same tools work in both directions. The PDF made from a .md is simple: headings in bold, lists and paragraphs. Tables and code blocks come out as plain text.',
-    'b34': 'Summary',
-    'b35': 'If the document is long, or you need control over what reaches the assistant, convert it to Markdown with the site’s tools. Check headings, tables and layout leftovers, delete the base64 images from an EPUB, split the text by sections if needed, and paste it with a clear instruction.',
+    'b10': 'A sample PDF converted to Markdown: headings become “#” and lists keep their dashes.',
+    'b10-src': '/guias/img/pdf-markdown-1.en.webp',
+    'b10-srco': '/guias/img/pdf-markdown-1.oscuro.en.webp',
+    'b11': 'From a scanned PDF',
+    'b12': 'If the tool answers “No text was found in the PDF (is it a scan?)”, the file is an image. Run it first through <a href="../herramientas/ocr-pdf.html">OCR for scanned PDFs and images</a>: it returns a PDF with selectable text and a .txt file (ocr-text.txt) with everything it recognized. That .txt is running text, with no heading or list marks, so check it by hand. OCR is not reliable with handwriting, blurry text or strong shadows.',
+    'b13': 'From Word to Markdown',
+    'b14': 'In <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a>, choose “Word → Markdown” and drag in your .docx files. It only accepts .docx. For an old .doc, save it as .docx in Word first, because when you drag one in, the page shows no notice. Headings, bold, italics, lists, links, tables and images are kept. Text boxes come out right after the paragraph that contains them, and footnotes go at the end, numbered.',
+    'b15': 'Headers and footers, comments, and the text of SmartArt and charts don’t come through. A cell that spanned several columns leaves the neighbouring ones empty, because Markdown has no merged cells. Images are saved in a folder next to the .md, and the download is a .zip. If the assistant reads only text, those images don’t reach it, so describe their content in the text if it matters.',
+    'b16': 'From EPUB to Markdown',
+    'b17': 'In <a href="../herramientas/epub-markdown.html">EPUB ↔ Markdown</a>, choose “EPUB → Markdown” and tap “Convert to Markdown”. It works with books that have no DRM; if the book has DRM, the page says so. Each chapter is separated by a --- line, and tables become Markdown tables.',
+    'b18': 'Images are the thing to check. The tool doesn’t save them as separate files: it writes them into the text as base64 data, on very long lines that start with ![ and contain data:image. That can make the .md much heavier than the book’s text, and for a text-only assistant it is just noise. Before you paste it, search your editor for “data:image” and delete each image.',
+    'b19': 'Check before you paste',
+    'b20': 'The conversion is automatic and can make mistakes. Before you paste the text, look at:',
+    'b21-1': 'Headings. An important section may have come out as ordinary text, if its type was no larger than the rest, or if it is long or ends in a colon. Mark it by hand with #.',
+    'b21-2': 'Paragraphs and columns. A sentence cut in the middle, or two columns mixed together, confuses the assistant.',
+    'b21-3': 'Tables. Check that every row has its cells. If a PDF table isn’t detected, it comes out as lines of text.',
+    'b21-4': 'Leftovers from the layout. Page numbers, running headers and photo captions stay in the text, because the tool only stops them from being marked as headings. Delete them.',
+    'b22': 'Split a long document',
+    'b23': 'Each assistant accepts a limited amount of text per conversation, and the limit depends on the service. If the document doesn’t fit, or you only need one part, split it:',
+    'b24-1': '<a href="../herramientas/dividir-markdown.html">Split Markdown</a> cuts the file at each heading of “First level (#)” or “Second level (##)”, and downloads a .zip with one .md per section, numbered, such as 01-Instalación.md. Anything before the first heading goes into a separate file, 01-introduccion.md. A # inside a code block doesn’t cut the document. Links and images are copied as they are, so a link to another section may point to a file that is no longer there.',
+    'b24-2': '<a href="../herramientas/administrar-markdown.html">Manage / reorder Markdown sections</a> shows one row per top-level section. You can drag them into a new order, remove the ones you don’t need, such as an appendix or a license, and download reordered-document.md. Subheadings travel with their section.',
+    'b24-3': '<a href="../herramientas/tabla-contenidos-markdown.html">Markdown table of contents</a> adds an index at the top, with a link to each heading. It helps you find the part you need before you split the file.',
+    'b25': 'Ask well',
+    'b26': 'Tell the assistant what you want before you paste the text, and say which part it is. For example: “Below is section 3 of an installation manual. Write a five-point summary and list the decisions that need approval.”',
+    'b27': 'If there are several parts, say how many there are and ask it to wait until it has them all before answering. You can also send them one at a time, each with its title.',
+    'b28': 'Limits and precautions',
+    'b29': 'Converting doesn’t guarantee that the assistant will understand the content. It can misread a figure, mix up sections or make up an answer. Check the important data, such as numbers, dates, names and clauses, against the original.',
+    'b30': 'The tools in this guide convert in your browser and don’t send the file to any server. What you paste into the assistant does leave your computer, though. Before that, consider which service receives it, what its terms of use say, and whether the document contains personal or confidential data.',
+    'b31': 'Frequently asked questions',
+    'b32': '<strong>Is formatting lost when converting to Markdown?</strong> What Markdown can’t express is lost: colours, typefaces, columns and positions. From a PDF, bold and italics are not kept either.',
+    'b33': '<strong>Can I convert several files at once?</strong> Yes. <a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a>, <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a> and <a href="../herramientas/epub-markdown.html">EPUB ↔ Markdown</a> accept several files and return a .zip with one .md per file.',
+    'b34': '<strong>How do I go back from Markdown to Word or PDF?</strong> The same tools work in both directions. The PDF made from a .md is simple: headings in bold, lists and paragraphs. Tables and code blocks come out as plain text.',
+    'b35': 'Summary',
+    'b36': 'If the document is long, or you need control over what reaches the assistant, convert it to Markdown with the site’s tools. Check headings, tables and layout leftovers, delete the base64 images from an EPUB, split the text by sections if needed, and paste it with a clear instruction.',
     'rel1': 'PDF ↔ Markdown',
     'rel2': 'Markdown ↔ Word',
     'rel3': 'EPUB ↔ Markdown',
@@ -142,41 +148,46 @@ window.i18nPagina = {
     <p data-i18n-html="b7">En <a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a>, elegí «PDF → Markdown», arrastrá el archivo y tocá «Convertir a Markdown». Con un PDF, el resultado aparece en un cuadro para copiarlo, o podés «Descargar .md» con el nombre del PDF. Con varios, la descarga es un .zip, markdown-desde-pdf.zip, con un .md por PDF.</p>
     <p data-i18n-html="b8">La herramienta marca un título cuando la letra es más grande que el texto normal, con #, ## o ### según cuánto más grande sea. Para contar como título, el texto tiene que ser corto (hasta 150 caracteres) y no terminar en punto, dos puntos, punto y coma o coma. También reconoce listas con viñeta o número, tablas sencillas, y une las palabras cortadas al final de un renglón. Cada página queda separada por una línea ---. Un texto que se repite en tres o más páginas, como un encabezado corrido o la numeración, no se marca como título, pero sigue en el texto.</p>
     <p data-i18n-html="b9">No salen las negritas, las cursivas ni las imágenes. El texto sigue el orden en que el PDF lo guarda, que no siempre es el orden de lectura: en una página de dos columnas, las líneas pueden mezclarse.</p>
-    <h3 data-i18n="b10">De PDF escaneado</h3>
-    <p data-i18n-html="b11">Si la herramienta responde «No se encontró texto en el PDF (¿es un escaneo?)», el archivo es una imagen. Pasalo primero por <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a>: devuelve un PDF con texto seleccionable y un .txt («texto-ocr.txt») con lo reconocido. Ese .txt es texto corrido, sin marcas de título ni de lista, así que revisalo a mano. El OCR no es confiable con letra manuscrita, texto borroso ni sombras fuertes.</p>
-    <h3 data-i18n="b12">De Word a Markdown</h3>
-    <p data-i18n-html="b13">En <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a>, elegí «Word → Markdown» y arrastrá tus .docx. Solo acepta .docx. Si tenés un .doc antiguo, guardalo como .docx en Word: al arrastrarlo, la página no muestra ningún aviso. Se conservan títulos, negrita, cursiva, listas, enlaces, tablas e imágenes. Los cuadros de texto salen justo después del párrafo que los contiene, y las notas al pie van al final, numeradas.</p>
-    <p data-i18n-html="b14">No pasan los encabezados y pies de página, los comentarios ni el texto de SmartArt y gráficos. Una celda que abarcaba varias columnas deja vacías a las de al lado, porque Markdown no tiene celdas combinadas. Las imágenes se guardan en una carpeta junto al .md, y la descarga es un .zip. Si el asistente solo lee texto, esas imágenes no le llegan: si su contenido importa, describilo en el texto.</p>
-    <h3 data-i18n="b15">De EPUB a Markdown</h3>
-    <p data-i18n-html="b16">En <a href="../herramientas/epub-markdown.html">EPUB ↔ Markdown</a>, elegí «EPUB → Markdown» y tocá «Convertir a Markdown». Funciona con libros sin DRM; si el libro lo tiene, la página lo dice. Cada capítulo queda separado por una línea ---, y las tablas pasan a tablas de Markdown.</p>
-    <p data-i18n-html="b17">Las imágenes son lo que hay que revisar. La herramienta no las guarda como archivos aparte: las escribe dentro del texto en base64, en líneas muy largas que empiezan con ![ y contienen data:image. Eso puede hacer el .md mucho más pesado que el texto del libro, y para un asistente de texto es puro ruido. Antes de pegarlo, buscá «data:image» en tu editor y borrá cada imagen.</p>
-    <h2 data-i18n="b18">Revisar antes de pegar</h2>
-    <p data-i18n-html="b19">La conversión es automática y puede equivocarse. Antes de pegar el texto, mirá:</p>
+    <figure class="guia-figura">
+      <img class="img-clara" src="/guias/img/pdf-markdown-1.es.webp" alt="Un PDF de ejemplo convertido a Markdown: los títulos pasan a «#» y las listas conservan sus guiones." width="520" height="1041" loading="lazy" decoding="async" data-i18n-attr="alt:b10;src:b10-src">
+      <img class="img-oscura" src="/guias/img/pdf-markdown-1.oscuro.es.webp" alt="Un PDF de ejemplo convertido a Markdown: los títulos pasan a «#» y las listas conservan sus guiones." width="520" height="1041" loading="lazy" decoding="async" data-i18n-attr="alt:b10;src:b10-srco">
+      <figcaption data-i18n="b10">Un PDF de ejemplo convertido a Markdown: los títulos pasan a «#» y las listas conservan sus guiones.</figcaption>
+    </figure>
+    <h3 data-i18n="b11">De PDF escaneado</h3>
+    <p data-i18n-html="b12">Si la herramienta responde «No se encontró texto en el PDF (¿es un escaneo?)», el archivo es una imagen. Pasalo primero por <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a>: devuelve un PDF con texto seleccionable y un .txt («texto-ocr.txt») con lo reconocido. Ese .txt es texto corrido, sin marcas de título ni de lista, así que revisalo a mano. El OCR no es confiable con letra manuscrita, texto borroso ni sombras fuertes.</p>
+    <h3 data-i18n="b13">De Word a Markdown</h3>
+    <p data-i18n-html="b14">En <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a>, elegí «Word → Markdown» y arrastrá tus .docx. Solo acepta .docx. Si tenés un .doc antiguo, guardalo como .docx en Word: al arrastrarlo, la página no muestra ningún aviso. Se conservan títulos, negrita, cursiva, listas, enlaces, tablas e imágenes. Los cuadros de texto salen justo después del párrafo que los contiene, y las notas al pie van al final, numeradas.</p>
+    <p data-i18n-html="b15">No pasan los encabezados y pies de página, los comentarios ni el texto de SmartArt y gráficos. Una celda que abarcaba varias columnas deja vacías a las de al lado, porque Markdown no tiene celdas combinadas. Las imágenes se guardan en una carpeta junto al .md, y la descarga es un .zip. Si el asistente solo lee texto, esas imágenes no le llegan: si su contenido importa, describilo en el texto.</p>
+    <h3 data-i18n="b16">De EPUB a Markdown</h3>
+    <p data-i18n-html="b17">En <a href="../herramientas/epub-markdown.html">EPUB ↔ Markdown</a>, elegí «EPUB → Markdown» y tocá «Convertir a Markdown». Funciona con libros sin DRM; si el libro lo tiene, la página lo dice. Cada capítulo queda separado por una línea ---, y las tablas pasan a tablas de Markdown.</p>
+    <p data-i18n-html="b18">Las imágenes son lo que hay que revisar. La herramienta no las guarda como archivos aparte: las escribe dentro del texto en base64, en líneas muy largas que empiezan con ![ y contienen data:image. Eso puede hacer el .md mucho más pesado que el texto del libro, y para un asistente de texto es puro ruido. Antes de pegarlo, buscá «data:image» en tu editor y borrá cada imagen.</p>
+    <h2 data-i18n="b19">Revisar antes de pegar</h2>
+    <p data-i18n-html="b20">La conversión es automática y puede equivocarse. Antes de pegar el texto, mirá:</p>
     <ul>
-      <li data-i18n-html="b20-1">Títulos. Una sección importante puede haber quedado como texto corriente si su letra no era más grande que el resto, o si es larga o termina en dos puntos. Marcala a mano con #.</li>
-      <li data-i18n-html="b20-2">Párrafos y columnas. Una frase cortada a mitad o dos columnas mezcladas confunden al asistente.</li>
-      <li data-i18n-html="b20-3">Tablas. Revisá que cada fila tenga sus celdas. Si una tabla de PDF no se detecta, sale como renglones de texto.</li>
-      <li data-i18n-html="b20-4">Restos del diseño. Números de página, encabezados corridos y pies de foto siguen en el texto, porque la herramienta solo evita marcarlos como títulos. Borralos.</li>
+      <li data-i18n-html="b21-1">Títulos. Una sección importante puede haber quedado como texto corriente si su letra no era más grande que el resto, o si es larga o termina en dos puntos. Marcala a mano con #.</li>
+      <li data-i18n-html="b21-2">Párrafos y columnas. Una frase cortada a mitad o dos columnas mezcladas confunden al asistente.</li>
+      <li data-i18n-html="b21-3">Tablas. Revisá que cada fila tenga sus celdas. Si una tabla de PDF no se detecta, sale como renglones de texto.</li>
+      <li data-i18n-html="b21-4">Restos del diseño. Números de página, encabezados corridos y pies de foto siguen en el texto, porque la herramienta solo evita marcarlos como títulos. Borralos.</li>
     </ul>
-    <h2 data-i18n="b21">Partir un documento largo</h2>
-    <p data-i18n-html="b22">Cada asistente acepta una cantidad limitada de texto por conversación, y el límite cambia según el servicio. Si el documento no entra, o si solo necesitás una parte, partilo:</p>
+    <h2 data-i18n="b22">Partir un documento largo</h2>
+    <p data-i18n-html="b23">Cada asistente acepta una cantidad limitada de texto por conversación, y el límite cambia según el servicio. Si el documento no entra, o si solo necesitás una parte, partilo:</p>
     <ul>
-      <li data-i18n-html="b23-1"><a href="../herramientas/dividir-markdown.html">Dividir Markdown</a> corta el archivo en cada encabezado de «Primer nivel (#)» o de «Segundo nivel (##)» y descarga un .zip con un .md por sección, numerados, como 01-Instalación.md. Lo que va antes del primer encabezado queda en un archivo aparte, 01-introduccion.md. Los # dentro de bloques de código no cortan. Los enlaces y las imágenes se copian tal cual, así que un enlace a otra sección puede apuntar a un archivo que ya no está allí.</li>
-      <li data-i18n-html="b23-2"><a href="../herramientas/administrar-markdown.html">Administrar / reordenar secciones de Markdown</a> muestra una fila por cada sección de primer nivel. Podés arrastrarlas para reordenarlas, quitar las que no sirven, como un anexo o una licencia, y descargar documento-reordenado.md. Los subtítulos viajan con su sección.</li>
-      <li data-i18n-html="b23-3"><a href="../herramientas/tabla-contenidos-markdown.html">Tabla de contenidos de Markdown</a> agrega al principio un índice con un enlace a cada encabezado. Sirve para ubicar la parte que necesitás antes de partir el archivo.</li>
+      <li data-i18n-html="b24-1"><a href="../herramientas/dividir-markdown.html">Dividir Markdown</a> corta el archivo en cada encabezado de «Primer nivel (#)» o de «Segundo nivel (##)» y descarga un .zip con un .md por sección, numerados, como 01-Instalación.md. Lo que va antes del primer encabezado queda en un archivo aparte, 01-introduccion.md. Los # dentro de bloques de código no cortan. Los enlaces y las imágenes se copian tal cual, así que un enlace a otra sección puede apuntar a un archivo que ya no está allí.</li>
+      <li data-i18n-html="b24-2"><a href="../herramientas/administrar-markdown.html">Administrar / reordenar secciones de Markdown</a> muestra una fila por cada sección de primer nivel. Podés arrastrarlas para reordenarlas, quitar las que no sirven, como un anexo o una licencia, y descargar documento-reordenado.md. Los subtítulos viajan con su sección.</li>
+      <li data-i18n-html="b24-3"><a href="../herramientas/tabla-contenidos-markdown.html">Tabla de contenidos de Markdown</a> agrega al principio un índice con un enlace a cada encabezado. Sirve para ubicar la parte que necesitás antes de partir el archivo.</li>
     </ul>
-    <h2 data-i18n="b24">Pedir bien</h2>
-    <p data-i18n-html="b25">Decile al asistente qué querés antes de pegar el texto, y de qué parte se trata. Por ejemplo: «Te paso la sección 3 de un manual de instalación. Hacé un resumen de cinco puntos y listá las decisiones que requieren aprobación.»</p>
-    <p data-i18n-html="b26">Si son varias partes, decí cuántas son y pedile que espere a tenerlas todas antes de responder. También podés mandarlas una por una, cada una con su título.</p>
-    <h2 data-i18n="b27">Límites y precauciones</h2>
-    <p data-i18n-html="b28">Convertir no garantiza que el asistente entienda bien. Puede leer mal una cifra, mezclar secciones o inventar una respuesta. Compará los datos importantes, como números, fechas, nombres y cláusulas, con el original.</p>
-    <p data-i18n-html="b29">Las herramientas de esta guía convierten en tu navegador y no envían el archivo a ningún servidor. Lo que pegás en el asistente sí sale de tu computadora. Antes, pensá qué servicio lo recibe, qué dicen sus condiciones de uso y si el documento tiene datos personales o confidenciales.</p>
-    <h2 data-i18n="b30">Preguntas frecuentes</h2>
-    <p data-i18n-html="b31"><strong>¿Se pierde el formato al convertir a Markdown?</strong> Lo que Markdown no puede expresar se pierde: colores, tipografías, columnas y posiciones. Desde un PDF, además, no se conservan las negritas ni las cursivas.</p>
-    <p data-i18n-html="b32"><strong>¿Puedo convertir varios archivos a la vez?</strong> Sí. <a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a>, <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a> y <a href="../herramientas/epub-markdown.html">EPUB ↔ Markdown</a> aceptan varios archivos y devuelven un .zip con un .md por cada uno.</p>
-    <p data-i18n-html="b33"><strong>¿Cómo vuelvo de Markdown a Word o a PDF?</strong> Las mismas herramientas funcionan en los dos sentidos. El PDF que sale de un .md es sencillo: títulos en negrita, listas y párrafos. Las tablas y los bloques de código salen como texto plano.</p>
-    <h2 data-i18n="b34">Resumen</h2>
-    <p data-i18n-html="b35">Si el documento es largo o necesitás controlar lo que llega al asistente, convertilo a Markdown con las herramientas del sitio. Revisá títulos, tablas y restos del diseño, borrá las imágenes en base64 de un EPUB, partí el texto por secciones si hace falta y pegalo con una instrucción clara.</p>
+    <h2 data-i18n="b25">Pedir bien</h2>
+    <p data-i18n-html="b26">Decile al asistente qué querés antes de pegar el texto, y de qué parte se trata. Por ejemplo: «Te paso la sección 3 de un manual de instalación. Hacé un resumen de cinco puntos y listá las decisiones que requieren aprobación.»</p>
+    <p data-i18n-html="b27">Si son varias partes, decí cuántas son y pedile que espere a tenerlas todas antes de responder. También podés mandarlas una por una, cada una con su título.</p>
+    <h2 data-i18n="b28">Límites y precauciones</h2>
+    <p data-i18n-html="b29">Convertir no garantiza que el asistente entienda bien. Puede leer mal una cifra, mezclar secciones o inventar una respuesta. Compará los datos importantes, como números, fechas, nombres y cláusulas, con el original.</p>
+    <p data-i18n-html="b30">Las herramientas de esta guía convierten en tu navegador y no envían el archivo a ningún servidor. Lo que pegás en el asistente sí sale de tu computadora. Antes, pensá qué servicio lo recibe, qué dicen sus condiciones de uso y si el documento tiene datos personales o confidenciales.</p>
+    <h2 data-i18n="b31">Preguntas frecuentes</h2>
+    <p data-i18n-html="b32"><strong>¿Se pierde el formato al convertir a Markdown?</strong> Lo que Markdown no puede expresar se pierde: colores, tipografías, columnas y posiciones. Desde un PDF, además, no se conservan las negritas ni las cursivas.</p>
+    <p data-i18n-html="b33"><strong>¿Puedo convertir varios archivos a la vez?</strong> Sí. <a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a>, <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a> y <a href="../herramientas/epub-markdown.html">EPUB ↔ Markdown</a> aceptan varios archivos y devuelven un .zip con un .md por cada uno.</p>
+    <p data-i18n-html="b34"><strong>¿Cómo vuelvo de Markdown a Word o a PDF?</strong> Las mismas herramientas funcionan en los dos sentidos. El PDF que sale de un .md es sencillo: títulos en negrita, listas y párrafos. Las tablas y los bloques de código salen como texto plano.</p>
+    <h2 data-i18n="b35">Resumen</h2>
+    <p data-i18n-html="b36">Si el documento es largo o necesitás controlar lo que llega al asistente, convertilo a Markdown con las herramientas del sitio. Revisá títulos, tablas y restos del diseño, borrá las imágenes en base64 de un EPUB, partí el texto por secciones si hace falta y pegalo con una instrucción clara.</p>
   </article>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
