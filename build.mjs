@@ -446,6 +446,9 @@ rmSync(SALIDA, { recursive: true, force: true });
 mkdirSync(SALIDA);
 if (ES_SEGURO) construirSeguro(); else recorrer(RAIZ);
 generarRobotsYSitemap(SALIDA, paginas.concat(paginasEn));
+// ads.txt: declara quién puede vender anuncios de este sitio (solo www; el sitio seguro no tiene anuncios).
+// La línea es la de Google AdSense para nuestro identificador de editor; f08c47fec0942fa0 es el código fijo de Google.
+if (!ES_SEGURO && ADSENSE) writeFileSync(join(SALIDA, 'ads.txt'), `google.com, ${ADSENSE.replace(/^ca-/, '')}, DIRECT, f08c47fec0942fa0\n`);
 if (ES_SEGURO) { cabecerasSeguro(paginas.concat(paginasEn)); revisarSeguro(); }
 // Todo servidor ajeno que el sitio carga tiene que estar en la política de
 // privacidad. Si no, el build falla y Cloudflare deja la versión anterior.
