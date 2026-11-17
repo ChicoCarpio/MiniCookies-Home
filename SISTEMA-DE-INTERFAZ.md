@@ -478,6 +478,11 @@ y `ingles.mjs`); el diccionario es HTML escrito por nosotros, nunca de un usuari
 (h1) de la herramienta, y las del sitio seguro apuntan a su dirección absoluta. `Herramientas-del-sitio\enlazar-guias.mjs` agrega
 «Guía completa: …» al final de la guía de uso de cada herramienta (mapa a mano, artículo → herramientas). Una guía nueva o un cambio de
 título obliga a regenerar y a revisar la tarjeta de la portada (`guia-N-titulo`, copiada del Markdown).
+**Capturas de la herramienta (2026-11-17):** una línea `![pie](nombre)` en el Markdown (en es y en en, mismo nombre) genera
+`<figure class="guia-figura">` con dos `<img>` (`.img-clara`, `.img-oscura`) y un `<figcaption>`; el pie es también el texto alternativo.
+Las imágenes viven en `guias/img/` (`<nombre>.<es|en>.webp` y `<nombre>.oscuro.<es|en>.webp`, con `medidas.json`), las toma
+`Herramientas-del-sitio\capturar-guias.mjs` desde `dist/` con archivos sintéticos, y el CSS muestra la del tema activo (`data-theme` o
+`prefers-color-scheme`). Procedimiento y trampas: `hallazgos/guias-como-construir.md`.
 
 ### E — Página de texto
 
