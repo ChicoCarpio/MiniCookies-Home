@@ -310,3 +310,8 @@ html.camara-completa, html.camara-completa body { overflow: hidden; }
 .contenedor-miniaturas.vista-grid .miniatura-pagina .mover-tarjeta button { min-width: 0; flex: 1; height: 28px; padding: 0; }
 .contenedor-miniaturas.vista-grid .miniatura-pagina .quitar-pagina { transform: scale(0.85); transform-origin: top right; }
 .contenedor-miniaturas.vista-grid .miniatura-pagina { align-self: start; }
+/* En el celular el mosaico va de a dos páginas por fila; en la computadora quedan cuatro. */
+@media (max-width: 640px) {
+  .contenedor-miniaturas.vista-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .contenedor-miniaturas.vista-grid .miniatura-pagina { padding: 6px; }
+}
