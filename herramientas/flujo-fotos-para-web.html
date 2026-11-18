@@ -83,18 +83,19 @@ window.i18nPagina = {
       </aside>
 
       <div>
+        <h2 data-i18n="listo-titulo-pasos">Los pasos de este flujo</h2>
+        <p class="nota-suave" data-i18n="listo-nota-opciones">Podés cambiar las opciones de cada paso antes de ejecutar.</p>
+        <ol class="lista-archivos lista-pasos" id="listaPasos"></ol>
+
         <div class="zona-arrastre" id="zonaArrastre">
           <span data-i18n="listo-zona">📂 Arrastrá tus archivos acá o hacé clic para elegirlos</span>
           <input type="file" id="entradaArchivos" multiple hidden>
         </div>
         <p class="nota-suave" id="recibe"></p>
         <p class="nota-suave" id="avisoArchivos" hidden></p>
-        <h2 data-i18n="listo-titulo-pasos">Los pasos de este flujo</h2>
-        <p class="nota-suave" data-i18n="listo-nota-opciones">Podés cambiar las opciones de cada paso antes de ejecutar.</p>
-        <ol class="lista-archivos lista-pasos" id="listaPasos"></ol>
-
         <div class="controles">
           <button type="button" class="boton" id="botonEjecutar" disabled data-i18n="boton-ejecutar">Ejecutar el flujo</button>
+          <button type="button" class="boton secundario" id="botonLimpiarArchivos" disabled data-i18n="boton-limpiar-archivos">Limpiar archivos</button>
           <button type="button" class="boton secundario" id="botonPersonalizar" data-i18n="boton-personalizar">✏️ Personalizar este flujo</button>
         </div>
         <p class="nota-suave" id="estado" role="status" hidden></p>

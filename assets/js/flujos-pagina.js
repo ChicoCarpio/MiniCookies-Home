@@ -30,7 +30,7 @@ window.i18nPieza = {
     'error-juntar': 'El paso {n} de la entrada {e} junta todo en uno: con varias entradas, ponelo en «Después de juntar las entradas».',
     'error-entrada-vacia': 'La entrada {e} no tiene pasos y no hay pasos después de juntar.',
     'archivos-n': '{n} archivos listos.', 'archivos-ignorados': ' {n} no los recibe ninguna entrada y se van a saltar.',
-    'boton-ejecutar': 'Ejecutar el flujo', 'procesando': 'Procesando {archivo} ({donde}, paso {paso})…',
+    'boton-ejecutar': 'Ejecutar el flujo', 'boton-limpiar-archivos': 'Limpiar archivos', 'procesando': 'Procesando {archivo} ({donde}, paso {paso})…',
     'donde-entrada': 'entrada {n}', 'donde-comun': 'después de juntar', 'preparando': 'Preparando los pasos…', 'falta-archivos': 'Elegí los archivos.',
     'resultado-n': '✅ Listo: {ok} resultados.', 'resultado-cero': 'No salió ningún resultado.',
     'boton-descargar': 'Descargar', 'boton-descargar-zip': 'Descargar todo (.zip)',
@@ -55,7 +55,7 @@ window.i18nPieza = {
     'error-juntar': 'Step {n} of input {e} joins everything into one: with several inputs, put it in “After the inputs join”.',
     'error-entrada-vacia': 'Input {e} has no steps and there are no steps after joining.',
     'archivos-n': '{n} files ready.', 'archivos-ignorados': ' {n} are not taken by any input and will be skipped.',
-    'boton-ejecutar': 'Run the flow', 'procesando': 'Processing {archivo} ({donde}, step {paso})…',
+    'boton-ejecutar': 'Run the flow', 'boton-limpiar-archivos': 'Clear files', 'procesando': 'Processing {archivo} ({donde}, step {paso})…',
     'donde-entrada': 'input {n}', 'donde-comun': 'after joining', 'preparando': 'Getting the steps ready…', 'falta-archivos': 'Choose the files.',
     'resultado-n': '✅ Done: {ok} results.', 'resultado-cero': 'No result came out.',
     'boton-descargar': 'Download', 'boton-descargar-zip': 'Download all (.zip)',
@@ -266,7 +266,7 @@ window.i18nPieza = {
 
   // ---------- página de un flujo listo ----------
   // Marcado que espera (ids): zonaArrastre + entradaArchivos, avisoArchivos, recibe, listaPasos, diagramaMini,
-  // botonEjecutar, botonPersonalizar, estado, avance, resultado (con resultadoTexto, descargas, codigos, fallos).
+  // botonEjecutar, botonLimpiarArchivos, botonPersonalizar, estado, avance, resultado (con resultadoTexto, descargas, codigos, fallos).
   function montarListo(base) {
     const $ = (id) => document.getElementById(id);
     let flujo = F.normalizar(JSON.parse(JSON.stringify(base)));
@@ -303,6 +303,7 @@ window.i18nPieza = {
       aviso.textContent = archivos.length ? rellenar('archivos-n', { n: archivos.length - reparto.sinEntrada.length }) + (reparto.sinEntrada.length ? rellenar('archivos-ignorados', { n: reparto.sinEntrada.length }) : '') : '';
       aviso.hidden = !archivos.length;
       $('botonEjecutar').disabled = ocupado || !archivos.length || !!F.validar(flujo);
+      $('botonLimpiarArchivos').disabled = ocupado || !archivos.length;
       $('botonPersonalizar').disabled = ocupado;
       pintarDiagrama($('diagramaMini'), flujo);
     }
@@ -310,6 +311,12 @@ window.i18nPieza = {
     conectarZonaArrastre($('zonaArrastre'), $('entradaArchivos'), (lista) => {
       if (ocupado) return;
       archivos = lista;
+      limpiarResultado(elementos);
+      pintar();
+    });
+    $('botonLimpiarArchivos').addEventListener('click', () => {
+      if (ocupado) return;
+      archivos = [];
       limpiarResultado(elementos);
       pintar();
     });
