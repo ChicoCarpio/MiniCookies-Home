@@ -43,8 +43,6 @@ window.i18nPagina = {
     'error-formato': 'Este archivo no es un Word (.docx), PDF, EPUB, Markdown ni texto.',
     'error-mismo-idioma': 'Elegí un idioma distinto del original.',
     'error-traducir': 'No se pudo traducir el documento',
-    'error-navegador': 'Tu navegador no puede ejecutar el traductor (necesita WebAssembly y trabajadores en segundo plano). Probá con una versión reciente de Edge, Chrome o Firefox.',
-    'error-sin-modelo': 'El traductor todavía no está disponible.',
     'ayuda-traductor': 'La traducción la hace Interpres, una IA de Mini Cookies que se descarga una vez (unos 45 MB) y corre en tu navegador, en varios hilos a la vez. Traduce oración por oración con la anterior como contexto, para que los términos se mantengan. El formato de dentro de cada oración (una palabra en negrita, un enlace) viaja con marcas que el modelo aprendió a conservar; si alguna vuelve rota, esa oración queda con el formato principal del párrafo y nunca se pierde texto.',
     'sufijo-archivo': 'traducido',
     'guia-titulo': 'Cómo traducir un documento sin perder el formato',
@@ -94,8 +92,6 @@ window.i18nPagina = {
     'error-formato': 'This file isn’t a Word (.docx), PDF, EPUB, Markdown or text file.',
     'error-mismo-idioma': 'Choose a language other than the original.',
     'error-traducir': 'The document couldn’t be translated',
-    'error-navegador': 'Your browser can’t run the translator (it needs WebAssembly and background workers). Try a recent version of Edge, Chrome or Firefox.',
-    'error-sin-modelo': 'The translator isn’t available yet.',
     'ayuda-traductor': 'The translation is done by Interpres, a Mini Cookies AI that is downloaded once (about 45 MB) and runs in your browser, on several threads at once. It translates sentence by sentence with the previous one as context, so terms stay consistent. Formatting inside each sentence (a bold word, a link) travels as marks the model learned to keep; if one comes back broken, that sentence takes the paragraph’s main formatting and no text is ever lost.',
     'sufijo-archivo': 'translated',
     'guia-titulo': 'How to translate a document without losing its formatting',
@@ -224,21 +220,10 @@ window.i18nPagina = {
 
 <script src="../assets/js/vendor.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
-<script src="../assets/js/zip-propio.js"></script>
-<script src="../assets/js/xml-editar.js"></script>
-<script src="../assets/js/traductor-documentos.js"></script>
-<script src="../assets/js/traductor-docx.js"></script>
-<script src="../assets/js/traductor-epub.js"></script>
-<script src="../assets/js/traductor-hilos.js"></script>
+<script src="../assets/js/traductor-archivo.js"></script>
 <script>
-// Lo pesado se carga solo si hace falta: PDF.js, pdf-lib y las fuentes al abrir un PDF; el OCR solo si el PDF tiene páginas escaneadas;
-// el modelo la primera vez que se traduce algo.
-const IDIOMAS = ['es', 'en', 'pt', 'fr', 'de', 'it', 'zh', 'ja', 'ko'];
-const OCR_DE = { es: 'spa', en: 'eng', pt: 'por', fr: 'fra', de: 'deu', it: 'ita', zh: 'chi_sim', ja: 'jpn', ko: 'kor' };
-const CJK = { zh: 'NotoSansSC', ja: 'NotoSansJP', ko: 'NotoSansKR' };
-// Archivos de Interpres Phone V1 (nombre elegido por el usuario el 2026-11-16). Mientras el modelo no exista, MODELO es null y la página dice que el
-// traductor todavía no está disponible.
-const MODELO = null; // { vocabulario: 'interpres-vocabulario.json', codificador: 'interpres-phone-v1-codificador-int8.onnx', decodificador: 'interpres-phone-v1-decodificador-int8.onnx', megas: 45 }
+// Lo pesado (modelo, PDF.js, pdf-lib, fuentes, OCR) lo carga assets/js/traductor-archivo.js solo cuando hace falta; el mismo código lo usa el módulo de Flujos.
+const IDIOMAS = TraducirArchivo.IDIOMAS;
 
 const $ = (id) => document.getElementById(id);
 const zonaArrastre = $('zonaArrastre'), entradaArchivo = $('entradaArchivo'), listaArchivo = $('listaArchivo');
@@ -246,7 +231,7 @@ const destino = $('destino'), origen = $('origen'), campoOrigen = $('campoOrigen
 const botonTraducir = $('botonTraducir'), botonCancelar = $('botonCancelar'), progreso = $('progreso'), mensajeError = $('mensajeError');
 const resultado = $('resultado'), resumen = $('resumen'), enlaceDescarga = $('enlaceDescarga'), enlaceDocx = $('enlaceDocx');
 
-let archivo = null, tipo = null, cancelar = false, traductor = null;
+let archivo = null, tipo = null, cancelar = false;
 
 function llenarIdiomas() {
   for (const [select, porDefecto] of [[destino, idiomaActual() === 'es' ? 'en' : 'es'], [origen, idiomaActual()]]) {
@@ -258,14 +243,13 @@ function llenarIdiomas() {
 document.addEventListener('DOMContentLoaded', llenarIdiomas);
 document.addEventListener('cambioIdioma', llenarIdiomas);
 
-const TIPOS = [[/\.docx$/i, 'docx'], [/\.pdf$/i, 'pdf'], [/\.epub$/i, 'epub'], [/\.(md|markdown)$/i, 'md'], [/\.txt$/i, 'txt']];
 function elegir(archivos) {
   const a = archivos[0];
   if (!a) return;
   ocultarMensajes();
-  const t_ = TIPOS.find(([re]) => re.test(a.name));
-  if (!t_) { mostrarError(t('error-formato')); return; }
-  archivo = a; tipo = t_[1];
+  const tipoArchivo = TraducirArchivo.tipoDe(a.name);
+  if (!tipoArchivo) { mostrarError(t('error-formato')); return; }
+  archivo = a; tipo = tipoArchivo;
   listaArchivo.replaceChildren(Object.assign(document.createElement('li'), { textContent: a.name }));
   opcionesPdf.hidden = tipo !== 'pdf';
   campoOrigen.hidden = tipo !== 'pdf';
@@ -277,65 +261,6 @@ function ocultarMensajes() { mensajeError.hidden = true; resultado.classList.rem
 function mostrarError(texto) { mensajeError.textContent = texto; mensajeError.hidden = false; }
 function avance(texto) { progreso.textContent = texto; progreso.hidden = false; }
 const relleno = (texto, datos) => Object.entries(datos).reduce((s, [k, v]) => s.replace('{' + k + '}', () => String(v)), texto);
-
-function cargarScript(src) {
-  return new Promise((ok, mal) => {
-    const s = document.createElement('script');
-    s.src = src; s.onload = ok; s.onerror = () => mal(new Error('No cargó ' + src));
-    document.head.appendChild(s);
-  });
-}
-const absoluta = (ruta) => new URL(ruta, location.href).href;
-
-async function obtenerTraductor() {
-  if (window.traductorDePrueba) return window.traductorDePrueba; // solo lo ponen las pruebas
-  if (traductor) return traductor;
-  if (!MODELO) throw new Error(t('error-sin-modelo'));
-  if (typeof Worker === 'undefined' || typeof WebAssembly === 'undefined') throw new Error(t('error-navegador'));
-  const base = absoluta('../assets/js/');
-  traductor = await TraductorHilos.crear({
-    rutaOrt: absoluta(rutaVendor('onnxruntime-web/1.20.1/')), rutaHilo: base + 'traductor-hilo.js',
-    rutaPiezas: base + 'traductor-piezas.js', rutaMotor: base + 'traductor-motor.js',
-    vocabulario: absoluta('../assets/modelos/' + MODELO.vocabulario), codificador: absoluta('../assets/modelos/' + MODELO.codificador),
-    decodificador: absoluta('../assets/modelos/' + MODELO.decodificador),
-    hilos: Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 4) - 1)),
-    alCargar: (bytes, total) => avance(relleno(t('progreso-cargando'), { mb: Math.round(bytes / 1e6), total: Math.round((total || MODELO.megas * 1e6) / 1e6) })),
-  });
-  return traductor;
-}
-
-async function pdfListo() {
-  if (!window.abrirPdf) await cargarScript(absoluta('../assets/js/pdfjs.js'));
-  if (!window.PDFLib) await cargarScript(rutaVendor('pdf-lib/1.17.1/pdf-lib.min.js'));
-  if (!window.fontkit) await cargarScript(rutaVendor('@pdf-lib/fontkit/1.1.1/dist/fontkit.umd.min.js'));
-  if (!window.EscritorDocx) await cargarScript(absoluta('../assets/js/escritor-docx.js'));
-  if (!window.TraductorPdf || !TraductorPdf.traducir) await cargarScript(absoluta('../assets/js/traductor-pdf.js'));
-}
-const bytesDe = async (ruta) => new Uint8Array(await (await fetch(ruta)).arrayBuffer());
-async function fuentesPdf(dest) {
-  const lib = (n) => bytesDe(rutaVendor(`liberation-fonts/2.1.5/${n}.ttf`));
-  const f = { sans: await lib('LiberationSans-Regular'), sansNegrita: await lib('LiberationSans-Bold'),
-    serifa: await lib('LiberationSerif-Regular'), serifaNegrita: await lib('LiberationSerif-Bold') };
-  if (CJK[dest]) {
-    f.cjk = await bytesDe(rutaVendor(`noto-sans-cjk/2.004/${CJK[dest]}-Regular.ttf`));
-    f.cjkNegrita = await bytesDe(rutaVendor(`noto-sans-cjk/2.004/${CJK[dest]}-Bold.ttf`));
-  }
-  return f;
-}
-// El OCR se crea solo si aparece una página escaneada.
-function ocrPerezoso(idioma) {
-  let motor = null;
-  return {
-    async leerPagina(lienzo) {
-      if (!motor) {
-        if (!window.OcrLibrarius) await cargarScript(absoluta('../assets/js/ocr-librarius.js'));
-        motor = await OcrLibrarius.crear([OCR_DE[idioma]]);
-      }
-      return motor.leerPagina(lienzo);
-    },
-    cerrar() { if (motor) motor.cerrar(); },
-  };
-}
 
 function nombreSalida(ext, dest) {
   const base = archivo.name.replace(/\.[^.]+$/, '');
@@ -356,42 +281,19 @@ botonTraducir.addEventListener('click', async () => {
   botonTraducir.disabled = true;
   botonCancelar.hidden = false;
   enlaceDocx.hidden = true;
-  let ocr = null;
   try {
-    const motor = await obtenerTraductor();
     avance(t('progreso-leyendo'));
-    const traducir = (segs, d, op = {}) => motor.traducir(segs, d, {
-      progreso: (h, total) => { avance(relleno(t('progreso-traduciendo'), { hechos: h, total })); if (op.progreso) op.progreso(h, total); },
+    const r = await TraducirArchivo.traducir(tipo === 'txt' || tipo === 'md' ? await archivo.text() : await archivo.arrayBuffer(), tipo, {
+      destino: dest, origen: origen.value, modo: document.querySelector('input[name="modoPdf"]:checked').value,
+      progreso: (h, total) => avance(relleno(t('progreso-traduciendo'), { hechos: h, total })),
+      cargando: (bytes, total) => avance(relleno(t('progreso-cargando'), { mb: Math.round(bytes / 1e6), total: Math.round(total / 1e6) })),
+      guardando: () => avance(t('progreso-guardando')),
       cancelado: () => cancelar,
     });
-    const op = { traducir, destino: dest };
-    let salida, mime, ext, est, docx = null;
-    if (tipo === 'txt' || tipo === 'md') {
-      const texto = await archivo.text();
-      const r = await (tipo === 'txt' ? TraductorDocumentos.traducirTexto : TraductorDocumentos.traducirMarkdown)(texto, op);
-      salida = new TextEncoder().encode(typeof r === 'string' ? r : r.texto);
-      est = r.estadistica || {};
-      mime = tipo === 'md' ? 'text/markdown;charset=utf-8' : 'text/plain;charset=utf-8';
-      ext = tipo === 'md' ? 'md' : 'txt';
-    } else if (tipo === 'docx') {
-      const r = await TraductorDocx.traducir(await archivo.arrayBuffer(), op);
-      salida = r.bytes; est = r.estadistica; ext = 'docx';
-      mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-    } else if (tipo === 'epub') {
-      const r = await TraductorEpub.traducir(await archivo.arrayBuffer(), op);
-      salida = r.bytes; est = r.estadistica; ext = 'epub'; mime = 'application/epub+zip';
-    } else {
-      await pdfListo();
-      ocr = ocrPerezoso(origen.value);
-      const modo = document.querySelector('input[name="modoPdf"]:checked').value;
-      const r = await TraductorPdf.traducir(new Uint8Array(await archivo.arrayBuffer()), { ...op, fuentes: await fuentesPdf(dest), ocr, modo });
-      salida = r.bytes; est = r.estadistica; ext = 'pdf'; mime = 'application/pdf';
-      avance(t('progreso-guardando'));
-      docx = await EscritorDocx.generar(TraductorPdf.comoDocx(r.paginas));
-    }
     if (cancelar) { avance(t('cancelado')); return; }
-    ofrecer(enlaceDescarga, salida, mime, nombreSalida(ext, dest));
-    if (docx) { ofrecer(enlaceDocx, docx, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', nombreSalida('docx', dest)); enlaceDocx.hidden = false; }
+    const est = r.estadistica || {};
+    ofrecer(enlaceDescarga, r.bytes, r.mime, nombreSalida(r.ext, dest));
+    if (r.docx) { ofrecer(enlaceDocx, r.docx, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', nombreSalida('docx', dest)); enlaceDocx.hidden = false; }
     let texto = relleno(t('resultado-listo'), { oraciones: est.oraciones ?? 0 });
     if (est.planB) texto += relleno(t('resultado-planb'), { n: est.planB });
     if (est.sinCaber) texto += relleno(t('resultado-sin-caber'), { n: est.sinCaber });
@@ -404,7 +306,6 @@ botonTraducir.addEventListener('click', async () => {
     if (cancelar) avance(t('cancelado'));
     else mostrarError(t('error-traducir') + ': ' + detalleError(error));
   } finally {
-    if (ocr) ocr.cerrar();
     botonTraducir.disabled = false;
     botonCancelar.hidden = true;
   }
