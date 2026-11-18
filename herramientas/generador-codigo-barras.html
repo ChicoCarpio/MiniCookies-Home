@@ -204,9 +204,13 @@ function generar() {
     resultado.classList.add('visible');
   } catch (error) {
     svgCodigo.innerHTML = '';
+    // El nombre del formato como lo ve el usuario en la lista («EAN-13»), no el interno del motor («EAN13»);
+    // reemplazos con función para que un «$&» escrito por el usuario no se interprete.
+    const opcion = document.getElementById('formato').selectedOptions[0];
+    const nombreFormato = opcion ? opcion.textContent.split(' (')[0].trim() : error.formato;
     mensajeError.textContent = '❌ ' + (error.name === 'EntradaNoValida'
-      ? t('error-entrada').replace('{formato}', error.formato).replace('{texto}', error.entrada)
-      : error.message);
+      ? t('error-entrada').replace('{formato}', () => nombreFormato).replace('{texto}', () => error.entrada)
+      : detalleError(error));
     mensajeError.style.display = 'block';
   }
 }

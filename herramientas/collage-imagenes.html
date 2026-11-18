@@ -715,7 +715,7 @@ async function agregarArchivos(listaFileList) {
       }
       fotos.push({ id: ++contadorFotos, nombre: archivo.name, archivo, vista, miniatura: crearMiniatura(vista), zoom: 1, cx: 0.5, cy: 0.5 });
     } catch (error) {
-      errores.push(error.message);
+      errores.push(detalleError(error));
     }
   }
   const avisos = [];
@@ -1092,7 +1092,7 @@ document.getElementById('botonDescargar').addEventListener('click', async () => 
     enlace.remove();
     setTimeout(() => URL.revokeObjectURL(enlace.href), 10000);
   } catch (error) {
-    alert(t('error-collage') + error.message);
+    alert(t('error-collage') + detalleError(error));
   } finally {
     editor.inert = false;
     zonaArrastre.inert = false;

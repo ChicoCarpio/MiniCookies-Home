@@ -189,6 +189,7 @@ window.i18nPagina = {
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/pdf-retoques.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
@@ -222,6 +223,12 @@ function elegirArchivo(listaFileList) {
 }
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
+
+// El campo muestra el número que de verdad se va a usar (entero desde 1).
+const campoInicial = document.getElementById('numeroInicial');
+campoInicial.addEventListener('change', () => {
+  campoInicial.value = Math.max(1, Math.floor(Number(campoInicial.value)) || 1);
+});
 
 botonNumerar.addEventListener('click', async () => {
   botonNumerar.disabled = true;

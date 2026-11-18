@@ -232,7 +232,7 @@
   function cargarScriptOcr(src) {
     return new Promise((ok, mal) => {
       const s = document.createElement('script');
-      s.src = src; s.onload = ok; s.onerror = () => mal(new Error('No cargó ' + src));
+      s.src = src; s.onload = ok; s.onerror = () => mal(errorMC('carga-no-cargo', { archivo: src }, 'No cargó {archivo}'));
       document.head.appendChild(s);
     });
   }

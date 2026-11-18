@@ -427,6 +427,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../vendor/@zxing/library/0.23.0/umd/index.min.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/qr-propio.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/enviar-qr.js"></script>
@@ -487,7 +488,7 @@ async function iniciarCamara(video, alTexto) {
     await lector.decodeFromVideoDevice(null, video, (r) => { if (r) alTexto(r.getText()); });
   } catch (e) {
     detenerCamara();
-    mostrarMensaje(t('error-camara') + e.message);
+    mostrarMensaje(t('error-camara') + detalleError(e));
   }
 }
 

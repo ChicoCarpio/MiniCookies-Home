@@ -264,3 +264,52 @@ html.camara-completa, html.camara-completa body { overflow: hidden; }
   background: var(--superficie);
   border-top: 1px solid var(--gris-borde);
 }
+
+/* Filtros con miniatura (como en las apps de escáner): cada uno muestra cómo quedaría la página. */
+.camara-filtros {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 10px 12px 0;
+  scrollbar-width: none;
+}
+.camara-filtros::-webkit-scrollbar { display: none; }
+.camara-filtro {
+  flex: 0 0 auto;
+  width: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #ccc;
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.camara-filtro canvas {
+  width: 72px;
+  height: 96px;
+  border-radius: 8px;
+  border: 2px solid #4b4b4b;
+  background: #2b2b2b;
+}
+.camara-filtro[aria-pressed="true"] { color: #fff; font-weight: 600; }
+.camara-filtro[aria-pressed="true"] canvas { border-color: #3fb68b; }
+.camara-filtro:focus-visible { outline: 3px solid var(--azul); outline-offset: 2px; border-radius: 8px; }
+
+/* Mosaico de páginas: bloques de cuatro por fila, también en el celular. */
+.contenedor-miniaturas.vista-grid .miniatura-pagina { padding: 4px; }
+.contenedor-miniaturas.vista-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.contenedor-miniaturas.vista-grid .miniatura-pagina .mover-tarjeta { gap: 4px; }
+.contenedor-miniaturas.vista-grid .miniatura-pagina .mover-tarjeta button { min-width: 0; flex: 1; height: 28px; padding: 0; }
+.contenedor-miniaturas.vista-grid .miniatura-pagina .quitar-pagina { transform: scale(0.85); transform-origin: top right; }
+.contenedor-miniaturas.vista-grid .miniatura-pagina { align-self: start; }
+/* En el celular el mosaico va de a dos páginas por fila; en la computadora quedan cuatro. */
+@media (max-width: 640px) {
+  .contenedor-miniaturas.vista-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .contenedor-miniaturas.vista-grid .miniatura-pagina { padding: 6px; }
+}

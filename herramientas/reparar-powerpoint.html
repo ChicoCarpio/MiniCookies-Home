@@ -192,6 +192,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/formatos-powerpoint.js"></script>
 <script src="../assets/js/ooxml-paquete.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
@@ -307,7 +308,7 @@ botonReparar.addEventListener('click', async () => {
       : t('mensaje-parcial').replace('{n}', descartadas).replace('{total}', totalOriginal);
     mensajeNivel.style.display = 'block';
   } catch (error) {
-    alert(t('error-reparar') + ': ' + error.message);
+    alert(t('error-reparar') + ': ' + detalleError(error));
   } finally {
     botonReparar.disabled = false;
     botonReparar.textContent = t('boton-reparar');

@@ -281,7 +281,7 @@
   function cambiarZoom(f) { if (!visor) return; visor.zoom(visor.zoom() * f); editorDoc.relayout(); }
 
   // los errores del maquetador traen un código y se dicen en el idioma de la página; el resto viene con su mensaje
-  const textoError = (e) => (e && e.codigo === 'hojas' ? tx('error-hojas') : e && e.message ? e.message : String(e));
+  const textoError = (e) => (e && e.codigo === 'hojas' ? tx('error-hojas') : e && e.message ? detalleError(e) : String(e));
   // ───────── Descargar y PDF ─────────
   let escribiendoParte = Promise.resolve();
   async function descargar() {
@@ -367,7 +367,7 @@
     if (seccion === undefined) seccion = edDoc.seccionDe(pos);
     if (cual === undefined) { const c = editorDoc.cajaDe(pos), hoja = c && editorDoc.diseno().paginas[c.n]; cual = (hoja && hoja.tipo) || 'default'; }
     let r = null;
-    try { r = await EncabezadoDoc.abrir(modelo, seccion, tipo, cual, { crear: true }); } catch (e) { avisar(tx('aviso-no-se-pudo') + ': ' + (e && e.message ? e.message : e)); return; }
+    try { r = await EncabezadoDoc.abrir(modelo, seccion, tipo, cual, { crear: true }); } catch (e) { avisar(tx('aviso-no-se-pudo') + ': ' + (typeof detalleError === 'function' ? detalleError(e) : (e && e.message ? e.message : e))); return; }
     if (!r) { avisar(tx('aviso-una-seccion', tx(tipo === 'pie' ? 'p-pie' : 'p-encabezado').toLowerCase())); return; }
     const vista = r.vista;
     vista.secciones[0].alto = 600;
@@ -549,7 +549,7 @@
       ancho *= k; alto *= k;
       const r = await editor.insertarImagen(bytes, ext, ancho, alto, archivo.name.replace(/\.[^.]+$/, ''));
       if (!r) avisar(tx('aviso-imagen'));
-    } catch (e) { avisar(tx('aviso-imagen') + ' ' + (e && e.message ? e.message : '')); }
+    } catch (e) { avisar(tx('aviso-imagen') + ' ' + (typeof detalleError === 'function' ? detalleError(e) : (e && e.message ? e.message : ''))); }
     editor.enfocar();
   });
 

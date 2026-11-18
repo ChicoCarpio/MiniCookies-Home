@@ -636,6 +636,7 @@ window.i18nPagina = {
 <script src="../assets/js/ajuste-por-color.js"></script>
 <script src="../assets/js/filtros-gpu.js"></script>
 <script src="../assets/js/filtros-color.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/lut-cube.js"></script>
 <script src="../assets/js/procesar-filtros.js"></script>
 <script src="../assets/js/atajos.js"></script>
@@ -809,7 +810,7 @@ document.getElementById('entradaLut').addEventListener('change', async (e) => {
     ponerLut({ lut, nombre: lut.titulo || archivo.name.replace(/\.cube$/i, '') });
     programarRenderizado();
   } catch (fallo) {
-    error.textContent = fallo.codigo === 'grande' ? t('lut-error-grande') : fallo.codigo ? t('lut-error-detalle') + ': ' + fallo.message : t('lut-error-formato');
+    error.textContent = fallo.codigo === 'grande' ? t('lut-error-grande') : fallo.codigo ? t('lut-error-detalle') + ': ' + detalleError(fallo) : t('lut-error-formato');
     error.hidden = false;
   }
 });

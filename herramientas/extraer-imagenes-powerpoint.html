@@ -162,6 +162,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/formatos-powerpoint.js"></script>
 <script src="../assets/js/extraer-medios-zip.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
@@ -202,7 +203,7 @@ botonExtraer.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blobZip);
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-extraer') + ': ' + error.message);
+    alert(t('error-extraer') + ': ' + detalleError(error));
   } finally {
     botonExtraer.disabled = false;
     botonExtraer.textContent = t('boton-extraer');

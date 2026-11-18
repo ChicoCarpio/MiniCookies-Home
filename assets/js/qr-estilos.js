@@ -327,7 +327,7 @@
       if (placa) { qr.nivel = 'H'; qr.placa = placa; return qr; }
       v = qr.version + 1;
     }
-    throw new Error('Too long data');
+    throw errorMC('qr-demasiado-largo', {}, 'Los datos son demasiado largos para un código QR.');
   }
 
   // Módulos que cubre la placa: los que tocan un cuadrado de esquinas redondeadas.

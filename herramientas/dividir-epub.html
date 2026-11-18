@@ -167,6 +167,7 @@ window.i18nPagina = {
 
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/epub.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
@@ -230,7 +231,7 @@ botonDividir.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blobZip);
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-dividir') + ': ' + error.message);
+    alert(t('error-dividir') + ': ' + detalleError(error));
   } finally {
     botonDividir.disabled = false;
     botonDividir.textContent = t('boton-dividir');

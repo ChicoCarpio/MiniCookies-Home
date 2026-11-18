@@ -52,7 +52,7 @@
     const asegurarTipo = enCola(async (parte, tipo) => {
       const nombre = '/' + parte.replace(/^\//, '');
       let xml = await leer('[Content_Types].xml');
-      if (xml === null) throw new Error('el paquete no tiene [Content_Types].xml');
+      if (xml === null) throw errorMC('oficina-sin-content-types', {}, 'el paquete no tiene [Content_Types].xml');
       const raiz = X().analizar(xml, { profundidad: 2 });
       for (const h of raiz.hijos) if (h.local === 'Override' && (h.attrs.PartName || '').toLowerCase() === nombre.toLowerCase()) return false;
       const ext = (nombre.match(/\.([^./]+)$/) || [])[1];

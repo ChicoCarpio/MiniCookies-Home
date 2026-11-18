@@ -188,6 +188,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/formatos-word.js"></script>
 <script src="../assets/js/docx-base.js"></script>
@@ -272,7 +273,7 @@ botonUnir.addEventListener('click', async () => {
       advertencias.style.display = 'block';
     }
   } catch (error) {
-    alert(t('error-unir') + ': ' + error.message);
+    alert(t('error-unir') + ': ' + detalleError(error));
   } finally {
     botonUnir.disabled = false;
     progreso.style.display = 'none';

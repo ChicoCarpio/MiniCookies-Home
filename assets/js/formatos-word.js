@@ -12,7 +12,7 @@
 //   await FormatosWord.comoDocx(datos)         → datos (ArrayBuffer, Uint8Array o Blob) listos para leer como .docx; DocxBase.abrirPaquete lo llama solo, así que
 //                                                DocxLector, DocxMaquetador y todo lo que pasa por ellos acepta .doc y .odt sin más. Un .docx no se toca (ni se examina).
 //
-// Lanza Error (con .codigo = 'cifrado' si el documento tiene contraseña) con un mensaje listo para mostrar.
+// Lanza Error (con .tipo = 'cifrado' si el documento tiene contraseña) con un mensaje listo para mostrar.
 // mensajes: claves de lo que no se pudo llevar al .docx: 'notas', 'dibujos', 'imagen-formato', 'imagen-falta', 'imagen-externa'.
 //
 // Los lectores de .doc y .odt (cfb-propio.js, doc-lector.js, odt-lector.js, docx-desde-contrato.js, xml-ligero.js) se piden la primera vez que llega un archivo
@@ -37,7 +37,7 @@
         const s = document.createElement('script');
         s.src = src;
         s.onload = resolver;
-        s.onerror = () => { cargas.delete(src); rechazar(new Error('No se pudo cargar el lector de este tipo de documento (' + archivo + '). Revisá tu conexión y volvé a intentarlo.')); };
+        s.onerror = () => { cargas.delete(src); rechazar(errorMC('word-lector-no-carga', { archivo: archivo }, 'No se pudo cargar el lector de este tipo de documento ({archivo}). Revisá tu conexión y volvé a intentarlo.')); };
         document.head.appendChild(s);
       }));
     }
@@ -86,7 +86,7 @@
     if (origen === 'doc') { const r = await DocLector.leer(bytes); return { contrato: r.contrato, origen, mensajes: r.mensajes }; }
     if (origen === 'odt') { const r = await OdtLector.leer(bytes); return { contrato: r.contrato, origen, mensajes: r.mensajes }; }
     if (esCfb(bytes)) await DocLector.aDocx(bytes);   // otro contenedor de Office (un .docx con contraseña, un .xls renombrado): el lector dice el motivo
-    throw new Error('el archivo no es un documento de Word que se pueda leer (.docx, .doc u .odt)');
+    throw errorMC('word-no-legible', {}, 'el archivo no es un documento de Word que se pueda leer (.docx, .doc u .odt)');
   }
 
   const ESCRITORES = { docx: ['DocxDesdeContrato', 'docx-desde-contrato.js'], doc: ['DocEscritor', 'doc-escritor.js'], odt: ['OdtEscritor', 'odt-escritor.js'], rtf: ['RtfEscritor', 'rtf-escritor.js'] };
@@ -106,7 +106,7 @@
     if (origen === 'doc') { const r = await DocLector.aDocx(bytes); return { bytes: r.bytes, origen, mensajes: r.mensajes }; }
     if (origen === 'odt') { const r = await OdtLector.aDocx(bytes); return { bytes: r.bytes, origen, mensajes: r.mensajes }; }
     if (esCfb(bytes)) await DocLector.aDocx(bytes);   // otro contenedor de Office (un .docx con contraseña, un .xls renombrado): el lector dice el motivo
-    throw new Error('el archivo no es un documento de Word que se pueda leer (.docx, .doc u .odt)');
+    throw errorMC('word-no-legible', {}, 'el archivo no es un documento de Word que se pueda leer (.docx, .doc u .odt)');
   }
 
   const aBytes = async (datos) => (typeof Blob !== 'undefined' && datos instanceof Blob ? new Uint8Array(await datos.arrayBuffer()) : datos instanceof Uint8Array ? datos : new Uint8Array(datos));

@@ -188,6 +188,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/xlsx-formato.js"></script>
 <script src="../assets/js/xlsx-estilos.js"></script>
@@ -237,7 +238,7 @@ async function mostrarArchivo(archivo) {
     comaDecimalArchivo = libro.comaDecimalCsv !== undefined ? libro.comaDecimalCsv : (1.5).toLocaleString().includes(',');
     hoja = await libro.cargar(libro.hojas[0].indice);
   } catch (error) {
-    alert(t('error-leer') + ': ' + error.message);
+    alert(t('error-leer') + ': ' + detalleError(error));
     return;
   }
   // La primera fila da los nombres de las columnas (los repetidos llevan _2, _3…); cada celda guarda el texto que muestra Excel
@@ -299,7 +300,7 @@ botonGraficar.addEventListener('click', async () => {
     hayGrafico = false;
     controlesDescarga.style.display = 'none';
     console.warn('No se pudo dibujar el gráfico:', error);
-    alert(t('error-grafico') + ': ' + error.message);
+    alert(t('error-grafico') + ': ' + detalleError(error));
   } finally {
     botonGraficar.disabled = false;
   }

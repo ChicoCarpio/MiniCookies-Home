@@ -89,7 +89,7 @@ window.i18nPagina = {
     'guia-pasos': 'Paso a paso',
     'guia-paso-1': 'Permití el acceso a la cámara cuando el navegador lo pida. Si preferís usar fotos que ya tenés, tocá 🖼️ al lado del obturador; en la computadora también podés arrastrarlas.',
     'guia-paso-2': 'Poné la hoja sobre una superficie de otro color y apuntá. Si hay más de una hoja, tocá la que querés: la cámara enfoca ahí. Cuando el marco verde la rodea, tocá el obturador.',
-    'guia-paso-3': 'Aparece la foto con el recorte. Si las esquinas no coinciden, arrastralas o tocá la hoja correcta; si la foto salió mal, tocá «Repetir». En «Resultado» elegí la mejora (Color, Grises o Blanco y negro) y, si hace falta, girá la página.',
+    'guia-paso-3': 'Aparece la foto con el recorte. Si las esquinas no coinciden, arrastralas o tocá la hoja correcta; si la foto salió mal, tocá «Repetir». En «Resultado» la página queda tal como salió de la foto (Original); si querés un filtro, tocá su miniatura (Color, Grises o Blanco y negro) y, si hace falta, girá la página.',
     'guia-paso-4': 'Tocá «Usar» y seguí con la próxima hoja. Para ver lo que llevás, tocá la miniatura de la derecha: aparecen todas las páginas en mosaico. Arrastralas (o usá ◀ ▶) para ordenarlas, tocá una para verla en grande, elegí el tamaño y descargá el PDF, imprimilo o tocá «Compartir» para mandarlo por WhatsApp, correo u otra aplicación.',
     'guia-consejos': 'Consejos',
     'guia-consejo-1': 'La luz pareja ayuda más que cualquier ajuste: evitá que tu propia sombra caiga sobre la hoja.',
@@ -180,7 +180,7 @@ window.i18nPagina = {
     'guia-pasos': 'Step by step',
     'guia-paso-1': 'Allow camera access when the browser asks. If you would rather use photos you already have, tap 🖼️ next to the shutter; on a computer you can also drag them in.',
     'guia-paso-2': 'Put the page on a surface of a different color and point at it. If there is more than one page, tap the one you want: the camera focuses there. When the green frame surrounds it, tap the shutter.',
-    'guia-paso-3': 'The photo appears with the crop. If the corners do not match, drag them or tap the right page; if the photo came out badly, tap “Retake”. In “Result” choose the enhancement (Color, Grayscale or Black and white) and rotate the page if needed.',
+    'guia-paso-3': 'The photo appears with the crop. If the corners do not match, drag them or tap the right page; if the photo came out badly, tap “Retake”. In “Result” the page stays as the photo came out (Original); if you want a filter, tap its thumbnail (Color, Grayscale or Black and white) and rotate the page if needed.',
     'guia-paso-4': 'Tap “Use” and go on with the next page. To see what you have so far, tap the thumbnail on the right: all the pages appear as tiles. Drag them (or use ◀ ▶) to sort them, tap one to see it large, choose the size and download the PDF, print it or tap “Share” to send it by WhatsApp, email or another app.',
     'guia-consejos': 'Tips',
     'guia-consejo-1': 'Even light helps more than any adjustment: keep your own shadow off the page.',
@@ -256,12 +256,13 @@ window.i18nPagina = {
       <button class="camara-chip" id="botonCuadro" type="button" data-i18n="boton-cuadro">Usar toda la foto</button>
       <button class="camara-chip" id="botonOtra" type="button" hidden></button>
     </div>
-    <div class="camara-chips" id="chipsMejora" role="group" aria-label="Mejora" data-i18n-attr="aria-label:campo-mejora" hidden>
-      <button class="camara-chip" type="button" data-mejora="original" aria-pressed="false" data-i18n="mejora-original">Original</button>
-      <button class="camara-chip" type="button" data-mejora="color" aria-pressed="true" data-i18n="mejora-color">Color</button>
-      <button class="camara-chip" type="button" data-mejora="gris" aria-pressed="false" data-i18n="mejora-gris">Grises</button>
-      <button class="camara-chip" type="button" data-mejora="bn" aria-pressed="false" data-i18n="mejora-bn">Blanco y negro</button>
-      <span class="camara-separador"></span>
+    <div class="camara-filtros" id="filtrosMejora" role="group" aria-label="Mejora" data-i18n-attr="aria-label:campo-mejora" hidden>
+      <button class="camara-filtro" type="button" data-mejora="original" aria-pressed="true"><canvas width="96" height="128"></canvas><span data-i18n="mejora-original">Original</span></button>
+      <button class="camara-filtro" type="button" data-mejora="color" aria-pressed="false"><canvas width="96" height="128"></canvas><span data-i18n="mejora-color">Color</span></button>
+      <button class="camara-filtro" type="button" data-mejora="gris" aria-pressed="false"><canvas width="96" height="128"></canvas><span data-i18n="mejora-gris">Grises</span></button>
+      <button class="camara-filtro" type="button" data-mejora="bn" aria-pressed="false"><canvas width="96" height="128"></canvas><span data-i18n="mejora-bn">Blanco y negro</span></button>
+    </div>
+    <div class="camara-chips" id="chipsMejora" hidden>
       <button class="camara-chip" id="botonGirarIzq" type="button" data-i18n="boton-girar-izq">↺ Girar</button>
       <button class="camara-chip" id="botonGirarDer" type="button" data-i18n="boton-girar-der">↻ Girar</button>
       <button class="camara-chip" id="botonAjustes" type="button" aria-pressed="false" data-i18n="boton-ajustes">☀ Ajustes</button>
@@ -332,7 +333,7 @@ window.i18nPagina = {
     <ol>
       <li data-i18n="guia-paso-1">Permití el acceso a la cámara cuando el navegador lo pida. Si preferís usar fotos que ya tenés, tocá 🖼️ al lado del obturador; en la computadora también podés arrastrarlas.</li>
       <li data-i18n="guia-paso-2">Poné la hoja sobre una superficie de otro color y apuntá. Si hay más de una hoja, tocá la que querés: la cámara enfoca ahí. Cuando el marco verde la rodea, tocá el obturador.</li>
-      <li data-i18n="guia-paso-3">Aparece la foto con el recorte. Si las esquinas no coinciden, arrastralas o tocá la hoja correcta; si la foto salió mal, tocá «Repetir». En «Resultado» elegí la mejora (Color, Grises o Blanco y negro) y, si hace falta, girá la página.</li>
+      <li data-i18n="guia-paso-3">Aparece la foto con el recorte. Si las esquinas no coinciden, arrastralas o tocá la hoja correcta; si la foto salió mal, tocá «Repetir». En «Resultado» la página queda tal como salió de la foto (Original); si querés un filtro, tocá su miniatura (Color, Grises o Blanco y negro) y, si hace falta, girá la página.</li>
       <li data-i18n="guia-paso-4">Tocá «Usar» y seguí con la próxima hoja. Para ver lo que llevás, tocá la miniatura de la derecha: aparecen todas las páginas en mosaico. Arrastralas (o usá ◀ ▶) para ordenarlas, tocá una para verla en grande, elegí el tamaño y descargá el PDF, imprimilo o tocá «Compartir» para mandarlo por WhatsApp, correo u otra aplicación.</li>
     </ol>
     <h3 data-i18n="guia-consejos">Consejos</h3>
@@ -378,11 +379,13 @@ window.i18nPagina = {
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/camara.js"></script>
 <script src="../assets/js/escaner-documento.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/custos.js"></script>
 <script>
 const E = EscanerDocumento;
 const LADO_MAX_FUENTE = 4096;   // las fotos más grandes se reducen: ahorra memoria y no mejora el PDF
 const LADO_VISTA = 1200;        // tamaño de los lienzos de la revisión
+const LADO_MINIATURA = 600;     // miniaturas del mosaico (4 por fila): nítidas también en pantallas de alta densidad
 const LADO_PAGINA = 2400;       // tamaño de la página que se guarda (A4 a ~290 ppp)
 
 const $ = (id) => document.getElementById(id);
@@ -395,7 +398,7 @@ let cam = null;            // la cámara abierta (assets/js/camara.js)
 let fuente = null;         // { canvas, datos } de la foto que se está revisando
 let esquinas = null;       // 4 puntos {x, y} en píxeles de la fuente
 let giro = 0;              // cuartos de vuelta de la página
-let modoMejora = 'color';
+let modoMejora = 'original';   // sin filtro por defecto: los filtros son opcionales y se elige uno con las miniaturas
 let vista = 'recorte';     // pestaña de la revisión: 'recorte' | 'resultado'
 let opciones = [];         // otras hojas posibles de la misma foto (un ticket sobre un formulario son dos)
 let opcionActual = 0;
@@ -470,6 +473,7 @@ function mostrarVista(v) {
   lienzoVista.hidden = v !== 'resultado';
   $('chipsRecorte').hidden = v !== 'recorte';
   $('chipsMejora').hidden = v !== 'resultado';
+  $('filtrosMejora').hidden = v !== 'resultado';
   if (v !== 'resultado') { $('ajustes').hidden = true; $('botonAjustes').setAttribute('aria-pressed', 'false'); }
   $('pestanaRecorte').setAttribute('aria-pressed', String(v === 'recorte'));
   $('pestanaResultado').setAttribute('aria-pressed', String(v === 'resultado'));
@@ -491,7 +495,7 @@ async function iniciarCamara() {
   } catch (error) {
     cam = null;
     estado('inicio');
-    aviso(error.name === 'SinCamara' ? t('error-sin-camara') : t('error-camara') + (error.message || error.name), true);
+    aviso(error.name === 'SinCamara' ? t('error-sin-camara') : t('error-camara') + (error.message ? detalleError(error) : error.name), true);
   }
 }
 
@@ -844,6 +848,31 @@ function actualizarVista() {
     lienzoVista.width = img.width;
     lienzoVista.height = img.height;
     lienzoVista.getContext('2d').putImageData(new ImageData(img.data, img.width, img.height), 0, 0);
+    dibujarFiltros();
+  });
+}
+
+// Miniaturas de cada filtro, hechas con la misma foto enderezada (como en las apps de escáner): se rehacen solo si cambió el recorte o el giro.
+let firmaFiltros = '';
+function dibujarFiltros() {
+  const firma = JSON.stringify(esquinas) + '|' + giro + '|' + (fuente && fuente.canvas.width);
+  if (firma === firmaFiltros) return;
+  firmaFiltros = firma;
+  const { ancho, alto } = E.tamanoSalida(esquinas, 200);
+  const base = E.enderezar(fuente.datos, esquinas, ancho, alto);
+  document.querySelectorAll('.camara-filtro').forEach((b) => {
+    const copia = { data: new Uint8ClampedArray(base.data), width: base.width, height: base.height };
+    const img = E.girar(E.mejorar(copia, b.dataset.mejora), giro);
+    const c = b.querySelector('canvas');
+    const k = Math.min(c.width / img.width, c.height / img.height);
+    const tmp = document.createElement('canvas');
+    tmp.width = img.width; tmp.height = img.height;
+    tmp.getContext('2d').putImageData(new ImageData(img.data, img.width, img.height), 0, 0);
+    const g = c.getContext('2d');
+    g.fillStyle = '#2b2b2b'; g.fillRect(0, 0, c.width, c.height);
+    const w = img.width * k, h = img.height * k;
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(tmp, (c.width - w) / 2, (c.height - h) / 2, w, h);
   });
 }
 
@@ -874,6 +903,22 @@ function lienzoAJpeg(lienzo, calidad) {
   return new Promise((resolver, rechazar) => lienzo.toBlob((b) => (b ? resolver(b) : rechazar(new Error('toBlob'))), 'image/jpeg', calidad));
 }
 
+// Reduce a la mitad cuantas veces haga falta antes del tamaño final: un solo drawImage desde 2400 px deja la miniatura áspera.
+function reducirBien(origen, ladoMax) {
+  let c = origen;
+  while (Math.max(c.width, c.height) / 2 >= ladoMax) {
+    const m = document.createElement('canvas');
+    m.width = Math.ceil(c.width / 2); m.height = Math.ceil(c.height / 2);
+    const g = m.getContext('2d'); g.imageSmoothingQuality = 'high'; g.drawImage(c, 0, 0, m.width, m.height);
+    c = m;
+  }
+  const k = Math.min(1, ladoMax / Math.max(c.width, c.height));
+  const f = document.createElement('canvas');
+  f.width = Math.max(1, Math.round(c.width * k)); f.height = Math.max(1, Math.round(c.height * k));
+  const g = f.getContext('2d'); g.imageSmoothingQuality = 'high'; g.drawImage(c, 0, 0, f.width, f.height);
+  return f;
+}
+
 $('botonAgregar').addEventListener('click', async () => {
   const boton = $('botonAgregar');
   boton.disabled = true;
@@ -885,11 +930,7 @@ $('botonAgregar').addEventListener('click', async () => {
     lienzo.getContext('2d').putImageData(new ImageData(img.data, img.width, img.height), 0, 0);
     // Se guarda el JPEG, no los píxeles: 30 páginas sin comprimir pesarían medio gigabyte.
     const blob = await lienzoAJpeg(lienzo, 0.88);
-    const miniatura = document.createElement('canvas');
-    const k = 220 / Math.max(img.width, img.height);
-    miniatura.width = Math.max(1, Math.round(img.width * k));
-    miniatura.height = Math.max(1, Math.round(img.height * k));
-    miniatura.getContext('2d').drawImage(lienzo, 0, 0, miniatura.width, miniatura.height);
+    const miniatura = reducirBien(lienzo, LADO_MINIATURA);
 
     const id = siguienteId++;
     paginas.set(id, { blob, ancho: img.width, alto: img.height });
@@ -1066,7 +1107,7 @@ $('botonImprimir').addEventListener('click', async () => {
     setTimeout(limpiar, 120000);   // por si el navegador no avisa al terminar
   } catch (error) {
     limpiar();
-    mostrarError(t('error-imprimir') + ': ' + (error.message || error.name));
+    mostrarError(t('error-imprimir') + ': ' + (error.message ? detalleError(error) : error.name));
   }
 });
 
@@ -1084,7 +1125,7 @@ $('botonCompartir').addEventListener('click', () => conBotonOcupado($('botonComp
   } catch (error) {
     if (error.name === 'AbortError') return; // la persona cerró el menú
     // Si armar el PDF tardó, el navegador ya no deja abrir el menú sin un toque nuevo.
-    mostrarError(error.name === 'NotAllowedError' ? t('compartir-reintentar') : t('error-compartir') + ': ' + (error.message || error.name));
+    mostrarError(error.name === 'NotAllowedError' ? t('compartir-reintentar') : t('error-compartir') + ': ' + (error.message ? detalleError(error) : error.name));
   }
 }));
 
@@ -1103,7 +1144,7 @@ $('botonCambiarCamara').addEventListener('click', async () => {
   if (!cam) return;
   deteccionPrevia = null;
   toqueCamara = null;
-  try { await cam.cambiar(); } catch (error) { aviso(t('error-camara') + (error.message || error.name), true); }
+  try { await cam.cambiar(); } catch (error) { aviso(t('error-camara') + (error.message ? detalleError(error) : error.name), true); }
 });
 window.addEventListener('pagehide', apagarCamara);
 estado('inicio');

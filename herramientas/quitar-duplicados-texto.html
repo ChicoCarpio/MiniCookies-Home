@@ -227,7 +227,7 @@ botonProcesar.addEventListener('click', async () => {
       (quitarDuplicadas ? t('mensaje-duplicadas').replace('{n}', r.duplicadasQuitadas) : '') + '.';
     mensaje.style.display = 'block';
   } catch (error) {
-    alert(t('error-procesar') + ': ' + error.message);
+    alert(t('error-procesar') + ': ' + detalleError(error));
   }
 });
 </script>

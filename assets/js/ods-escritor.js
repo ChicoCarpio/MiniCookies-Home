@@ -175,7 +175,7 @@
     const f1904 = !!opciones.fecha1904;
     const avisosMapa = new Map();
     const avisar = (tipo, ejemplo) => { const a = avisosMapa.get(tipo); if (a) a.cantidad++; else avisosMapa.set(tipo, { tipo, cantidad: 1, ...(ejemplo ? { ejemplo } : {}) }); };
-    if (!Array.isArray(hojasEntrada) || !hojasEntrada.length) throw new Error('el libro necesita al menos una hoja');
+    if (!Array.isArray(hojasEntrada) || !hojasEntrada.length) throw errorMC('excel-libro-sin-hojas', {}, 'el libro necesita al menos una hoja');
 
     const usados = new Set(), sufijo = new Map();   // sufijo: el próximo número que se prueba para cada nombre repetido (miles de hojas iguales no vuelven a probar desde 2)
     const nombreUnico = (n, k) => {

@@ -879,7 +879,7 @@ window.i18nPagina = {
     }catch(err){
       outputEl.innerHTML = '<span class="placeholder">' + window.t('placeholder-no-formateado') + '</span>';
       errorBanner.hidden = false;
-      errorBanner.textContent = err.message;
+      errorBanner.textContent = detalleError(err);
       setBadge('error', window.t('badge-error-sintaxis'));
       statCanonical.textContent = '—';
       statFormatted.textContent = '—';

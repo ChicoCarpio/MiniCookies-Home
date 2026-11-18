@@ -34,6 +34,8 @@
 
   async function numerar(pdf, { inicio = 1, posicion = 'bottom-center' } = {}) {
     const { rgb, StandardFonts, degrees } = PDFLib;
+    // Entero de 1 en adelante (el campo dice min="1", pero se puede escribir -5 o 2.7 a mano).
+    inicio = Math.max(1, Math.floor(Number(inicio)) || 1);
     const fuente = await pdf.embedFont(StandardFonts.Helvetica);
     const tamanoFuente = 12;
     const margen = 30;
@@ -127,7 +129,7 @@
 
   // createImageBitmap (no <img>): da los mismos píxeles en la página y en los hilos de Flujos (flujos-hilo.js).
   async function decodificarImagenJpeg(bytes) {
-    try { return await createImageBitmap(new Blob([bytes], { type: 'image/jpeg' })); } catch (e) { throw new Error('JPEG inválido'); }
+    try { return await createImageBitmap(new Blob([bytes], { type: 'image/jpeg' })); } catch (e) { throw errorMC('pdf-jpeg-invalido', {}, 'JPEG inválido'); }
   }
 
   // alAvanzar(n): se llama antes de procesar la foto n (1, 2, …); alGuardar(): antes de guardar el PDF.

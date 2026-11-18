@@ -30,7 +30,7 @@ const GraficoSuelto = (() => {
         const s = document.createElement('script');
         s.src = src;
         s.onload = resolver;
-        s.onerror = () => { cargas.delete(src); rechazar(new Error('No se pudo cargar ' + src.split('/').pop().replace(/\?.*$/, ''))); };
+        s.onerror = () => { cargas.delete(src); rechazar(errorMC('excel-no-carga', { archivo: src.split('/').pop().replace(/\?.*$/, '') }, 'No se pudo cargar {archivo}')); };
         document.head.appendChild(s);
       }));
     }

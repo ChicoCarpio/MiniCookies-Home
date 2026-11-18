@@ -299,7 +299,7 @@ function mostrarCodigos(codigos, resumenOrigen) {
         copiar.textContent = t('boton-copiado');
         setTimeout(() => { copiar.textContent = t('boton-copiar'); }, 1500);
       } catch (error) {
-        mostrarError(t('error-copiar') + error.message);
+        mostrarError(t('error-copiar') + detalleError(error));
       }
     });
     controles.appendChild(copiar);
@@ -412,7 +412,7 @@ async function leerArchivo(archivo) {
     }
   } catch (error) {
     avisar('');
-    mostrarError(t('error-leer-archivo') + ((error && error.message) || error));
+    mostrarError(t('error-leer-archivo') + detalleError(error));
     return;
   }
 
@@ -456,7 +456,7 @@ async function iniciarCamara(deviceId, esReintento) {
     }
   } catch (error) {
     camaraActiva = false;
-    mostrarError(t('error-camara') + error.message);
+    mostrarError(t('error-camara') + detalleError(error));
     if (selectorCamara.options.length) selectorCamara.value = deviceIdActivo || '';
     if (deviceIdActivo && !esReintento) {
       iniciarCamara(deviceIdActivo, true);

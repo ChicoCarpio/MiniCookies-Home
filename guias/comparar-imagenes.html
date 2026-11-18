@@ -27,23 +27,26 @@ window.i18nPagina = {
     'b6': 'Cómo leer el resultado',
     'b7': 'Lo rojo son los píxeles que la herramienta considera distintos. Lo gris es el resto de la imagen A, atenuado, para que ubiques cada cambio. Debajo queda el porcentaje con dos decimales, calculado sobre el total de píxeles de la imagen A.',
     'b8': 'El número solo no alcanza. Un puntito disperso por toda la imagen suele ser ruido de compresión. Una zona roja compacta, con forma de letra o de bloque, suele ser un cambio real. Esa es una lectura visual que hacés vos: la herramienta no distingue los dos casos.',
-    'b9': 'La tolerancia',
-    'b10': 'Para cada píxel, la herramienta suma las diferencias de rojo, verde y azul entre A y B. Si la suma supera la tolerancia, el píxel sale en rojo. Con la tolerancia en 30, un píxel que cambió 10 en cada canal (suma 30) no se marca; uno que cambió 11 en cada canal (suma 33) sí.',
-    'b11': 'Subila cuando compares JPG o capturas comprimidas, para que no cuenten las pequeñas variaciones de color que trae el formato. Bajala si buscás un cambio sutil de tono. Empezá con 30 y, si todo el fondo aparece en rojo, subila de a poco.',
-    'b12': 'Medidas distintas y alineación',
-    'b13': 'Si las imágenes tienen medidas distintas, aparece el aviso «Las imágenes tienen tamaños distintos» con las dos medidas, y la herramienta estira la B hasta el tamaño de la A sin conservar su proporción. Después compara la B estirada con la A, y cada punto de la B cae en otro lugar. Casi todo sale en rojo y el porcentaje no dice nada útil. Aunque la diferencia sea chica, el estiramiento mueve el contenido, sobre todo hacia los bordes, y aparece rojo donde no hubo ningún cambio.',
-    'b14': 'Igualá las medidas antes de comparar. Si las dos tienen la misma proporción, <a href="../herramientas/redimensionar-imagen.html">Redimensionar imagen</a> lleva la B al ancho de la A con «Mantener proporción» marcada, y revisás que el alto también coincida. Si no tienen la misma proporción, recortá las dos con <a href="../herramientas/recortar-imagen.html">Recortar imagen</a> a la misma medida en píxeles y desde el mismo punto. El recorte quita parte de la imagen, así que comparás solo la zona común. Lo mismo vale para las capturas: si una está corrida unos pocos píxeles, casi todo sale en rojo.',
-    'b15': 'Límites',
-    'b16-1': 'Compara los canales de color. La transparencia no entra en la cuenta, y un píxel transparente se lee como negro.',
-    'b16-2': 'Compara píxeles, no el significado. Un cambio de brillo general, o un corrimiento de un píxel, marca como distinto algo que se ve igual.',
-    'b16-3': 'Un reloj, un anuncio o una fecha que cambia entre capturas salen en rojo aunque el resto no haya cambiado. Recortá esa parte antes de comparar.',
-    'b16-4': 'Acepta lo que tu navegador puede abrir, como JPG, PNG, WebP o GIF. Un archivo que no reconoce como imagen se ignora sin aviso, y si el navegador no puede leer el archivo, la zona no cambia y tampoco aparece un mensaje.',
-    'b17': 'Preguntas frecuentes',
-    'b18': '<strong>¿El porcentaje es exacto?</strong> Es exacto para la tolerancia que elegiste: los píxeles marcados sobre el total de la imagen A, con dos decimales. Si cambiás la tolerancia, cambia el número.',
-    'b19': '<strong>¿Por qué me aparece casi todo en rojo?</strong> Casi siempre por una de tres causas: las medidas no coinciden, las capturas están corridas o la tolerancia es muy baja para un formato con compresión.',
-    'b20': '<strong>¿Qué formato tiene la imagen descargada?</strong> PNG, con el nombre <code>comparacion.png</code>.',
-    'b21': 'Resumen',
-    'b22': 'Cargá las dos imágenes con la misma medida y alineadas, dejá la tolerancia en 30 y tocá «Comparar». Lo rojo son los cambios, y el porcentaje da una idea de cuánto difiere la B de la A. Si las medidas no coinciden, igualálas antes, porque si no el resultado pierde sentido.',
+    'b9': 'Dos fotos casi iguales, cargadas como A y B: el resultado marca en rojo lo que cambió y dice qué porcentaje de píxeles es distinto.',
+    'b9-src': '/guias/img/comparar-imagenes-1.es.webp',
+    'b9-srco': '/guias/img/comparar-imagenes-1.oscuro.es.webp',
+    'b10': 'La tolerancia',
+    'b11': 'Para cada píxel, la herramienta suma las diferencias de rojo, verde y azul entre A y B. Si la suma supera la tolerancia, el píxel sale en rojo. Con la tolerancia en 30, un píxel que cambió 10 en cada canal (suma 30) no se marca; uno que cambió 11 en cada canal (suma 33) sí.',
+    'b12': 'Subila cuando compares JPG o capturas comprimidas, para que no cuenten las pequeñas variaciones de color que trae el formato. Bajala si buscás un cambio sutil de tono. Empezá con 30 y, si todo el fondo aparece en rojo, subila de a poco.',
+    'b13': 'Medidas distintas y alineación',
+    'b14': 'Si las imágenes tienen medidas distintas, aparece el aviso «Las imágenes tienen tamaños distintos» con las dos medidas, y la herramienta estira la B hasta el tamaño de la A sin conservar su proporción. Después compara la B estirada con la A, y cada punto de la B cae en otro lugar. Casi todo sale en rojo y el porcentaje no dice nada útil. Aunque la diferencia sea chica, el estiramiento mueve el contenido, sobre todo hacia los bordes, y aparece rojo donde no hubo ningún cambio.',
+    'b15': 'Igualá las medidas antes de comparar. Si las dos tienen la misma proporción, <a href="../herramientas/redimensionar-imagen.html">Redimensionar imagen</a> lleva la B al ancho de la A con «Mantener proporción» marcada, y revisás que el alto también coincida. Si no tienen la misma proporción, recortá las dos con <a href="../herramientas/recortar-imagen.html">Recortar imagen</a> a la misma medida en píxeles y desde el mismo punto. El recorte quita parte de la imagen, así que comparás solo la zona común. Lo mismo vale para las capturas: si una está corrida unos pocos píxeles, casi todo sale en rojo.',
+    'b16': 'Límites',
+    'b17-1': 'Compara los canales de color. La transparencia no entra en la cuenta, y un píxel transparente se lee como negro.',
+    'b17-2': 'Compara píxeles, no el significado. Un cambio de brillo general, o un corrimiento de un píxel, marca como distinto algo que se ve igual.',
+    'b17-3': 'Un reloj, un anuncio o una fecha que cambia entre capturas salen en rojo aunque el resto no haya cambiado. Recortá esa parte antes de comparar.',
+    'b17-4': 'Acepta lo que tu navegador puede abrir, como JPG, PNG, WebP o GIF. Un archivo que no reconoce como imagen se ignora sin aviso, y si el navegador no puede leer el archivo, la zona no cambia y tampoco aparece un mensaje.',
+    'b18': 'Preguntas frecuentes',
+    'b19': '<strong>¿El porcentaje es exacto?</strong> Es exacto para la tolerancia que elegiste: los píxeles marcados sobre el total de la imagen A, con dos decimales. Si cambiás la tolerancia, cambia el número.',
+    'b20': '<strong>¿Por qué me aparece casi todo en rojo?</strong> Casi siempre por una de tres causas: las medidas no coinciden, las capturas están corridas o la tolerancia es muy baja para un formato con compresión.',
+    'b21': '<strong>¿Qué formato tiene la imagen descargada?</strong> PNG, con el nombre <code>comparacion.png</code>.',
+    'b22': 'Resumen',
+    'b23': 'Cargá las dos imágenes con la misma medida y alineadas, dejá la tolerancia en 30 y tocá «Comparar». Lo rojo son los cambios, y el porcentaje da una idea de cuánto difiere la B de la A. Si las medidas no coinciden, igualálas antes, porque si no el resultado pierde sentido.',
     'rel1': 'Comparar dos imágenes',
     'rel2': 'Redimensionar imagen',
     'rel3': 'Recortar imagen',
@@ -65,23 +68,26 @@ window.i18nPagina = {
     'b6': 'How to read the result',
     'b7': 'Red marks the pixels the tool considers different. Gray is the rest of image A, dimmed, so you can locate each change. Below it you get the percentage with two decimals, calculated over the total pixels of image A.',
     'b8': 'The number alone is not enough. A tiny dot scattered across the image is usually compression noise. A compact red area, shaped like a letter or a block, is usually a real change. That is a visual reading you make yourself: the tool does not tell the two apart.',
-    'b9': 'Tolerance',
-    'b10': 'For each pixel, the tool adds up the red, green and blue differences between A and B. If the sum is above the tolerance, the pixel turns red. With tolerance at 30, a pixel that changed by 10 in each channel (sum 30) is not marked; one that changed by 11 in each channel (sum 33) is.',
-    'b11': 'Raise it when you compare JPGs or compressed screenshots, so the small color variations of the format don’t count. Lower it if you are looking for a subtle change of tone. Start at 30 and, if the whole background turns red, raise it little by little.',
-    'b12': 'Different sizes and alignment',
-    'b13': 'If the images have different sizes, the notice “The images are different sizes” appears with both sizes, and the tool stretches B to A’s size without keeping its proportions. It then compares the stretched B with A, so every point of B lands somewhere else. Almost everything turns red and the percentage tells you nothing useful. Even a small difference is enough: the stretch moves the content, mostly toward the edges, and red appears where nothing changed.',
-    'b14': 'Match the sizes before comparing. If both have the same proportions, <a href="../herramientas/redimensionar-imagen.html">Resize an image</a> takes B to A’s width with “Keep aspect ratio” ticked, and you check that the height matches too. If the proportions differ, crop both with <a href="../herramientas/recortar-imagen.html">Crop an image</a> to the same size in pixels, from the same starting point. Cropping removes part of the image, so you are comparing only the shared area. The same goes for screenshots: if one is shifted by a few pixels, almost everything turns red.',
-    'b15': 'Limits',
-    'b16-1': 'It compares the color channels. Transparency is not counted, and a transparent pixel is read as black.',
-    'b16-2': 'It compares pixels, not meaning. An overall brightness change, or a one-pixel shift, marks as different something that looks the same.',
-    'b16-3': 'A clock, an ad or a date that changes between screenshots turns red even if nothing else changed. Crop that part before comparing.',
-    'b16-4': 'It accepts what your browser can open, such as JPG, PNG, WebP or GIF. A file it doesn’t recognize as an image is ignored without a notice, and if the browser can’t read the file, the area doesn’t change and no message appears either.',
-    'b17': 'Frequently asked questions',
-    'b18': '<strong>Is the percentage exact?</strong> It is exact for the tolerance you chose: the marked pixels over the total of image A, with two decimals. If you change the tolerance, the number changes.',
-    'b19': '<strong>Why is almost everything red?</strong> Almost always for one of three reasons: the sizes don’t match, the screenshots are shifted, or the tolerance is too low for a compressed format.',
-    'b20': '<strong>What format is the downloaded image?</strong> PNG, named <code>comparison.png</code>.',
-    'b21': 'Summary',
-    'b22': 'Load both images at the same size and aligned, leave the tolerance at 30 and tap “Compare”. Red marks the changes, and the percentage gives an idea of how much B differs from A. If the sizes don’t match, match them first, or the result stops meaning anything.',
+    'b9': 'Two almost identical photos, loaded as A and B: the result marks in red what changed and says what percentage of pixels differ.',
+    'b9-src': '/guias/img/comparar-imagenes-1.en.webp',
+    'b9-srco': '/guias/img/comparar-imagenes-1.oscuro.en.webp',
+    'b10': 'Tolerance',
+    'b11': 'For each pixel, the tool adds up the red, green and blue differences between A and B. If the sum is above the tolerance, the pixel turns red. With tolerance at 30, a pixel that changed by 10 in each channel (sum 30) is not marked; one that changed by 11 in each channel (sum 33) is.',
+    'b12': 'Raise it when you compare JPGs or compressed screenshots, so the small color variations of the format don’t count. Lower it if you are looking for a subtle change of tone. Start at 30 and, if the whole background turns red, raise it little by little.',
+    'b13': 'Different sizes and alignment',
+    'b14': 'If the images have different sizes, the notice “The images are different sizes” appears with both sizes, and the tool stretches B to A’s size without keeping its proportions. It then compares the stretched B with A, so every point of B lands somewhere else. Almost everything turns red and the percentage tells you nothing useful. Even a small difference is enough: the stretch moves the content, mostly toward the edges, and red appears where nothing changed.',
+    'b15': 'Match the sizes before comparing. If both have the same proportions, <a href="../herramientas/redimensionar-imagen.html">Resize an image</a> takes B to A’s width with “Keep aspect ratio” ticked, and you check that the height matches too. If the proportions differ, crop both with <a href="../herramientas/recortar-imagen.html">Crop an image</a> to the same size in pixels, from the same starting point. Cropping removes part of the image, so you are comparing only the shared area. The same goes for screenshots: if one is shifted by a few pixels, almost everything turns red.',
+    'b16': 'Limits',
+    'b17-1': 'It compares the color channels. Transparency is not counted, and a transparent pixel is read as black.',
+    'b17-2': 'It compares pixels, not meaning. An overall brightness change, or a one-pixel shift, marks as different something that looks the same.',
+    'b17-3': 'A clock, an ad or a date that changes between screenshots turns red even if nothing else changed. Crop that part before comparing.',
+    'b17-4': 'It accepts what your browser can open, such as JPG, PNG, WebP or GIF. A file it doesn’t recognize as an image is ignored without a notice, and if the browser can’t read the file, the area doesn’t change and no message appears either.',
+    'b18': 'Frequently asked questions',
+    'b19': '<strong>Is the percentage exact?</strong> It is exact for the tolerance you chose: the marked pixels over the total of image A, with two decimals. If you change the tolerance, the number changes.',
+    'b20': '<strong>Why is almost everything red?</strong> Almost always for one of three reasons: the sizes don’t match, the screenshots are shifted, or the tolerance is too low for a compressed format.',
+    'b21': '<strong>What format is the downloaded image?</strong> PNG, named <code>comparison.png</code>.',
+    'b22': 'Summary',
+    'b23': 'Load both images at the same size and aligned, leave the tolerance at 30 and tap “Compare”. Red marks the changes, and the percentage gives an idea of how much B differs from A. If the sizes don’t match, match them first, or the result stops meaning anything.',
     'rel1': 'Compare two images',
     'rel2': 'Resize an image',
     'rel3': 'Crop an image',
@@ -123,25 +129,30 @@ window.i18nPagina = {
     <h2 data-i18n="b6">Cómo leer el resultado</h2>
     <p data-i18n-html="b7">Lo rojo son los píxeles que la herramienta considera distintos. Lo gris es el resto de la imagen A, atenuado, para que ubiques cada cambio. Debajo queda el porcentaje con dos decimales, calculado sobre el total de píxeles de la imagen A.</p>
     <p data-i18n-html="b8">El número solo no alcanza. Un puntito disperso por toda la imagen suele ser ruido de compresión. Una zona roja compacta, con forma de letra o de bloque, suele ser un cambio real. Esa es una lectura visual que hacés vos: la herramienta no distingue los dos casos.</p>
-    <h2 data-i18n="b9">La tolerancia</h2>
-    <p data-i18n-html="b10">Para cada píxel, la herramienta suma las diferencias de rojo, verde y azul entre A y B. Si la suma supera la tolerancia, el píxel sale en rojo. Con la tolerancia en 30, un píxel que cambió 10 en cada canal (suma 30) no se marca; uno que cambió 11 en cada canal (suma 33) sí.</p>
-    <p data-i18n-html="b11">Subila cuando compares JPG o capturas comprimidas, para que no cuenten las pequeñas variaciones de color que trae el formato. Bajala si buscás un cambio sutil de tono. Empezá con 30 y, si todo el fondo aparece en rojo, subila de a poco.</p>
-    <h2 data-i18n="b12">Medidas distintas y alineación</h2>
-    <p data-i18n-html="b13">Si las imágenes tienen medidas distintas, aparece el aviso «Las imágenes tienen tamaños distintos» con las dos medidas, y la herramienta estira la B hasta el tamaño de la A sin conservar su proporción. Después compara la B estirada con la A, y cada punto de la B cae en otro lugar. Casi todo sale en rojo y el porcentaje no dice nada útil. Aunque la diferencia sea chica, el estiramiento mueve el contenido, sobre todo hacia los bordes, y aparece rojo donde no hubo ningún cambio.</p>
-    <p data-i18n-html="b14">Igualá las medidas antes de comparar. Si las dos tienen la misma proporción, <a href="../herramientas/redimensionar-imagen.html">Redimensionar imagen</a> lleva la B al ancho de la A con «Mantener proporción» marcada, y revisás que el alto también coincida. Si no tienen la misma proporción, recortá las dos con <a href="../herramientas/recortar-imagen.html">Recortar imagen</a> a la misma medida en píxeles y desde el mismo punto. El recorte quita parte de la imagen, así que comparás solo la zona común. Lo mismo vale para las capturas: si una está corrida unos pocos píxeles, casi todo sale en rojo.</p>
-    <h2 data-i18n="b15">Límites</h2>
+    <figure class="guia-figura">
+      <img class="img-clara" src="/guias/img/comparar-imagenes-1.es.webp" alt="Dos fotos casi iguales, cargadas como A y B: el resultado marca en rojo lo que cambió y dice qué porcentaje de píxeles es distinto." width="520" height="924" loading="lazy" decoding="async" data-i18n-attr="alt:b9;src:b9-src">
+      <img class="img-oscura" src="/guias/img/comparar-imagenes-1.oscuro.es.webp" alt="Dos fotos casi iguales, cargadas como A y B: el resultado marca en rojo lo que cambió y dice qué porcentaje de píxeles es distinto." width="520" height="924" loading="lazy" decoding="async" data-i18n-attr="alt:b9;src:b9-srco">
+      <figcaption data-i18n="b9">Dos fotos casi iguales, cargadas como A y B: el resultado marca en rojo lo que cambió y dice qué porcentaje de píxeles es distinto.</figcaption>
+    </figure>
+    <h2 data-i18n="b10">La tolerancia</h2>
+    <p data-i18n-html="b11">Para cada píxel, la herramienta suma las diferencias de rojo, verde y azul entre A y B. Si la suma supera la tolerancia, el píxel sale en rojo. Con la tolerancia en 30, un píxel que cambió 10 en cada canal (suma 30) no se marca; uno que cambió 11 en cada canal (suma 33) sí.</p>
+    <p data-i18n-html="b12">Subila cuando compares JPG o capturas comprimidas, para que no cuenten las pequeñas variaciones de color que trae el formato. Bajala si buscás un cambio sutil de tono. Empezá con 30 y, si todo el fondo aparece en rojo, subila de a poco.</p>
+    <h2 data-i18n="b13">Medidas distintas y alineación</h2>
+    <p data-i18n-html="b14">Si las imágenes tienen medidas distintas, aparece el aviso «Las imágenes tienen tamaños distintos» con las dos medidas, y la herramienta estira la B hasta el tamaño de la A sin conservar su proporción. Después compara la B estirada con la A, y cada punto de la B cae en otro lugar. Casi todo sale en rojo y el porcentaje no dice nada útil. Aunque la diferencia sea chica, el estiramiento mueve el contenido, sobre todo hacia los bordes, y aparece rojo donde no hubo ningún cambio.</p>
+    <p data-i18n-html="b15">Igualá las medidas antes de comparar. Si las dos tienen la misma proporción, <a href="../herramientas/redimensionar-imagen.html">Redimensionar imagen</a> lleva la B al ancho de la A con «Mantener proporción» marcada, y revisás que el alto también coincida. Si no tienen la misma proporción, recortá las dos con <a href="../herramientas/recortar-imagen.html">Recortar imagen</a> a la misma medida en píxeles y desde el mismo punto. El recorte quita parte de la imagen, así que comparás solo la zona común. Lo mismo vale para las capturas: si una está corrida unos pocos píxeles, casi todo sale en rojo.</p>
+    <h2 data-i18n="b16">Límites</h2>
     <ul>
-      <li data-i18n-html="b16-1">Compara los canales de color. La transparencia no entra en la cuenta, y un píxel transparente se lee como negro.</li>
-      <li data-i18n-html="b16-2">Compara píxeles, no el significado. Un cambio de brillo general, o un corrimiento de un píxel, marca como distinto algo que se ve igual.</li>
-      <li data-i18n-html="b16-3">Un reloj, un anuncio o una fecha que cambia entre capturas salen en rojo aunque el resto no haya cambiado. Recortá esa parte antes de comparar.</li>
-      <li data-i18n-html="b16-4">Acepta lo que tu navegador puede abrir, como JPG, PNG, WebP o GIF. Un archivo que no reconoce como imagen se ignora sin aviso, y si el navegador no puede leer el archivo, la zona no cambia y tampoco aparece un mensaje.</li>
+      <li data-i18n-html="b17-1">Compara los canales de color. La transparencia no entra en la cuenta, y un píxel transparente se lee como negro.</li>
+      <li data-i18n-html="b17-2">Compara píxeles, no el significado. Un cambio de brillo general, o un corrimiento de un píxel, marca como distinto algo que se ve igual.</li>
+      <li data-i18n-html="b17-3">Un reloj, un anuncio o una fecha que cambia entre capturas salen en rojo aunque el resto no haya cambiado. Recortá esa parte antes de comparar.</li>
+      <li data-i18n-html="b17-4">Acepta lo que tu navegador puede abrir, como JPG, PNG, WebP o GIF. Un archivo que no reconoce como imagen se ignora sin aviso, y si el navegador no puede leer el archivo, la zona no cambia y tampoco aparece un mensaje.</li>
     </ul>
-    <h2 data-i18n="b17">Preguntas frecuentes</h2>
-    <p data-i18n-html="b18"><strong>¿El porcentaje es exacto?</strong> Es exacto para la tolerancia que elegiste: los píxeles marcados sobre el total de la imagen A, con dos decimales. Si cambiás la tolerancia, cambia el número.</p>
-    <p data-i18n-html="b19"><strong>¿Por qué me aparece casi todo en rojo?</strong> Casi siempre por una de tres causas: las medidas no coinciden, las capturas están corridas o la tolerancia es muy baja para un formato con compresión.</p>
-    <p data-i18n-html="b20"><strong>¿Qué formato tiene la imagen descargada?</strong> PNG, con el nombre <code>comparacion.png</code>.</p>
-    <h2 data-i18n="b21">Resumen</h2>
-    <p data-i18n-html="b22">Cargá las dos imágenes con la misma medida y alineadas, dejá la tolerancia en 30 y tocá «Comparar». Lo rojo son los cambios, y el porcentaje da una idea de cuánto difiere la B de la A. Si las medidas no coinciden, igualálas antes, porque si no el resultado pierde sentido.</p>
+    <h2 data-i18n="b18">Preguntas frecuentes</h2>
+    <p data-i18n-html="b19"><strong>¿El porcentaje es exacto?</strong> Es exacto para la tolerancia que elegiste: los píxeles marcados sobre el total de la imagen A, con dos decimales. Si cambiás la tolerancia, cambia el número.</p>
+    <p data-i18n-html="b20"><strong>¿Por qué me aparece casi todo en rojo?</strong> Casi siempre por una de tres causas: las medidas no coinciden, las capturas están corridas o la tolerancia es muy baja para un formato con compresión.</p>
+    <p data-i18n-html="b21"><strong>¿Qué formato tiene la imagen descargada?</strong> PNG, con el nombre <code>comparacion.png</code>.</p>
+    <h2 data-i18n="b22">Resumen</h2>
+    <p data-i18n-html="b23">Cargá las dos imágenes con la misma medida y alineadas, dejá la tolerancia en 30 y tocá «Comparar». Lo rojo son los cambios, y el porcentaje da una idea de cuánto difiere la B de la A. Si las medidas no coinciden, igualálas antes, porque si no el resultado pierde sentido.</p>
   </article>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>

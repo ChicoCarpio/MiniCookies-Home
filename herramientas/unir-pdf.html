@@ -35,6 +35,7 @@ window.i18nPagina = {
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar PDF combinado',
     'error-unir': 'No se pudo unir los archivos',
+    'pdf-protegido': 'tiene contraseña o permisos protegidos y así no se puede unir. Quitalos antes con «Desbloquear PDF» y volvé a agregarlo',
     'guia-titulo': 'Cómo unir PDF, imágenes y documentos en un solo archivo',
     'guia-mas-link': 'Cómo unir varios archivos en un solo PDF, en el orden que quieras',
     'guia-intro': 'Armar un expediente con el contrato escaneado, las fotos de un recibo y el informe en Word suele obligar a abrir varios programas. Acá podés mezclar PDF, imágenes (JPG, PNG, WebP, GIF, BMP), Word, Excel o CSV, PowerPoint, EPUB, Markdown y texto: cada archivo entra completo y el resultado es un único PDF con las páginas en el orden que definas.',
@@ -75,6 +76,7 @@ window.i18nPagina = {
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download combined PDF',
     'error-unir': 'Couldn’t merge the files',
+    'pdf-protegido': 'it has a password or protected permissions and can’t be merged like that. Remove them first with “Unlock PDF” and add it again',
     'guia-titulo': 'How to merge PDFs, images and documents into one file',
     'guia-mas-link': 'How to Merge Several Files Into One PDF, in Any Order You Want',
     'guia-intro': 'Putting together a case file with a scanned contract, photos of a receipt and a report in Word usually means opening several programs. Here you can mix PDF, images (JPG, PNG, WebP, GIF, BMP), Word, Excel or CSV, PowerPoint, EPUB, Markdown and text: each file goes in whole and the result is a single PDF with the pages in the order you set.',
@@ -239,6 +241,8 @@ const esImagen = (archivo) => archivo.type.startsWith('image/');
 // alAvanzar(fraccion): la barra de la tarjeta.
 async function prepararEntrada(archivo, alAvanzar) {
   if (esPdf(archivo)) {
+    // Con contraseña no se puede unir: se avisa ahora, con el nombre, y no recién al tocar «Unir».
+    if (await PdfUnir.estaCifrado(archivo)) throw Object.assign(new Error(t('pdf-protegido')), { protegido: true });
     const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
     return { entrada: { archivo, tipo: 'pdf' }, elemento, totalPaginas };
   }
@@ -338,7 +342,11 @@ async function prepararTarjeta(id, archivo, tarjeta) {
         etiqueta: totalPaginas ? `${archivo.name} (${totalPaginas} ${t('sufijo-pag')})` : archivo.name,
       });
     } catch (error) {
-      if (esPdf(archivo) || esImagen(archivo)) {
+      if (error.protegido) {
+        tarjeta.remove();
+        fallos.push({ nombre: archivo.name, motivo: detalleError(error) });
+        mostrarNoConvertidos(fallos);
+      } else if (esPdf(archivo) || esImagen(archivo)) {
         // Como antes: un PDF o una imagen sin miniatura igual se puede unir
         // (si de verdad está dañado, lo dice el botón de unir).
         if (!tarjeta.isConnected) return;
@@ -378,12 +386,17 @@ botonUnir.addEventListener('click', async () => {
       const entrada = entradasPorId.get(id);
       if (!entrada) continue; // la quitaron mientras se unía
       const { archivo, tipo, pdf } = entrada;
-      if (tipo === 'imagen') {
-        const imagenEmbebida = await incrustarImagenEnPdf(pdfFinal, archivo);
-        agregarPaginaConImagen(pdfFinal, imagenEmbebida, tamanoElegido);
-      } else {
-        const bytes = await (tipo === 'convertido' ? pdf : archivo).arrayBuffer();
-        await PdfUnir.agregarPdf(pdfFinal, bytes);
+      try {
+        if (tipo === 'imagen') {
+          const imagenEmbebida = await incrustarImagenEnPdf(pdfFinal, archivo);
+          agregarPaginaConImagen(pdfFinal, imagenEmbebida, tamanoElegido);
+        } else {
+          const bytes = await (tipo === 'convertido' ? pdf : archivo).arrayBuffer();
+          await PdfUnir.agregarPdf(pdfFinal, bytes);
+        }
+      } catch (error) {
+        // Que se sepa cuál de los archivos falló.
+        throw new Error(`${archivo.name}: ${detalleError(error)}`);
       }
     }
 

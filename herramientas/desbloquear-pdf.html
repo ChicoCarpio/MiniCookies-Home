@@ -258,7 +258,7 @@ botonDesbloquear.addEventListener('click', async () => {
   } catch (error) {
     if (/needs password/i.test(error.message)) alert(t('error-necesita-contrasena'));
     else if (/password incorrect/i.test(error.message)) alert(t('error-contrasena-incorrecta'));
-    else alert(t('error-desbloquear') + error.message);
+    else alert(t('error-desbloquear') + detalleError(error));
   } finally {
     actualizarBoton();
     botonDesbloquear.textContent = t('boton-desbloquear');

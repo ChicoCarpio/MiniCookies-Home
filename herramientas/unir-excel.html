@@ -162,6 +162,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/xml-editar.js"></script>
 <script src="../assets/js/xlsx-formato.js"></script>
@@ -271,7 +272,7 @@ botonUnir.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-unir') + ': ' + error.message);
+    alert(t('error-unir') + ': ' + detalleError(error));
   } finally {
     botonUnir.disabled = false;
     botonUnir.textContent = t('boton-unir');

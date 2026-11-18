@@ -6,7 +6,7 @@
 //   await OdtLector.leer(bytes, opciones?)   → { contrato, mensajes: [clave…] }
 //   await OdtLector.aDocx(bytes)             → { bytes, mensajes }     (mensajes: claves de aviso, ver MENSAJES)
 //
-// Lanza Error (con .codigo = 'cifrado' si el .odt tiene contraseña) con un mensaje listo para mostrar.
+// Lanza Error (con .tipo = 'cifrado' si el .odt tiene contraseña) con un mensaje listo para mostrar.
 // Se llevan: párrafos y títulos con su estilo (también los estilos con nombre), negrita, cursiva, subrayado, tachado, superíndice, subíndice, versalitas, mayúsculas, fuente, tamaño,
 // color, resaltado, alineación, sangrías, espaciado, interlineado, tabulaciones, saltos de página, listas (numeradas y con viñetas, anidadas), tablas (celdas combinadas, relleno,
 // bordes, anchos), imágenes en línea, enlaces, marcadores, números de página, secciones con su hoja (tamaño, márgenes, encabezado y pie). No se llevan: notas, comentarios, texto
@@ -32,8 +32,8 @@
     let cuenta = 0;
     XmlLigero.recorrer(xml, {
       abrir(n, a) {
-        if (++cuenta > MAX_ELEMENTOS) throw new Error('El documento tiene demasiados elementos y no se puede leer.');
-        if (pila.length > MAX_PROFUNDIDAD * 4) throw new Error('El documento tiene demasiados niveles anidados y no se puede leer.');
+        if (++cuenta > MAX_ELEMENTOS) throw errorMC('xml-demasiados-elementos', {}, 'El documento tiene demasiados elementos y no se puede leer.');
+        if (pila.length > MAX_PROFUNDIDAD * 4) throw errorMC('xml-demasiados-niveles', {}, 'El documento tiene demasiados niveles anidados y no se puede leer.');
         const e = { n, a, h: [] };
         pila[pila.length - 1].h.push(e);
         pila.push(e);
@@ -322,7 +322,7 @@
 
     agregarTexto(salida, texto, estilo, r) {
       if (!texto) return;
-      if ((this.caracteres += texto.length) > MAX_CARACTERES) throw new Error('El documento es demasiado grande para abrirlo aquí.');
+      if ((this.caracteres += texto.length) > MAX_CARACTERES) throw errorMC('word-demasiado-grande', {}, 'El documento es demasiado grande para abrirlo aquí.');
       const u = salida[salida.length - 1];
       if (u && u.texto !== undefined && u.estilo === estilo && JSON.stringify(u.r || {}) === JSON.stringify(r || {})) { u.texto += texto; return; }
       const run = { texto };
@@ -332,7 +332,7 @@
     }
 
     inline(nodo, fmt, salida, st, prof) {
-      if (prof > MAX_PROFUNDIDAD) throw new Error('El documento tiene demasiados niveles anidados y no se puede leer.');
+      if (prof > MAX_PROFUNDIDAD) throw errorMC('xml-demasiados-niveles', {}, 'El documento tiene demasiados niveles anidados y no se puede leer.');
       for (const h of nodo.h) {
         if (typeof h === 'string') {
           let t = h.replace(/[ \t\r\n]+/g, ' ');
@@ -386,7 +386,7 @@
       ruta = ruta.replace(/^\.\//, '');
       const entrada = this.zip.file(ruta);
       if (!entrada) { this.aviso('imagen-falta'); return null; }
-      if (++this.imagenes > MAX_IMAGENES) throw new Error('El documento tiene demasiadas imágenes y no se puede leer.');
+      if (++this.imagenes > MAX_IMAGENES) throw errorMC('word-demasiadas-imagenes', {}, 'El documento tiene demasiadas imágenes y no se puede leer.');
       return { ruta, ancho: puntos(frame.a.width) || 72, alto: puntos(frame.a.height) || 72, texto: (hijo(frame, 'desc') && hijo(frame, 'desc').h.filter((x) => typeof x === 'string').join('')) || undefined, entrada };
     }
 
@@ -419,7 +419,7 @@
     }
 
     lista(nodo, nivel, salida, idLista, prof) {
-      if (prof > MAX_PROFUNDIDAD) throw new Error('El documento tiene demasiados niveles anidados y no se puede leer.');
+      if (prof > MAX_PROFUNDIDAD) throw errorMC('xml-demasiados-niveles', {}, 'El documento tiene demasiados niveles anidados y no se puede leer.');
       const nombre = nodo.a['style-name'] || nodo.a['list-style-name'] || '';
       let nueva = false;
       if (idLista === null) {
@@ -521,8 +521,8 @@
         const rep = acotar(parseInt(fila.a['number-rows-repeated'], 10) || 1, 1, 1000);
         // cuentan las filas ya repetidas: una fila vacía con number-rows-repeated="1000" son 1000 filas del contrato
         totalFilas += rep;
-        if (totalFilas > MAX_FILAS_TABLA) throw new Error('La tabla tiene demasiadas filas y no se puede leer.');
-        if ((this.bloquesLeidos += rep) > MAX_BLOQUES) throw new Error('El documento tiene demasiados párrafos y no se puede leer.');
+        if (totalFilas > MAX_FILAS_TABLA) throw errorMC('odt-tabla-filas', {}, 'La tabla tiene demasiadas filas y no se puede leer.');
+        if ((this.bloquesLeidos += rep) > MAX_BLOQUES) throw errorMC('word-demasiados-parrafos', {}, 'El documento tiene demasiados párrafos y no se puede leer.');
         const estFila = this.est.buscar('table-row', fila.a['style-name'] || '');
         for (let r = 0; r < rep; r++) {
           const celdas = [];
@@ -533,7 +533,7 @@
             const repC = acotar(parseInt(c.a['number-columns-repeated'], 10) || 1, 1, 1024);
             for (let k = 0; k < repC; k++) {
               if (col >= 1024) break;
-              if (++this.bloquesLeidos > MAX_BLOQUES) throw new Error('El documento tiene demasiados párrafos y no se puede leer.');
+              if (++this.bloquesLeidos > MAX_BLOQUES) throw errorMC('word-demasiados-parrafos', {}, 'El documento tiene demasiados párrafos y no se puede leer.');
               if (saltarH > 0) { saltarH--; col++; continue; }
               const p = pendiente[col];
               if (c.n === 'covered-table-cell' || (p && p.resto > 0)) {
@@ -585,8 +585,8 @@
     }
 
     bloque(nodo, salida, prof) {
-      if (prof > MAX_PROFUNDIDAD) throw new Error('El documento tiene demasiados niveles anidados y no se puede leer.');
-      if (++this.bloquesLeidos > MAX_BLOQUES) throw new Error('El documento tiene demasiados párrafos y no se puede leer.');
+      if (prof > MAX_PROFUNDIDAD) throw errorMC('xml-demasiados-niveles', {}, 'El documento tiene demasiados niveles anidados y no se puede leer.');
+      if (++this.bloquesLeidos > MAX_BLOQUES) throw errorMC('word-demasiados-parrafos', {}, 'El documento tiene demasiados párrafos y no se puede leer.');
       switch (nodo.n) {
         case 'p': case 'h': {
           const b = this.parrafo(nodo, null);   // un párrafo con otra hoja (master-page-name) abre una sección: va en la nueva, no en la que estaba
@@ -662,7 +662,7 @@
     convertir(contenido, estilosRaiz) {
       this.secs = [];
       const cuerpo = hijo(hijo(contenido, 'body'), 'text');
-      if (!cuerpo) throw new Error('El archivo no es un documento de texto de OpenDocument (.odt).');
+      if (!cuerpo) throw errorMC('odt-no-es-odt', {}, 'El archivo no es un documento de texto de OpenDocument (.odt).');
       this.nuevaSeccion(null);
       this.maestraActual = null;
       for (const h of hijos(cuerpo)) this.bloque(h, this.sec.hijos, 0);
@@ -679,13 +679,13 @@
   async function abrir(bytes) {
     const datos = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
     let zip;
-    try { zip = await ZipPropio.loadAsync(datos); } catch (e) { throw new Error('El archivo no es un .odt válido (no se puede abrir como un paquete).'); }
+    try { zip = await ZipPropio.loadAsync(datos); } catch (e) { throw errorMC('odt-paquete-invalido', {}, 'El archivo no es un .odt válido (no se puede abrir como un paquete).'); }
     if (zip.file('encrypted-package') || (zip.file('META-INF/manifest.xml') && /encryption-data/.test(await zip.file('META-INF/manifest.xml').async('string')))) {
-      const err = new Error('El documento está protegido con contraseña. Sacale la contraseña en LibreOffice y volvé a intentarlo.');
-      err.codigo = 'cifrado';
+      const err = errorMC('odt-cifrado', {}, 'El documento está protegido con contraseña. Sacale la contraseña en LibreOffice y volvé a intentarlo.');
+      err.tipo = 'cifrado';
       throw err;
     }
-    if (!zip.file('content.xml')) throw new Error('El archivo no es un documento de OpenDocument (.odt).');
+    if (!zip.file('content.xml')) throw errorMC('odt-sin-content', {}, 'El archivo no es un documento de OpenDocument (.odt).');
     return zip;
   }
 
@@ -705,9 +705,9 @@
     const texto = async (ruta) => {
       const f = zip.file(ruta);
       if (!f) return null;
-      if (tamanoDe(f) > MAX_TEXTO_XML) throw new Error('El documento es demasiado grande para abrirlo aquí.');   // antes de descomprimir
+      if (tamanoDe(f) > MAX_TEXTO_XML) throw errorMC('word-demasiado-grande', {}, 'El documento es demasiado grande para abrirlo aquí.');   // antes de descomprimir
       const t = await f.async('string');
-      if (t.length > MAX_TEXTO_XML) throw new Error('El documento es demasiado grande para abrirlo aquí.');
+      if (t.length > MAX_TEXTO_XML) throw errorMC('word-demasiado-grande', {}, 'El documento es demasiado grande para abrirlo aquí.');
       return t;
     };
     const estilos = new Estilos();
@@ -715,7 +715,7 @@
     const contenido = arbol(contenidoXml);
     const estilosXml = await texto('styles.xml');
     const estilosRaiz = estilosXml ? arbol(estilosXml) : null;
-    if (!contenido) throw new Error('El archivo no es un documento de OpenDocument (.odt).');
+    if (!contenido) throw errorMC('odt-sin-content', {}, 'El archivo no es un documento de OpenDocument (.odt).');
     if (estilosRaiz) { estilos.leerDeclaraciones(estilosRaiz); }
     estilos.leerDeclaraciones(contenido);
     if (estilosRaiz) {
@@ -744,10 +744,10 @@
       delete r.imagen.entrada;
       let datos = leidas.get(r.imagen.ruta);
       if (!datos) {
-        if (conv.bytesImagenes + tamanoDe(e) > MAX_IMAGENES_BYTES) throw new Error('Las imágenes del documento ocupan demasiado y no se puede leer.');   // antes de descomprimir
+        if (conv.bytesImagenes + tamanoDe(e) > MAX_IMAGENES_BYTES) throw errorMC('word-imagenes-ocupan', {}, 'Las imágenes del documento ocupan demasiado y no se puede leer.');   // antes de descomprimir
         datos = await e.async('uint8array');
         conv.bytesImagenes += datos.length;
-        if (conv.bytesImagenes > MAX_IMAGENES_BYTES) throw new Error('Las imágenes del documento ocupan demasiado y no se puede leer.');
+        if (conv.bytesImagenes > MAX_IMAGENES_BYTES) throw errorMC('word-imagenes-ocupan', {}, 'Las imágenes del documento ocupan demasiado y no se puede leer.');
         leidas.set(r.imagen.ruta, datos);
       }
       r.imagen.datos = datos;

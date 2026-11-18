@@ -46,7 +46,7 @@
       const s = document.createElement('script');
       s.src = src;
       s.onload = resolver;
-      s.onerror = () => rechazar(new Error('No se pudo cargar ' + src));
+      s.onerror = () => rechazar(errorMC('carga-no-se-pudo', { archivo: src }, 'No se pudo cargar {archivo}'));
       document.head.appendChild(s);
     });
   }

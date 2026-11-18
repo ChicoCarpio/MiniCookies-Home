@@ -190,6 +190,7 @@ window.i18nPagina = {
 
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/xml-editar.js"></script>
 <script src="../assets/js/xlsx-formato.js"></script>
@@ -237,7 +238,7 @@ async function mostrarArchivo(archivo) {
     libro = await LectorHojas.abrir(archivo);
   } catch (error) {
     libro = null;
-    alert(t('error-leer') + ': ' + error.message);
+    alert(t('error-leer') + ': ' + detalleError(error));
     return;
   }
 
@@ -291,7 +292,7 @@ botonConvertir.addEventListener('click', async () => {
 
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-leer') + ': ' + error.message);
+    alert(t('error-leer') + ': ' + detalleError(error));
   } finally {
     botonConvertir.disabled = false;
   }

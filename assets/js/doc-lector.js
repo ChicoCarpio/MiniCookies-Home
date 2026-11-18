@@ -6,7 +6,7 @@
 //   await DocLector.leer(bytes)        → { contrato, mensajes: [clave…] }
 //   await DocLector.aDocx(bytes)       → { bytes, mensajes }
 //
-// Lanza Error (con .codigo = 'cifrado' si tiene contraseña, 'antiguo' si es de Word 95 o anterior, 'danado' si está roto) con un mensaje listo para mostrar.
+// Lanza Error (con .codigo del catálogo de mensajes-error.js y .tipo = 'cifrado' si tiene contraseña, 'antiguo' si es de Word 95 o anterior, 'danado' si está roto) con un mensaje listo para mostrar.
 // Se llevan: texto (también con guardado rápido: tabla de piezas), estilos con nombre, formato de carácter (negrita, cursiva, subrayado, tachado, superíndice, subíndice,
 // versalitas, mayúsculas, fuente, tamaño, color, resaltado), formato de párrafo (alineación, sangrías, espaciado, interlineado, tabulaciones, salto antes), listas con
 // viñetas y numeradas, tablas (celdas combinadas, relleno, bordes, anidadas), imágenes en línea (PNG y JPEG; las DIB, EMF y WMF se omiten con un aviso), enlaces y marcadores, números de página,
@@ -26,7 +26,8 @@
   const sinProto = (o) => Object.assign(Object.create(null), o);
   const acotar = (x, min, max) => Math.min(Math.max(x, min), max);
 
-  class Danado extends Error { constructor(m, codigo) { super(m); this.codigo = codigo || 'danado'; } }
+  // Un error de errorMC marcado como «dañado»: .codigo es el del catálogo (mensajes-error.js) y .tipo conserva el motivo que leen las páginas ('cifrado', 'antiguo', 'danado').
+  const marcarDanado = (e, tipo) => { e.tipo = tipo || 'danado'; e.danado = true; return e; };
 
   // ───────── Lectura de bytes sin salirse del arreglo ─────────
   const u8 = (b, p) => (p >= 0 && p < b.length ? b[p] : 0);
@@ -209,24 +210,24 @@
 
     abrir(bytes) {
       let cfb;
-      try { cfb = CfbPropio.leer(bytes, { danado: (d) => new Danado('El archivo está dañado y no se puede abrir (' + d + ').') }); } catch (e) {
-        if (e instanceof Danado) throw e;
-        throw new Danado('El archivo no es un documento de Word 97-2003 válido.');
+      try { cfb = CfbPropio.leer(bytes, { danado: (d, c) => marcarDanado(errorMC('doc-cfb-danado', { detalle: d, detalleCodigo: c }, 'El archivo está dañado y no se puede abrir ({detalle}).')) }); } catch (e) {
+        if (e && e.danado) throw e;
+        throw marcarDanado(errorMC('doc-no-valido', {}, 'El archivo no es un documento de Word 97-2003 válido.'));
       }
       const entrada = (n) => cfb.entradas.find((e) => e.tipo === 2 && e.nombre === n);
       const eWd = entrada('WordDocument');
       // Un .docx con contraseña también es un contenedor CFB (con EncryptedPackage en vez de WordDocument)
-      if (!eWd && entrada('EncryptedPackage')) throw new Danado('El documento está protegido con contraseña. Sacale la contraseña en Word y volvé a intentarlo.', 'cifrado');
-      if (!eWd) throw new Danado('El archivo no es un documento de Word (.doc).');
+      if (!eWd && entrada('EncryptedPackage')) throw marcarDanado(errorMC('doc-cifrado', {}, 'El documento está protegido con contraseña. Sacale la contraseña en Word y volvé a intentarlo.'), 'cifrado');
+      if (!eWd) throw marcarDanado(errorMC('doc-no-es-doc', {}, 'El archivo no es un documento de Word (.doc).'));
       this.wd = cfb.flujo(eWd);
       const wd = this.wd;
-      if (wd.length < 0x9A || u16(wd, 0) !== 0xA5EC) throw new Danado('El archivo no es un documento de Word 97-2003 válido.');
+      if (wd.length < 0x9A || u16(wd, 0) !== 0xA5EC) throw marcarDanado(errorMC('doc-no-valido', {}, 'El archivo no es un documento de Word 97-2003 válido.'));
       const nFib = u16(wd, 2);
-      if (nFib < 0xC0) throw new Danado('Este documento es de una versión de Word anterior a Word 97 y no se puede leer. Abrilo en Word y guardalo como .docx.', 'antiguo');
+      if (nFib < 0xC0) throw marcarDanado(errorMC('doc-antiguo', {}, 'Este documento es de una versión de Word anterior a Word 97 y no se puede leer. Abrilo en Word y guardalo como .docx.'), 'antiguo');
       const flags = u16(wd, 0x0A);
-      if (flags & 0x100) throw new Danado('El documento está protegido con contraseña. Sacale la contraseña en Word y volvé a intentarlo.', 'cifrado');
+      if (flags & 0x100) throw marcarDanado(errorMC('doc-cifrado', {}, 'El documento está protegido con contraseña. Sacale la contraseña en Word y volvé a intentarlo.'), 'cifrado');
       const eTabla = entrada((flags & 0x200) ? '1Table' : '0Table');
-      if (!eTabla) throw new Danado('El documento está dañado: falta la tabla de estructura.');
+      if (!eTabla) throw marcarDanado(errorMC('doc-sin-tabla', {}, 'El documento está dañado: falta la tabla de estructura.'));
       this.tabla = cfb.flujo(eTabla);
       const eData = entrada('Data');
       this.datos = eData ? cfb.flujo(eData) : new Uint8Array(0);
@@ -250,10 +251,10 @@
       const t = this.enTabla(fc, lcb);
       let p = 0;
       while (p < t.length && t[p] === 1) p += 3 + u16(t, p + 1);   // los Prc (propiedades de piezas) se saltan
-      if (t[p] !== 2) throw new Danado('El documento está dañado: no tiene tabla de piezas de texto.');
+      if (t[p] !== 2) throw marcarDanado(errorMC('doc-sin-piezas', {}, 'El documento está dañado: no tiene tabla de piezas de texto.'));
       const tam = u32(t, p + 1);
       const n = Math.floor((tam - 4) / 12);
-      if (n < 0 || n > MAX_ENTRADAS || p + 5 + tam > t.length + 8) throw new Danado('El documento está dañado: tabla de piezas inválida.');
+      if (n < 0 || n > MAX_ENTRADAS || p + 5 + tam > t.length + 8) throw marcarDanado(errorMC('doc-piezas-invalidas', {}, 'El documento está dañado: tabla de piezas inválida.'));
       const base = p + 5;
       const piezas = [];
       const partes = [];
@@ -263,13 +264,13 @@
         const fcRaw = u32(t, base + 4 * (n + 1) + 8 * i + 2);
         const comp = (fcRaw & 0x40000000) !== 0;
         const fcp = comp ? (fcRaw & 0x3FFFFFFF) >>> 1 : fcRaw & 0x3FFFFFFF;
-        if (cp1 < cp0) throw new Danado('El documento está dañado: piezas de texto desordenadas.');
-        if (cp0 !== total) throw new Danado('El documento está dañado: piezas de texto con huecos.');
+        if (cp1 < cp0) throw marcarDanado(errorMC('doc-piezas-desordenadas', {}, 'El documento está dañado: piezas de texto desordenadas.'));
+        if (cp0 !== total) throw marcarDanado(errorMC('doc-piezas-huecos', {}, 'El documento está dañado: piezas de texto con huecos.'));
         let largo = cp1 - cp0;
         const bpc = comp ? 1 : 2;
         if (fcp >= this.wd.length) largo = 0;
         else if (fcp + largo * bpc > this.wd.length) largo = Math.floor((this.wd.length - fcp) / bpc);
-        if (total + (cp1 - cp0) > MAX_TEXTO) throw new Danado('El documento es demasiado grande para abrirlo aquí.');
+        if (total + (cp1 - cp0) > MAX_TEXTO) throw marcarDanado(errorMC('word-demasiado-grande', {}, 'El documento es demasiado grande para abrirlo aquí.'));
         let s = largo ? (comp ? decodificarAnsi(this.wd, fcp, fcp + largo) : decodificarUtf16(this.wd, fcp, fcp + 2 * largo)) : '';
         if (s.length < cp1 - cp0) s += ' '.repeat(cp1 - cp0 - s.length);
         partes.push(s);
@@ -329,7 +330,7 @@
               if (g) g = this.papGrande(g);
               lista.push({ fc0, fc1, istd, g });
             }
-            if (lista.length > MAX_ENTRADAS) throw new Danado('El documento está dañado: demasiados formatos.');
+            if (lista.length > MAX_ENTRADAS) throw marcarDanado(errorMC('doc-demasiados-formatos', {}, 'El documento está dañado: demasiados formatos.'));
           }
         }
         lista.sort((a, b) => a.fc0 - b.fc0);
@@ -604,7 +605,7 @@
       let ini = cp0;
       const fin = Math.min(cp1, T.length);
       // tope sobre lo que se recorre en total: secciones superpuestas o encabezados repetidos no pueden volver a leer el texto sin límite
-      if ((this.caracteresLeidos += Math.max(0, fin - cp0)) > MAX_TEXTO) throw new Danado('El documento es demasiado grande para abrirlo aquí.');
+      if ((this.caracteresLeidos += Math.max(0, fin - cp0)) > MAX_TEXTO) throw marcarDanado(errorMC('word-demasiado-grande', {}, 'El documento es demasiado grande para abrirlo aquí.'));
       for (let cp = cp0; cp < fin; cp++) {
         const c = T.charCodeAt(cp);
         let termina = false;
@@ -619,12 +620,12 @@
         const fc = d.fcDe(cp);
         const pap = fc >= 0 ? d.buscar(d.pap, fc) : null;
         lista.push({ cp0: ini, cp1: cp, marca: c, pap });
-        if (++this.parrafosLeidos > MAX_PARRAFOS) throw new Danado('El documento tiene demasiados párrafos y no se puede leer.');
+        if (++this.parrafosLeidos > MAX_PARRAFOS) throw marcarDanado(errorMC('word-demasiados-parrafos', {}, 'El documento tiene demasiados párrafos y no se puede leer.'));
         ini = cp + 1;
       }
       if (ini < fin) {
         lista.push({ cp0: ini, cp1: fin, marca: 13, pap: null });
-        if (++this.parrafosLeidos > MAX_PARRAFOS) throw new Danado('El documento tiene demasiados párrafos y no se puede leer.');
+        if (++this.parrafosLeidos > MAX_PARRAFOS) throw marcarDanado(errorMC('word-demasiados-parrafos', {}, 'El documento tiene demasiados párrafos y no se puede leer.'));
       }
       return lista;
     }
@@ -824,7 +825,7 @@
         if (im) this._imagenes.set(desp, im);
       }
       if (!im) return null;
-      if (++this.imagenesUsadas > MAX_IMAGENES) throw new Danado('El documento tiene demasiadas imágenes y no se puede leer.');
+      if (++this.imagenesUsadas > MAX_IMAGENES) throw marcarDanado(errorMC('word-demasiadas-imagenes', {}, 'El documento tiene demasiadas imágenes y no se puede leer.'));
       return Object.assign({}, im);
     }
     leerImagen(desp) {
@@ -855,7 +856,7 @@
           else { this.d.aviso('imagen-formato'); }
           if (!datos || !datos.length) return null;
           this.bytesImagenes += datos.length;
-          if (this.bytesImagenes > MAX_IMAGENES_BYTES) throw new Danado('Las imágenes del documento ocupan demasiado y no se puede leer.');
+          if (this.bytesImagenes > MAX_IMAGENES_BYTES) throw marcarDanado(errorMC('word-imagenes-ocupan', {}, 'Las imágenes del documento ocupan demasiado y no se puede leer.'));
           return { datos: new Uint8Array(datos), tipo: tipoImg, ancho: acotar((dxaGoal * mx / 1000) / 20, 1, 1584) || 72, alto: acotar((dyaGoal * my / 1000) / 20, 1, 1584) || 72 };
         }
         p += 8 + largo;

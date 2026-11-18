@@ -232,6 +232,9 @@
   function base(nombre) { const i = nombre.lastIndexOf('.'); return i > 0 ? nombre.slice(0, i) : nombre; }
   // Lo que se lanzó, en texto: un Error da su mensaje; un evento de «no cargó» (un <img>, un script) no tiene.
   const mensajeDe = (e) => (e && typeof e.message === 'string' && e.message) || (typeof e === 'string' && e) || (e && e.type ? 'error: ' + e.type : String(e));
+  // El código de un errorMC (mensajes-error.js), para que la página lo cuente en su idioma. «codigo» ya lo usan los fallos propios de
+  // Flujos («tipo», «quitado»): el del motor va aparte.
+  const codigoDe = (e) => (e && typeof e.codigo === 'string' ? { errorCodigo: e.codigo, errorDatos: e.datos } : {});
 
   // Un SVG no lo abre createImageBitmap, que es lo que usan los módulos de imagen (en los hilos no hay <img>):
   // entra al flujo ya dibujado como PNG. Como es un dibujo sin tamaño fijo, se lo lleva a un lado útil.
@@ -298,7 +301,8 @@
 
   async function abrirHilos(cuantos) {
     if (typeof Worker !== 'function' || typeof OffscreenCanvas !== 'function' || location.protocol === 'file:') return null;
-    const scripts = ['vendor.js', 'flujos.js', 'flujos-modulos.js'].map(rutaJs);
+    // mensajes-error.js primero: los motores que cargan los módulos lanzan errorMC.
+    const scripts = ['mensajes-error.js', 'vendor.js', 'flujos.js', 'flujos-modulos.js'].map(rutaJs);
     const idioma = window.idiomaActual && idiomaActual() === 'en' ? 'en' : 'es';
     const nuevos = [];
     for (let i = 0; i < cuantos; i++) { try { nuevos.push(new Worker(rutaJs('flujos-hilo.js'))); } catch (e) { break; } }
@@ -349,7 +353,7 @@
         pasos.set(w, pasos.get(w) + 1);
         const d = e.data || {};
         if (d.tipo === 'hecho') tarea.ok(d);
-        else tarea.mal(Object.assign(new Error(d.mensaje || 'Error en el hilo'), { name: d.nombre || 'Error', enPreparar: !!d.enPreparar }));
+        else tarea.mal(Object.assign(new Error(d.mensaje || 'Error en el hilo'), { name: d.nombre || 'Error', enPreparar: !!d.enPreparar, codigo: d.codigo, datos: d.datos }));
         despachar();
       };
       w.onerror = (e) => { if (e.preventDefault) e.preventDefault(); caido(w); };
@@ -477,7 +481,7 @@
         if (!tipo || !aceptados.includes(tipo)) { fallos.push({ nombre: a.name, entrada: i, codigo: 'tipo' }); continue; }
         let archivo = a;
         if (tipo === 'imagen' && esSvg(a)) {
-          try { archivo = await svgAPng(a); } catch (e) { fallos.push({ nombre: a.name, entrada: i, paso: 0, error: mensajeDe(e) }); continue; }
+          try { archivo = await svgAPng(a); } catch (e) { fallos.push({ nombre: a.name, entrada: i, paso: 0, error: mensajeDe(e), ...codigoDe(e) }); continue; }
         }
         fichas.push({ nombre: archivo.name, blob: archivo, tipo, datos: {}, origen: a.name });
       }
@@ -500,7 +504,7 @@
       try {
         r = await ejecutarPaso(modulo(pasos[k].id), ficha, pasos[k].opciones, { paso: k, entrada });
       } catch (e) {
-        anotar(orden, { nombre: ficha.origen, entrada, paso: k, error: mensajeDe(e) });
+        anotar(orden, { nombre: ficha.origen, entrada, paso: k, error: mensajeDe(e), ...codigoDe(e) });
         r = null;
         fallo = true;
       }
@@ -527,7 +531,7 @@
               const r = await limiteDe(m)(() => m.ejecutar(juntas, pasos[i].opciones, { paso: i, entrada }));
               fichas = r ? [r] : [];
             } catch (e) {
-              anotar(inicio + 1e7 - 1, { nombre: fichas.map((f) => f.origen).join(', '), entrada, paso: i, error: mensajeDe(e) });
+              anotar(inicio + 1e7 - 1, { nombre: fichas.map((f) => f.origen).join(', '), entrada, paso: i, error: mensajeDe(e), ...codigoDe(e) });
               fichas = [];
             }
           }
@@ -618,7 +622,7 @@
     if (!cargados.has(src)) cargados.set(src, new Promise((ok, mal) => {
       const s = document.createElement('script');
       s.src = src; s.onload = ok;
-      s.onerror = () => { cargados.delete(src); mal(new Error('No cargó ' + src)); };
+      s.onerror = () => { cargados.delete(src); mal(errorMC('carga-no-cargo', { archivo: src }, 'No cargó {archivo}')); };
       document.head.appendChild(s);
     }));
     return cargados.get(src);

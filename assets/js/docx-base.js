@@ -95,10 +95,10 @@
       if (r && r.a.Target) principal = resolver('x', r.a.Target);
     }
     const docFile = zip.file(principal);
-    if (!docFile) throw new Error('No es un documento de Word válido (falta word/document.xml).');
+    if (!docFile) throw errorMC('word-sin-document-xml', {}, 'No es un documento de Word válido (falta word/document.xml).');
     const rels = await leerRels(zip, principal);
     const cuerpo = hijo(arbol(await docFile.async('string')), 'body');
-    if (!cuerpo) throw new Error('El documento no tiene cuerpo.');
+    if (!cuerpo) throw errorMC('word-sin-cuerpo', {}, 'El documento no tiene cuerpo.');
     return { zip, principal, rels, cuerpo };
   }
 
