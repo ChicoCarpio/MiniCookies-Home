@@ -36,6 +36,7 @@ window.i18nPagina = {
     'boton-ejemplo': 'Ejemplo: QR → recorte → PDF',
     'boton-ejemplo-doble': 'Ejemplo con dos entradas: fotos y PDF → unir',
     'boton-limpiar': 'Vaciar',
+    'boton-limpiar-archivos': 'Limpiar archivos',
     'sin-compatibles': 'Ningún paso recibe lo que sale del último.',
     'resumen-entra': 'Entrega: {sale}.',
     'subir': 'Subir el paso',
@@ -100,6 +101,7 @@ window.i18nPagina = {
     'boton-ejemplo': 'Example: QR → crop → PDF',
     'boton-ejemplo-doble': 'Example with two inputs: photos and PDF → merge',
     'boton-limpiar': 'Clear',
+    'boton-limpiar-archivos': 'Clear files',
     'sin-compatibles': 'No step takes what the last one produces.',
     'resumen-entra': 'Produces: {sale}.',
     'subir': 'Move the step up',
@@ -170,12 +172,6 @@ window.i18nPagina = {
       </aside>
 
       <div>
-        <!-- Una sola zona para todos los archivos, arriba de la configuración: cada entrada toma los de su tipo. -->
-        <div class="zona-arrastre" id="zonaArrastre">
-          <span data-i18n="zona-arrastre">📂 Arrastrá todos tus archivos acá o hacé clic para elegirlos: cada entrada toma los suyos</span>
-          <input type="file" id="entradaArchivos" multiple accept="image/*,.pdf,application/pdf" hidden>
-        </div>
-        <p class="nota-suave" id="avisoArchivos" hidden></p>
         <h2>
           <span data-i18n="titulo-pasos">Pasos del flujo</span>
           <span class="ayuda-tip">
@@ -221,8 +217,15 @@ window.i18nPagina = {
           </div>
         </details>
 
+        <!-- Una sola zona para todos los archivos, justo encima de Ejecutar, con Limpiar al lado, para tener todo junto: cada entrada toma los de su tipo. -->
+        <div class="zona-arrastre" id="zonaArrastre">
+          <span data-i18n="zona-arrastre">📂 Arrastrá todos tus archivos acá o hacé clic para elegirlos: cada entrada toma los suyos</span>
+          <input type="file" id="entradaArchivos" multiple accept="image/*,.pdf,application/pdf" hidden>
+        </div>
+        <p class="nota-suave" id="avisoArchivos" hidden></p>
         <div class="controles">
           <button type="button" class="boton" id="botonEjecutar" disabled data-i18n="boton-ejecutar">Ejecutar el flujo</button>
+          <button type="button" class="boton secundario" id="botonLimpiarArchivos" disabled data-i18n="boton-limpiar-archivos">Limpiar archivos</button>
         </div>
         <p class="nota-suave" id="estado" role="status" hidden></p>
         <progress id="avance" max="1" value="0" hidden></progress>
@@ -455,6 +458,7 @@ function pintar() {
   aviso.textContent = archivos.length ? rellenar('archivos-n', { n: archivos.length }) + (reparto.sinEntrada.length ? rellenar('archivos-ignorados', { n: reparto.sinEntrada.length }) : '') : '';
   aviso.hidden = !archivos.length;
   $('botonEjecutar').disabled = ocupado || !!error || !archivos.length;
+  $('botonLimpiarArchivos').disabled = ocupado || !archivos.length;
   pintarDiagrama($('diagramaMini'));
   if ($('dialogoDiagrama').open) pintarDiagrama($('diagramaGrande'));
 }
@@ -470,6 +474,12 @@ $('dialogoDiagrama').addEventListener('click', (e) => { if (e.target === $('dial
 $('botonEjemplo').addEventListener('click', () => ponerFlujo(EJEMPLO));
 $('botonEjemploDoble').addEventListener('click', () => ponerFlujo(EJEMPLO_DOBLE));
 $('botonLimpiar').addEventListener('click', () => ponerFlujo([]));
+$('botonLimpiarArchivos').addEventListener('click', () => {
+  if (ocupado) return;
+  archivos = [];
+  limpiarResultado();
+  pintar();
+});
 $('botonAgregarEntrada').addEventListener('click', () => {
   if (flujo.entradas.length >= MAX_ENTRADAS) return;
   flujo.entradas.push([]);
