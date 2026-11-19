@@ -4,9 +4,13 @@
 // no entra. Una página escaneada (sin texto) pasa antes por Librarius (OCR) y sigue igual. También se puede sacar como Word o texto.
 //
 // Parte sin navegador (la prueban las pruebas en Node):
-//   TraductorPdf.bloques(items, { anchoPagina })   items = [{ texto, x, y, ancho, tam, negrita? }]  (x, y: línea base, PDF: y hacia arriba)
-//        -> [{ texto, x0, x1, y0, y1, tam, interlinea, lineas }]   un bloque por párrafo, en orden de lectura
-//   TraductorPdf.acomodar(texto, { ancho, alto, tam, interlinea, medir, asiatico })   medir(texto, tam) -> ancho
+//   TraductorPdf.bloques(items, { reglas })   items = [{ texto, x, y, ancho, tam, negrita? }]  (x, y: línea base, PDF: y hacia arriba)
+//        reglas = { v: [{ x, y0, y1 }], h: [{ y, x0, x1 }] }: las rayas verticales y horizontales dibujadas en la página (bordes de tabla). Un
+//        texto no se junta con el de otra celda: ninguna línea cruza una raya vertical y ningún párrafo cruza una horizontal.
+//        -> [{ texto, x0, x1, y0, y1, tam, interlinea, lineas, piezas, celda? }]   un bloque por párrafo, en orden de lectura;
+//        celda = { x1?, y0? }: hasta dónde llega la celda (la raya de la derecha y la de abajo), para que la traducción use todo su lugar
+//   TraductorPdf.esTraducible(texto)   false si es solo números, un correo, una dirección o un código (eso no se traduce)
+//   TraductorPdf.acomodar(texto, { ancho, alto, tam, interlinea, medir, asiatico, pasos })   medir(texto, tam) -> ancho; pasos = cuántas veces probar con 5 % menos (0: solo el tamaño original)
 //        -> { tam, lineas: [texto], cabe }   la letra baja de a 5 % hasta que entra (hasta la mitad); si no entra, cabe = false
 // Parte con navegador (PDF.js para leer, pdf-lib para escribir; ver traducir):
 //   const { bytes, texto, bloques, estadistica } = await TraductorPdf.traducir(datos, { traducir, destino, progreso, fuentes, ocr })
@@ -19,7 +23,22 @@
   // ───────── Líneas y bloques ─────────
   // 1) Las piezas se juntan por altura (misma línea base ± 35 % del tamaño: las palabras del OCR traen cada una la suya, apenas distinta);
   // 2) dentro de cada altura, de izquierda a derecha; 3) un hueco de más de 2,5 veces el tamaño separa columnas (dos líneas distintas).
-  function lineas(items) {
+  const HUECO_COLUMNA = 1.6;   // un hueco de más de 1,6 veces el tamaño separa celdas o columnas (el espacio entre palabras es 0,25-0,4)
+
+  // ¿Hay una raya vertical entre xa y xb, a la altura de esta línea?
+  function rayaVerticalEntre(reglas, xa, xb, y, tam) {
+    if (!reglas) return false;
+    const ym = y + 0.3 * tam;
+    return reglas.v.some((r) => r.x > xa - 0.5 && r.x < xb + 0.5 && r.y0 <= ym && r.y1 >= ym);
+  }
+  // ¿Hay una raya horizontal entre una línea de arriba (u) y una de abajo (l), sobre el texto de las dos?
+  function rayaHorizontalEntre(reglas, u, l) {
+    if (!reglas) return false;
+    const xa = Math.max(u.x0, l.x0), xb = Math.min(u.x1, l.x1);
+    return reglas.h.some((r) => r.y < u.y - 0.35 * u.tam && r.y > l.y + 0.5 * l.tam && r.x0 < xb && r.x1 > xa);
+  }
+
+  function lineas(items, reglas) {
     const alturas = [];
     for (const it of items.filter((i) => i.texto && i.texto.trim() && i.tam > 0).sort((a, b) => b.y - a.y)) {
       const g = alturas.find((x) => Math.abs(x.y - it.y) < 0.35 * Math.max(x.tam, it.tam));
@@ -28,7 +47,7 @@
     const ordenados = alturas.flatMap((g) => g.items.sort((a, b) => a.x - b.x).map((it) => ({ ...it, yLinea: g.y })));
     const ls = [];
     for (const it of ordenados) {
-      const l = ls.find((x) => x.y === it.yLinea && it.x >= x.x1 - 0.5 * it.tam && it.x - x.x1 < 2.5 * it.tam);
+      const l = ls.find((x) => x.y === it.yLinea && it.x >= x.x1 - 0.5 * it.tam && it.x - x.x1 < HUECO_COLUMNA * it.tam && !rayaVerticalEntre(reglas, x.x1, it.x, x.y, x.tam));
       if (l) {
         const hueco = it.x - l.x1;
         const pegar = hueco < 0.15 * it.tam || /\s$/.test(l.texto) || /^\s/.test(it.texto) || (CJK.test(l.texto.slice(-1)) && CJK.test(it.texto[0]));
@@ -36,8 +55,10 @@
         l.x1 = Math.max(l.x1, it.x + it.ancho);
         l.tam = Math.max(l.tam, it.tam);
         l.negritas += it.negrita ? it.texto.length : 0; l.letras += it.texto.length;
+        l.piezas.push({ texto: it.texto, x: it.x, y: it.y, tam: it.tam, cursiva: it.cursiva, mono: it.mono, serifa: it.serifa });
       } else {
-        ls.push({ texto: it.texto, x0: it.x, x1: it.x + it.ancho, y: it.yLinea, tam: it.tam, negritas: it.negrita ? it.texto.length : 0, letras: it.texto.length });
+        ls.push({ texto: it.texto, x0: it.x, x1: it.x + it.ancho, y: it.yLinea, tam: it.tam, negritas: it.negrita ? it.texto.length : 0, letras: it.texto.length,
+          piezas: [{ texto: it.texto, x: it.x, y: it.y, tam: it.tam, cursiva: it.cursiva, mono: it.mono, serifa: it.serifa }] });
       }
     }
     for (const l of ls) l.texto = l.texto.replace(/\s+/g, ' ').trim();
@@ -51,9 +72,9 @@
     return a + ' ' + b;
   }
 
-  function bloques(items) {
+  function bloques(items, { reglas } = {}) {
     const bs = [];
-    for (const l of lineas(items)) {
+    for (const l of lineas(items, reglas)) {
       const negrita = l.negritas > l.letras / 2;
       // Un bloque abierto que siga: mismo tamaño (± 20 %), justo debajo (hueco de menos de 1,8 líneas), que se superpongan en horizontal,
       // y que no sea un párrafo nuevo (la línea anterior cerró con punto y fue corta, o la nueva tiene sangría).
@@ -64,19 +85,20 @@
         if (Math.abs(x.tam - l.tam) > 0.2 * x.tam || hueco <= 0 || hueco > 1.8 * x.tam) return false;
         if (l.x0 > x.x1 || l.x1 < x.x0) return false;
         if (negrita !== x.negrita) return false;
+        if (rayaHorizontalEntre(reglas, u, l)) return false;
         if (FIN_ORACION.test(u.texto) && (u.x1 < x.x0 + 0.75 * (x.x1 - x.x0) || l.x0 > x.x0 + 1.2 * x.tam)) return false;
         return true;
       });
       if (b) {
         b.interlinea = b.lineas.length === 1 ? b.ult.y - l.y : (b.interlinea * (b.lineas.length - 1) + (b.ult.y - l.y)) / b.lineas.length;
         b.texto = unirLinea(b.texto, l.texto);
-        b.lineas.push(l); b.ult = l;
+        b.lineas.push(l); b.ult = l; b.piezas.push(...l.piezas);
         b.x0 = Math.min(b.x0, l.x0); b.x1 = Math.max(b.x1, l.x1);
         b.y0 = l.y - 0.25 * l.tam;
       } else {
         // Las líneas por encima de esta que ya no pueden seguir (quedaron arriba de un hueco grande) se cierran.
         for (const x of bs) if (!x.cerrado && x.ult.y - l.y > 1.8 * x.tam && !(l.x0 > x.x1 || l.x1 < x.x0)) x.cerrado = true;
-        bs.push({ texto: l.texto, lineas: [l], ult: l, x0: l.x0, x1: l.x1, y1: l.y + 0.85 * l.tam, y0: l.y - 0.25 * l.tam, tam: l.tam, interlinea: 1.2 * l.tam, negrita });
+        bs.push({ texto: l.texto, lineas: [l], ult: l, piezas: l.piezas.slice(), x0: l.x0, x1: l.x1, y1: l.y + 0.85 * l.tam, y0: l.y - 0.25 * l.tam, tam: l.tam, interlinea: 1.2 * l.tam, negrita });
       }
     }
     // Orden de lectura: por columnas (bloques que se superponen en horizontal más de la mitad del más angosto van juntos, de arriba abajo),
@@ -88,7 +110,48 @@
     }
     columnas.sort((a, b) => a.x0 - b.x0);
     const ordenados = columnas.flatMap((c) => c.bloques.sort((a, b) => b.y1 - a.y1));
-    return ordenados.map(({ texto, x0, x1, y0, y1, tam, interlinea, lineas: ls, negrita }) => ({ texto, x0, x1, y0, y1, tam, interlinea, negrita, lineas: ls.length }));
+    return ordenados.map(({ texto, x0, x1, y0, y1, tam, interlinea, lineas: ls, negrita, piezas }) =>
+      ({ texto, x0, x1, y0, y1, tam, interlinea, negrita, lineas: ls.length, piezas, celda: celdaDe(reglas, { x0, x1, y0, y1, tam }),
+        ...estiloDe(piezas) }));
+  }
+
+  // Cursiva, monoespaciada y serifa de un bloque: lo que tenga la mayoría de sus letras.
+  function estiloDe(piezas) {
+    const total = piezas.reduce((t, p) => t + p.texto.length, 0) || 1;
+    const mayoria = (k) => piezas.reduce((t, p) => t + (p[k] ? p.texto.length : 0), 0) > total / 2;
+    return { cursiva: mayoria('cursiva'), mono: mayoria('mono'), serifa: mayoria('serifa') };
+  }
+
+  // Lugar libre alrededor de un bloque (sin otro texto ni raya de tabla): hasta dónde puede crecer la traducción hacia la derecha y hacia abajo.
+  function espacioLibre(b, otros, caja) {
+    let derecha = caja ? caja[2] - 18 : Infinity, abajo = caja ? caja[1] + 18 : -Infinity;
+    if (b.celda && b.celda.x1 !== undefined) derecha = Math.min(derecha, b.celda.x1 - 1.5);
+    if (b.celda && b.celda.y0 !== undefined) abajo = Math.max(abajo, b.celda.y0 + 1);
+    for (const o of otros) {
+      if (o === b) continue;
+      if (o.y0 < b.y1 && o.y1 > b.y0 && o.x0 >= b.x1 - 1) derecha = Math.min(derecha, o.x0 - 3);
+      if (o.x0 < b.x1 && o.x1 > b.x0 && o.y1 <= b.y0 + 1) abajo = Math.max(abajo, o.y1 + 1);
+    }
+    return { derecha, abajo };
+  }
+
+  // Hasta dónde llega la celda de un bloque: la primera raya vertical a su derecha y la primera horizontal debajo (si la hay).
+  function celdaDe(reglas, b) {
+    if (!reglas) return undefined;
+    const ym = (b.y0 + b.y1) / 2, xm = (b.x0 + b.x1) / 2;
+    let x1 = Infinity, y0 = -Infinity;
+    for (const r of reglas.v) if (r.x >= b.x1 - 1 && r.x < x1 && r.y0 <= ym && r.y1 >= ym) x1 = r.x;
+    for (const r of reglas.h) if (r.y <= b.y0 + 0.3 * b.tam && r.y > y0 && r.x0 <= xm && r.x1 >= xm) y0 = r.y;
+    return x1 === Infinity && y0 === -Infinity ? undefined : { x1: x1 === Infinity ? undefined : x1, y0: y0 === -Infinity ? undefined : y0 };
+  }
+
+  // Lo que no se traduce: solo números o signos, correos, direcciones web, rutas y códigos (letras y cifras juntas, como «ICEPERBARAM2» o «A4»).
+  function identificador(t) {
+    return !/\p{L}/u.test(t) || /@|^(?:https?:\/\/|www\.)/i.test(t) || /^[\p{L}\d_-]+(?:[./\\_][\p{L}\d_-]+)+$/u.test(t) || (/\d/.test(t) && /\p{L}/u.test(t));
+  }
+  function esTraducible(texto) {
+    const trozos = String(texto || '').trim().split(/\s+/).filter(Boolean);
+    return trozos.length > 0 && !trozos.every(identificador);
   }
 
   // ───────── Acomodar la traducción ─────────
@@ -110,10 +173,10 @@
     return ls;
   }
 
-  function acomodar(texto, { ancho, alto, tam, interlinea, medir, asiatico }) {
+  function acomodar(texto, { ancho, alto, tam, interlinea, medir, asiatico, pasos = 14 }) {
     const proporcion = (interlinea || 1.2 * tam) / tam;
     let t = tam;
-    for (let i = 0; i <= 14; i++) {
+    for (let i = 0; i <= pasos; i++) {
       const ls = cortar(texto, ancho, t, medir, asiatico);
       const largo = ls.reduce((m, l) => Math.max(m, medir(l, t)), 0);
       // Alto que ocupa: las líneas con su interlineado (la última solo con su cuerpo).
@@ -139,9 +202,73 @@
       try { nombre = pagina.commonObjs.has(it.fontName) ? String(pagina.commonObjs.get(it.fontName).name || '') : ''; } catch (err) { nombre = ''; }
       const familia = (contenido.styles[it.fontName] || {}).fontFamily || '';
       items.push({ texto: it.str, x: e, y: f, ancho: it.width, tam, negrita: /bold|black|heavy|semibold/i.test(nombre),
+        cursiva: /italic|oblique|[-,]it\b|ital\b/i.test(nombre), mono: /mono|courier|consolas|menlo|lucida ?console|typewriter/i.test(nombre + ' ' + familia),
         serifa: /serif(?!-?sans)|times|roman|georgia|garamond|cambria|book|minion/i.test(nombre + ' ' + familia) && !/sans/i.test(nombre + ' ' + familia) });
     }
     return items;
+  }
+
+  // Las rayas de la página (bordes de tablas, líneas de gráficos): del dibujo del PDF. Cada trazo recto horizontal o vertical de un contorno,
+  // y los rectángulos rellenos muy finos (una raya hecha con un rectángulo). Coordenadas del PDF (y hacia arriba).
+  const TRAZAR = new Set([20, 21, 24, 25, 26, 27]), RELLENAR = new Set([22, 23, 24, 25, 26, 27]);
+  async function reglasDePagina(pagina) {
+    const reglas = { v: [], h: [] };
+    let lista;
+    try { lista = await pagina.getOperatorList(); } catch (err) { return reglas; }
+    const O = raiz.pdfjsLib && raiz.pdfjsLib.OPS;
+    if (!O) return reglas;
+    const mul = (m1, m2) => [m1[0] * m2[0] + m1[1] * m2[2], m1[0] * m2[1] + m1[1] * m2[3], m1[2] * m2[0] + m1[3] * m2[2], m1[2] * m2[1] + m1[3] * m2[3],
+      m1[4] * m2[0] + m1[5] * m2[2] + m2[4], m1[4] * m2[1] + m1[5] * m2[3] + m2[5]];
+    let ctm = [1, 0, 0, 1, 0, 0];
+    const pila = [];
+    const MIN = 6, MAX = 3000;
+    const recta = (a, b) => {
+      const dx = Math.abs(a[0] - b[0]), dy = Math.abs(a[1] - b[1]);
+      if (dx < 0.5 && dy >= MIN) reglas.v.push({ x: (a[0] + b[0]) / 2, y0: Math.min(a[1], b[1]), y1: Math.max(a[1], b[1]) });
+      else if (dy < 0.5 && dx >= MIN) reglas.h.push({ y: (a[1] + b[1]) / 2, x0: Math.min(a[0], b[0]), x1: Math.max(a[0], b[0]) });
+    };
+    for (let i = 0; i < lista.fnArray.length && reglas.v.length + reglas.h.length < MAX; i++) {
+      const f = lista.fnArray[i], args = lista.argsArray[i];
+      if (f === O.save) pila.push(ctm);
+      else if (f === O.restore) { if (pila.length) ctm = pila.pop(); }
+      else if (f === O.transform) ctm = mul(args, ctm);
+      else if (f === O.constructPath) {
+        const pintar = args[0];
+        const datos = args[1] && args[1].length && typeof args[1][0] === 'object' ? args[1][0] : args[1];
+        if (!datos || (!TRAZAR.has(pintar) && !RELLENAR.has(pintar))) continue;
+        const pt = (x, y) => [x * ctm[0] + y * ctm[2] + ctm[4], x * ctm[1] + y * ctm[3] + ctm[5]];
+        let sub = [], cerrada = false, curva = false;
+        const cerrarSub = () => {
+          if (sub.length >= 2 && !curva) {
+            const n = sub.length;
+            if (TRAZAR.has(pintar)) {
+              for (let k = 1; k < n; k++) recta(sub[k - 1], sub[k]);
+              if (cerrada && n > 2) recta(sub[n - 1], sub[0]);
+            }
+            if (RELLENAR.has(pintar) && (n === 4 || n === 5)) {
+              const xs = sub.map((q) => q[0]), ys = sub.map((q) => q[1]);
+              const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+              const w = x1 - x0, h = y1 - y0;
+              if (Math.min(w, h) <= 3 && Math.max(w, h) >= MIN) {
+                if (w >= h) recta([x0, (y0 + y1) / 2], [x1, (y0 + y1) / 2]); else recta([(x0 + x1) / 2, y0], [(x0 + x1) / 2, y1]);
+              }
+            }
+          }
+          sub = []; cerrada = false; curva = false;
+        };
+        for (let k = 0; k < datos.length;) {
+          const op = datos[k++];
+          if (op === 0) { cerrarSub(); sub = [pt(datos[k], datos[k + 1])]; k += 2; }
+          else if (op === 1) { sub.push(pt(datos[k], datos[k + 1])); k += 2; }
+          else if (op === 2) { curva = true; k += 6; }
+          else if (op === 3) { curva = true; k += 4; }
+          else if (op === 4) cerrada = true;
+          else break;
+        }
+        cerrarSub();
+      }
+    }
+    return reglas;
   }
 
   // Colores de fondo y de letra de cada bloque, mirando la página dibujada: el fondo = el color más común en un borde alrededor del
@@ -344,20 +471,21 @@
         });
         escaneada = items.length > 0;
       }
-      const bs = bloques(items);
+      const bs = bloques(items, { reglas: escaneada ? undefined : await reglasDePagina(pagina) });
+      for (const b of bs) b.conservar = !esTraducible(b.texto);
       const aPixel = (x, y) => vista.convertToViewportPoint(x, y);
       for (const b of bs) Object.assign(b, colores(ctx, aPixel, b));
-      // Serifa: la mayoría de los trozos de la página.
-      const conSerifa = items.filter((i) => i.serifa).length > items.length / 2;
-      for (const b of bs) b.serifa = conSerifa;
-      paginas.push({ bloques: bs, escaneada });
+      paginas.push({ bloques: bs, escaneada, caja: pagina.view });
       lienzo.width = lienzo.height = 0;
     }
     const todos = paginas.flatMap((p) => p.bloques);
-    const r = await raiz.TraductorDocumentos.traducirUnidades(todos.map((b) => [{ texto: b.texto, formato: '' }]), {
+    // Lo que no se traduce (números, correos, códigos) se deja como está.
+    const aTraducir = todos.filter((b) => !b.conservar);
+    const r = await raiz.TraductorDocumentos.traducirUnidades(aTraducir.map((b) => [{ texto: b.texto, formato: '' }]), {
       traducir: (segs, d, avisar) => traductor(segs, d, { progreso: avisar }), destino, progreso,
     });
-    todos.forEach((b, i) => { b.traduccion = r[i].map((t) => t.texto).join('').trim(); });
+    aTraducir.forEach((b, i) => { b.traduccion = r[i].map((t) => t.texto).join('').trim(); });
+    todos.filter((b) => b.conservar).forEach((b) => { b.traduccion = b.texto; });
 
     // Modo «quitar»: se borra el texto original de cada página (no de las escaneadas: ahí el texto es parte de la imagen) y se vuelve a
     // leer con PDF.js: un bloque que todavía tenga texto debajo (texto dentro de un objeto reutilizado, Form XObject) se tapa igual.
@@ -369,27 +497,30 @@
     if (quitar) {
       const limpio = await PDFLib.PDFDocument.load(bytes, { updateMetadata: false });
       paginas.forEach((p, n) => {
-        if (p.escaneada) { p.bloques.forEach((b) => aTapar.add(b)); return; }
+        if (p.escaneada) { p.bloques.filter((b) => !b.conservar).forEach((b) => aTapar.add(b)); return; }
         const r2 = quitarTextoDePagina(limpio, limpio.getPage(n));
         quitados += r2.quitados;
-        if (r2.error) p.bloques.forEach((b) => aTapar.add(b));
+        if (r2.error) p.bloques.forEach((b) => { if (!b.conservar) aTapar.add(b); });
+        else p.bloques.forEach((b) => { if (b.conservar) b.redibujar = true; });
       });
       base = await limpio.save();
       const revisado = await abrir(base.slice());
       for (let n = 0; n < paginas.length; n++) {
         const quedan = await itemsDePagina(await revisado.getPage(n + 1));
         for (const b of paginas[n].bloques) {
-          if (quedan.some((it) => it.x < b.x1 && it.x + it.ancho > b.x0 && it.y < b.y1 && it.y + 0.7 * it.tam > b.y0)) aTapar.add(b);
+          if (quedan.some((it) => it.x < b.x1 && it.x + it.ancho > b.x0 && it.y < b.y1 && it.y + 0.7 * it.tam > b.y0)) {
+            if (b.conservar) b.redibujar = false; else aTapar.add(b);
+          }
         }
       }
-    } else todos.forEach((b) => aTapar.add(b));
+    } else todos.forEach((b) => { if (!b.conservar) aTapar.add(b); });
 
     // Escribir: la traducción en el lugar de cada bloque (con un recuadro del color del fondo debajo cuando hay que tapar).
     const doc = await PDFLib.PDFDocument.load(base, { updateMetadata: false });
     doc.registerFontkit(raiz.fontkit);
     const cache = new Map();
     const fuente = async (clave) => {
-      if (!cache.has(clave)) cache.set(clave, doc.embedFont(fuentes[clave], { subset: true }));
+      if (!cache.has(clave)) cache.set(clave, (async () => doc.embedFont(typeof fuentes[clave] === 'function' ? await fuentes[clave]() : fuentes[clave], { subset: true }))());
       return cache.get(clave);
     };
     const asiatico = ASIATICO.has(destino);
@@ -398,15 +529,41 @@
       const pag = doc.getPage(n);
       for (const b of paginas[n].bloques) {
         if (!b.traduccion) continue;
-        const clave = asiatico ? (b.negrita && fuentes.cjkNegrita ? 'cjkNegrita' : 'cjk') : `${b.serifa ? 'serifa' : 'sans'}${b.negrita ? 'Negrita' : ''}`;
-        const f = await fuente(fuentes[clave] ? clave : (asiatico ? 'cjk' : 'sans'));
+        if (b.conservar && !b.redibujar) continue;
+        // La fuente más parecida a la original: monoespaciada, con o sin serifa, negrita y cursiva (la que falte se reemplaza por la más cercana).
+        const base = b.mono && fuentes.mono ? 'mono' : b.serifa ? 'serifa' : 'sans';
+        const nb = b.negrita ? 'Negrita' : '', cu = b.cursiva ? 'Cursiva' : '';
+        const clave = asiatico ? (b.negrita && fuentes.cjkNegrita ? 'cjkNegrita' : 'cjk') : [base + nb + cu, base + nb, base, 'sans'].find((k) => fuentes[k]);
+        const f = await fuente(clave || 'cjk');
         // Letras que la fuente no tiene (signos raros): fuera, para que pdf-lib no falle.
         if (!f._letras) f._letras = new Set(f.getCharacterSet());
         const texto = f._letras.size ? [...b.traduccion].filter((c) => /\s/.test(c) || f._letras.has(c.codePointAt(0))).join('') : b.traduccion;
+        if (b.conservar) {
+          // Números, correos y códigos: se vuelven a poner donde estaban, pieza por pieza (el texto original se quitó).
+          for (const pz of b.piezas) {
+            const t = f._letras.size ? [...pz.texto].filter((c) => /\s/.test(c) || f._letras.has(c.codePointAt(0))).join('') : pz.texto;
+            if (t.trim()) pag.drawText(t, { x: pz.x, y: pz.y, size: pz.tam, font: f, color: PDFLib.rgb(...b.letra) });
+          }
+          continue;
+        }
         const ancho = b.x1 - b.x0, altoB = b.y1 - b.y0;
-        // El coreano separa palabras con espacios: se corta por palabras, como el español.
-        const ac = acomodar(texto, { ancho, alto: altoB, tam: b.tam, interlinea: b.interlinea, medir: (s, t) => f.widthOfTextAtSize(s, t),
-          asiatico: asiatico && destino !== 'ko' });
+        // En una tabla la traducción puede usar toda la celda (hasta la raya de la derecha y la de abajo), no solo lo que ocupaba el original.
+        const cajaAncho = b.celda && b.celda.x1 !== undefined ? Math.max(ancho, b.celda.x1 - 1.5 - b.x0) : ancho;
+        const cajaAlto = b.celda && b.celda.y0 !== undefined ? Math.max(altoB, b.y1 - b.celda.y0 - 1) : altoB;
+        // Se mantiene el tamaño de la letra: primero en el lugar del original (o su celda); si no entra, en el lugar libre de alrededor (un poco
+        // más ancho, hasta el siguiente texto o raya, y hacia abajo); solo si todavía no entra se achica la letra. El coreano separa palabras con
+        // espacios: se corta por palabras, como el español.
+        const dat = { tam: b.tam, interlinea: b.interlinea, medir: (s, t) => f.widthOfTextAtSize(s, t), asiatico: asiatico && destino !== 'ko' };
+        const libre = espacioLibre(b, paginas[n].bloques, paginas[n].caja);
+        const anchoL = Math.max(cajaAncho, Math.min(libre.derecha - b.x0, Math.max(1.5 * ancho, ancho + 6 * b.tam)));
+        const altoL = Math.max(cajaAlto, b.y1 - libre.abajo);
+        // Cada intento crece un poco más: el lugar del original, el ancho de la celda, el lugar libre a la derecha y, por último, más líneas.
+        let ac = null;
+        for (const [w, h] of [[ancho, altoB], [cajaAncho, altoB], [anchoL, altoB], [anchoL, altoL]]) {
+          ac = acomodar(texto, { ...dat, ancho: w, alto: h, pasos: 0 });
+          if (ac.cabe) break;
+        }
+        if (!ac.cabe) ac = acomodar(texto, { ...dat, ancho: anchoL, alto: altoL });
         if (!ac.cabe) sinCaber.push(b);
         // El recuadro tapa el original (con un margen chico) y también lo que ocupe de más la traducción que no cupo.
         const extra = ac.cabe ? 0 : Math.max(0, (ac.lineas.length - 1) * ac.interlinea + 1.1 * ac.tam - altoB);
@@ -446,6 +603,6 @@
     return { hijos };
   }
 
-  raiz.TraductorPdf = Object.assign(raiz.TraductorPdf || {}, { bloques, acomodar, traducir, comoDocx, marcarIA,
+  raiz.TraductorPdf = Object.assign(raiz.TraductorPdf || {}, { bloques, acomodar, esTraducible, reglasDePagina, espacioLibre, traducir, comoDocx, marcarIA,
     _nucleo: { lineas, unirLinea, cortar, colores, itemsDePagina, quitarTextoDeContenido } });
 })(typeof self !== 'undefined' ? self : globalThis);
