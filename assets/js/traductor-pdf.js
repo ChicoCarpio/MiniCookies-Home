@@ -418,31 +418,17 @@
         });
       }
     }
-    // Marca de contenido generado con IA: una línea chica y discreta abajo a la izquierda de la última página, y los metadatos del PDF.
-    await marcarIA(doc, fuente, destino, asiatico);
+    marcarIA(doc);
     const salida = await doc.save();
     const texto = paginas.map((p) => p.bloques.map((b) => b.traduccion).filter(Boolean).join('\n\n')).join('\n\n\f\n\n');
     return { bytes: salida, texto, paginas, estadistica: { ...r.estadistica, bloques: todos.length, sinCaber: sinCaber.length,
       escaneadas: paginas.filter((p) => p.escaneada).length, modo: quitar ? 'quitar' : 'tapar', tapados: aTapar.size, textosQuitados: quitados } };
   }
 
-  // Texto de la marca en el idioma del destino (cada uno con la fuente que sí tiene sus letras).
-  const MARCA_IA = { es: 'Traducido con IA (Interpres Phone V1) · minicookies.net', en: 'Translated with AI (Interpres Phone V1) · minicookies.net',
-    pt: 'Traduzido com IA (Interpres Phone V1) · minicookies.net', fr: 'Traduit avec une IA (Interpres Phone V1) · minicookies.net',
-    de: 'Mit KI übersetzt (Interpres Phone V1) · minicookies.net', it: 'Tradotto con IA (Interpres Phone V1) · minicookies.net',
-    zh: '由 AI 翻译（Interpres Phone V1）· minicookies.net', ja: 'AIで翻訳（Interpres Phone V1）· minicookies.net', ko: 'AI로 번역됨 (Interpres Phone V1) · minicookies.net' };
-  async function marcarIA(doc, fuente, destino, asiatico) {
+  // Marca de contenido generado con IA, solo en los metadatos del PDF (Asunto y Palabras clave), como en Word y EPUB.
+  function marcarIA(doc) {
     doc.setSubject('Translated with AI (Interpres Phone V1), minicookies.net');
     doc.setKeywords(['AI-translated', 'Interpres Phone V1', 'Mini Cookies']);
-    const paginasDoc = doc.getPages();
-    if (!paginasDoc.length) return;
-    const pag = paginasDoc[paginasDoc.length - 1];
-    const caja = pag.getCropBox();
-    const clave = asiatico ? 'cjk' : 'sans';
-    const f = await fuente(clave);
-    if (!f._letras) f._letras = new Set(f.getCharacterSet());
-    const texto = [...(MARCA_IA[destino] || MARCA_IA.en)].filter((c) => /\s/.test(c) || f._letras.has(c.codePointAt(0))).join('');
-    pag.drawText(texto, { x: caja.x + 14, y: caja.y + 8, size: 6.5, font: f, color: PDFLib.rgb(0.5, 0.5, 0.5) });
   }
 
   // Los bloques traducidos como documento para el escritor de Word del sitio (EscritorDocx): títulos por tamaño de letra.
