@@ -25,6 +25,8 @@
 // Etapa 4 (2026-11-13):
 //   ordenar-lineas, quitar-lineas, encabezado-pie-texto, arreglar-codificacion   TextoRetoques (sus 4 páginas)   texto -> texto
 //   reparar-pdf         PdfReparar (reparar-pdf.html)                 pdf -> pdf
+// Etapa 5 (2026-11-18):
+//   traducir-documento  TraducirArchivo (traducir-documentos.html)    pdf|documento|texto -> igual (Word, EPUB, Markdown, texto y PDF; el modelo traduce en sus propios hilos)
 //
 // Un módulo que junta (forma 'juntar', como unir-pdf) es el que se usa para unir varias entradas, pero el tramo
 // común acepta cualquier módulo que reciba lo que llega de todas: unir PDF es solo el primero de ese tipo.
@@ -1005,6 +1007,38 @@
         if (e.codigo === 'sin-nada' || e.codigo === 'sin-paginas') throw fallo({ es: 'no se pudo rescatar ninguna página', en: 'no page could be rescued' });
         throw e;
       }
+    },
+  });
+
+  // ---------- 34. Traducir documento ----------
+  const IDIOMAS_TRADUCIR = [
+    { valor: 'es', es: 'Español', en: 'Spanish' }, { valor: 'en', es: 'Inglés', en: 'English' }, { valor: 'pt', es: 'Portugués', en: 'Portuguese' },
+    { valor: 'fr', es: 'Francés', en: 'French' }, { valor: 'de', es: 'Alemán', en: 'German' }, { valor: 'it', es: 'Italiano', en: 'Italian' },
+    { valor: 'zh', es: 'Chino (simplificado)', en: 'Chinese (simplified)' }, { valor: 'ja', es: 'Japonés', en: 'Japanese' }, { valor: 'ko', es: 'Coreano', en: 'Korean' },
+  ];
+  F.registrar({
+    id: 'traducir-documento',
+    icono: '🌐',
+    nombre: { es: 'Traducir documento', en: 'Translate document' },
+    descripcion: { es: 'Traduce un Word, PDF, EPUB, Markdown o texto a otro idioma y lo entrega en el mismo formato, con la IA de Mini Cookies que corre en tu navegador.', en: 'Translates a Word, PDF, EPUB, Markdown or text file into another language and gives it back in the same format, with Mini Cookies’ own AI running in your browser.' },
+    entra: ['pdf', 'documento', 'texto'], sale: 'igual', forma: 'uno',
+    opciones: [
+      { id: 'destino', tipo: 'select', defecto: 'en', etiqueta: { es: 'Traducir al', en: 'Translate into' }, valores: IDIOMAS_TRADUCIR },
+      { id: 'origen', tipo: 'select', defecto: 'es', etiqueta: { es: 'Idioma del PDF (solo si tiene páginas escaneadas)', en: 'PDF language (only if it has scanned pages)' }, valores: IDIOMAS_TRADUCIR },
+      { id: 'modo', tipo: 'select', defecto: 'quitar', etiqueta: { es: 'En un PDF, el texto original', en: 'In a PDF, the original text' },
+        valores: [{ valor: 'quitar', es: 'Quitarlo', en: 'Remove it' }, { valor: 'tapar', es: 'Taparlo', en: 'Cover it' }] },
+    ],
+    // El modelo traduce en sus propios hilos de trabajo (varios por documento): por eso un archivo a la vez y en la página.
+    simultaneos: 1,
+    async preparar() { await js('traductor-archivo.js'); await TraducirArchivo.preparar(); },
+    terminar() { return window.TraducirArchivo ? TraducirArchivo.cerrar() : Promise.resolve(); },
+    async ejecutar(f, o) {
+      const tipo = TraducirArchivo.tipoDe(f.nombre);
+      if (!tipo) throw fallo({ es: 'este formato no se puede traducir (sirven Word, PDF, EPUB, Markdown y texto)', en: 'this format can’t be translated (Word, PDF, EPUB, Markdown and text work)' });
+      const r = await TraducirArchivo.traducir(tipo === 'txt' || tipo === 'md' ? await f.blob.text() : await f.blob.arrayBuffer(), tipo,
+        { destino: o.destino, origen: o.origen, modo: o.modo, comoDocx: false });
+      return { ...f, blob: new Blob([r.bytes], { type: r.mime }), nombre: F.base(f.nombre) + '-' + o.destino + '.' + r.ext,
+        tipo: r.ext === 'pdf' ? 'pdf' : r.ext === 'txt' ? 'texto' : 'documento' };
     },
   });
 })();
