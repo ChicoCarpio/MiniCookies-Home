@@ -211,6 +211,8 @@
     }
     // Idioma del libro.
     opf = opf.replace(/(<dc:language\b[^>]*>)[^<]*(<\/dc:language>)/, `$1${destino}$2`);
+    // Marca de contenido generado con IA en los metadatos del libro.
+    opf = opf.replace(/<\/((?:\w+:)?metadata)>/, '<meta name="ai-translation" content="Translated with AI (Interpres Phone V1), minicookies.net"/></$1>');
     zip.file(rutaOpf, opf);
     // El mimetype va primero y sin comprimir (lo pide el estándar): ZipPropio conserva el orden de las entradas.
     zip.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
