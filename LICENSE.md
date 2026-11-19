@@ -32,14 +32,14 @@ transparencia, inspección, estudio y aprendizaje.
 El objetivo es que cualquier persona pueda conocer cómo está construido Mini Cookies,
 mientras el titular conserva los derechos exclusivos de reproducción, adaptación,
 distribución, puesta a disposición del público y cualquier otra forma de explotación del
-código, conforme al artículo 16 de la Ley N.º 6683 de Derechos de Autor y Derechos Conexos
+código, conforme a la Ley N.º 6683 de Derechos de Autor y Derechos Conexos
 de Costa Rica.
 
 ## 2. Qué cubre esta licencia
 
 Esta licencia se aplica a todo el contenido de este repositorio que es obra original del
-titular: el código fuente, su documentación técnica (que la Ley N.º 6683, artículo 4,
-inciso ñ, considera parte del programa de cómputo), los textos de las páginas y de las
+titular: el código fuente, su documentación técnica (que la Ley N.º 6683
+considera parte del programa de cómputo), los textos de las páginas y de las
 guías, y las imágenes y diseños propios, y los modelos de inteligencia artificial propios
 (Custos, Librarius, Versus y los que el titular publique después): los archivos de
 `assets/modelos/` y cualquier copia de ellos, con su arquitectura, sus pesos o parámetros,
@@ -75,22 +75,22 @@ Cualquier persona puede:
 - Analizar sus técnicas de programación y su arquitectura.
 - Aprender de los conceptos y conocimientos técnicos que contiene.
 - Hacer cambios en su propia copia para probar o entender cómo funciona el código, solo
-  para uso personal y sin distribuirlos (lo que coincide con el artículo 10 del
+  para uso personal y sin distribuirlos (lo que coincide con el
   Reglamento a la Ley N.º 6683, Decreto Ejecutivo N.º 24611-J).
 - Usar el código para entrenar, ajustar o evaluar modelos de inteligencia artificial, e
   incluirlo con ese fin en conjuntos de datos de entrenamiento. Este permiso no se
   extiende a los Modelos, a las guías ni a los demás textos (secciones 13 y 14), ni a los
   componentes de terceros (sección 8), que se rigen por sus propias licencias.
 - Citar fragmentos breves en análisis, críticas, artículos o material educativo,
-  indicando la fuente y el autor, en la medida que permite el artículo 70 de la
+  indicando la fuente y el autor, en la medida que permite la
   Ley N.º 6683.
 
 Estos permisos se conceden de forma expresa porque la reproducción de la obra es un
-derecho exclusivo del titular (Ley N.º 6683, artículo 16) y la excepción de copia personal
-de esa ley no se aplica a los programas de cómputo (artículo 74). La única copia que la
+derecho exclusivo del titular (Ley N.º 6683) y la excepción de copia personal
+de esa ley no se aplica a los programas de cómputo. La única copia que la
 ley permite sin autorización es una de resguardo o seguridad y la carga del programa en la
 memoria del equipo para usarlo, salvo que la licencia disponga otra cosa (Decreto
-Ejecutivo N.º 24611-J, artículo 9). Estos permisos no autorizan a reutilizar el código en
+Ejecutivo N.º 24611-J). Estos permisos no autorizan a reutilizar el código en
 otros productos o servicios.
 
 ## 5. Usos que requieren autorización
@@ -116,12 +116,12 @@ derecho de reutilización.
 
 ## 6. Autoría y atribución
 
-El titular conserva sobre su obra los derechos morales que reconocen los artículos 13 y 14
-de la Ley N.º 6683, que son irrenunciables. En consecuencia, nadie puede:
+El titular conserva sobre su obra los derechos morales que reconoce
+la Ley N.º 6683, que son irrenunciables. En consecuencia, nadie puede:
 
 - Presentar el código original de Mini Cookies como creación propia.
 - Eliminar o modificar los avisos de copyright o de licencia, que son información sobre
-  la gestión de derechos (Ley N.º 8039, artículos 2 bis, inciso b, y 63).
+  la gestión de derechos (Ley N.º 8039).
 - Registrar o reclamar como propio el código de Mini Cookies.
 - Redistribuir el código como si tuviera una licencia que permitiera reutilizarlo.
 
@@ -132,7 +132,7 @@ aparentar una afiliación o autorización que no existe.
 
 Solo el titular puede conceder autorizaciones para reutilizar el código. Pueden ser:
 
-- Gratuitas o remuneradas (el titular fija la retribución, artículo 17 de la
+- Gratuitas o remuneradas (el titular fija la retribución, conforme a la
   Ley N.º 6683).
 - Comerciales o no comerciales.
 - Limitadas a determinados módulos o fragmentos.
@@ -142,12 +142,12 @@ Solo el titular puede conceder autorizaciones para reutilizar el código. Pueden
 
 Cada autorización constará en un documento escrito y firmado por el titular, porque la
 autorización del titular de un derecho de propiedad intelectual es siempre expresa y por
-escrito (Ley N.º 8039, artículo 1). Cuando implique una enajenación (cesión) total o
+escrito (Ley N.º 8039). Cuando implique una enajenación (cesión) total o
 parcial de derechos patrimoniales, se hará en instrumento público o privado ante dos
-testigos, como exige el artículo 89 de la Ley N.º 6683.
+testigos, como exige la Ley N.º 6683.
 
-Que el código sea públicamente accesible no implica ninguna autorización. Conforme al
-artículo 16 de la Ley N.º 6683, los contratos sobre derechos de autor se interpretan de
+Que el código sea públicamente accesible no implica ninguna autorización. Conforme a la
+Ley N.º 6683, los contratos sobre derechos de autor se interpretan de
 forma restrictiva: no se entiende concedido ningún derecho que no esté escrito de forma
 expresa, salvo los que resulten necesariamente de la naturaleza de sus términos.
 
@@ -169,7 +169,7 @@ junto al componente, y la lista completa, con versión y enlace a la licencia, e
 `creditos.html`. Esta licencia no modifica ni limita los derechos que esas licencias
 conceden, y quien reutilice uno de esos componentes debe cumplir su licencia, no esta.
 
-Como establece el artículo 1 de la Ley N.º 6683, la protección cubre la expresión del
+Como establece la Ley N.º 6683, la protección cubre la expresión del
 código y no las ideas, procedimientos, métodos de operación ni conceptos matemáticos en
 sí. Esta licencia no pretende reclamar derechos exclusivos sobre ellos.
 
@@ -181,15 +181,15 @@ de la sección 4 y de las secciones 13 y 14 para quien lo cometa.
 Ese uso, además, infringe los derechos del titular y da lugar a las acciones
 administrativas ante el Registro Nacional de Derechos de Autor y Derechos Conexos y a las
 acciones judiciales que prevé la Ley N.º 8039 de Procedimientos de Observancia de los
-Derechos de Propiedad Intelectual (artículo 1). Entre ellas están:
+Derechos de Propiedad Intelectual. Entre ellas están:
 
 - Las medidas cautelares, la indemnización de daños y perjuicios y el pago de costas
-  (artículos 38 bis, 40 y 40 bis de la Ley N.º 8039), además de las medidas cautelares
-  que puede dictar el Registro según el artículo 95 de la Ley N.º 6683.
+  (Ley N.º 8039), además de las medidas cautelares
+  que puede dictar el Registro según la Ley N.º 6683.
 - Las sanciones penales por reproducir, modificar, distribuir o poner a disposición del
   público la obra sin autorización, o por suprimir o alterar los avisos de derechos
-  (artículos 51, 54, 58, 59 y 63 de la Ley N.º 8039), cuando se cumplan los requisitos
-  de esos artículos. El artículo 70 de esa ley prevé sanciones penales al menos para los
+  (Ley N.º 8039), cuando se cumplan los requisitos
+  que esa ley establece. Esa ley prevé sanciones penales al menos para los
   casos de piratería a escala comercial.
 
 ## 10. Sin garantías
@@ -207,7 +207,7 @@ perjuicio de la protección que otorgan los tratados internacionales de los que 
 Rica es parte, como el Convenio de Berna.
 
 La protección de esta obra existe desde su creación, sin necesidad de registro
-(artículo 101 de la Ley N.º 6683).
+(Ley N.º 6683).
 
 ## 12. Contacto
 
@@ -218,7 +218,7 @@ https://www.minicookies.net/contacto
 
 **13.1 Qué son.** Custos, Librarius y Versus (en adelante, «los Modelos») fueron diseñados y
 entrenados por el titular. El titular los protege como programas de cómputo y producciones
-intelectuales conforme a los artículos 1 y 4, inciso ñ, de la Ley N.º 6683. Además, las
+intelectuales conforme a la Ley N.º 6683. Además, las
 reglas de esta sección son condiciones de uso del sitio y de sus archivos, y se aplican
 aunque alguna parte de un Modelo no alcanzara protección de derecho de autor.
 
@@ -240,8 +240,7 @@ otros modelos, reentrenarlos o ajustarlos, o crear modelos derivados.
 e) Extraer sus pesos, su arquitectura o su alfabeto, o usar sus salidas de forma
 sistemática, para entrenar, ajustar o destilar otro modelo.
 f) Suprimir o alterar los datos de autor, copyright y licencia escritos dentro de cada
-archivo, que son información sobre la gestión de derechos (Ley N.º 8039, artículos 2 bis,
-inciso b, y 63).
+archivo, que son información sobre la gestión de derechos (Ley N.º 8039).
 g) Presentarlos como propios o publicarlos con otro nombre.
 
 **13.4 Lo que se puede hacer sin pedir permiso.** Describir los Modelos, medir su calidad
