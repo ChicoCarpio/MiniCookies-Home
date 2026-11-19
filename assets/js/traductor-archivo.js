@@ -88,9 +88,12 @@
   }
   const bytesDe = async (ruta) => new Uint8Array(await (await fetch(ruta)).arrayBuffer());
   async function fuentesPdf(dest) {
-    const lib = (n) => bytesDe(rutaVendor(`liberation-fonts/2.1.5/${n}.ttf`));
-    const f = { sans: await lib('LiberationSans-Regular'), sansNegrita: await lib('LiberationSans-Bold'),
-      serifa: await lib('LiberationSerif-Regular'), serifaNegrita: await lib('LiberationSerif-Bold') };
+    // Las 12 variantes de Liberation (con y sin serifa, monoespaciada; normal, negrita, cursiva): se bajan solo las que el PDF usa.
+    const lib = (n) => () => bytesDe(rutaVendor(`liberation-fonts/2.1.5/${n}.ttf`));
+    const f = {};
+    for (const [familia, nombre] of [['sans', 'LiberationSans'], ['serifa', 'LiberationSerif'], ['mono', 'LiberationMono']]) {
+      for (const [sufijo, estilo] of [['', 'Regular'], ['Negrita', 'Bold'], ['Cursiva', 'Italic'], ['NegritaCursiva', 'BoldItalic']]) f[familia + sufijo] = lib(`${nombre}-${estilo}`);
+    }
     if (CJK[dest]) {
       f.cjk = await bytesDe(rutaVendor(`noto-sans-cjk/2.004/${CJK[dest]}-Regular.ttf`));
       f.cjkNegrita = await bytesDe(rutaVendor(`noto-sans-cjk/2.004/${CJK[dest]}-Bold.ttf`));
