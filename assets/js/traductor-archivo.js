@@ -1,6 +1,6 @@
 /*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 /*
- * Traducir un archivo de principio a fin: lo comparten la página «Traducir documentos» y el módulo de Flujos (una sola copia).
+ * Traducir un archivo de principio a fin: lo comparten la página «Traductor de documentos» y el módulo de Flujos (una sola copia).
  * Carga lo pesado solo cuando hace falta (el modelo la primera vez, PDF.js, pdf-lib y las fuentes con un PDF, el OCR con una página escaneada).
  * Necesita antes vendor.js, traductor-documentos.js, traductor-docx.js, traductor-epub.js y traductor-hilos.js (los trae `preparar`).
  *
@@ -19,9 +19,10 @@
   const IDIOMAS = ['es', 'en', 'pt', 'fr', 'de', 'it', 'zh', 'ja', 'ko'];
   const OCR_DE = { es: 'spa', en: 'eng', pt: 'por', fr: 'fra', de: 'deu', it: 'ita', zh: 'chi_sim', ja: 'jpn', ko: 'kor' };
   const CJK = { zh: 'NotoSansSC', ja: 'NotoSansJP', ko: 'NotoSansKR' };
-  // Archivos de Interpres Phone V1 (nombre elegido por el usuario el 2026-11-16). Mientras el modelo no exista, MODELO es null y se avisa
-  // que el traductor todavía no está disponible.
-  const MODELO = null; // { vocabulario: 'interpres-vocabulario.json', codificador: 'interpres-phone-v1-codificador-int8.onnx', decodificador: 'interpres-phone-v1-decodificador-int8.onnx', megas: 45 }
+  // Archivos de Interpres Phone V1 (nombre elegido por el usuario el 2026-11-16). Cada .onnx va partido en trozos de 25 MB porque Cloudflare Pages
+  // no admite archivos de más de 25 MiB; traductor-hilos.js los baja en orden y los junta. SHA-256 del archivo entero en 00-huellas.md.
+  const PARTES = (nombre, n) => Array.from({ length: n }, (_, i) => `interpres-phone-v1-${nombre}-int8.onnx.parte${i + 1}`);
+  const MODELO = { vocabulario: 'interpres-vocabulario.json', codificador: PARTES('codificador', 2), decodificador: PARTES('decodificador', 2), megas: 83 };
 
   const TIPOS = [[/\.docx$/i, 'docx'], [/\.pdf$/i, 'pdf'], [/\.epub$/i, 'epub'], [/\.(md|markdown)$/i, 'md'], [/\.txt$/i, 'txt']];
   const tipoDe = (nombre) => { const t = TIPOS.find(([re]) => re.test(nombre || '')); return t ? t[1] : null; };
@@ -64,8 +65,8 @@
       creando = TraductorHilos.crear({
         rutaOrt: absoluta(rutaVendor('onnxruntime-web/1.20.1/')), rutaHilo: BASE + 'traductor-hilo.js',
         rutaPiezas: BASE + 'traductor-piezas.js', rutaMotor: BASE + 'traductor-motor.js',
-        vocabulario: BASE + '../modelos/' + MODELO.vocabulario, codificador: BASE + '../modelos/' + MODELO.codificador,
-        decodificador: BASE + '../modelos/' + MODELO.decodificador,
+        vocabulario: BASE + '../modelos/' + MODELO.vocabulario, codificador: MODELO.codificador.map((f) => BASE + '../modelos/' + f),
+        decodificador: MODELO.decodificador.map((f) => BASE + '../modelos/' + f),
         hilos: Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 4) - 1)),
         alCargar: (bytes, total) => { if (cargando) cargando(bytes, total || MODELO.megas * 1e6); },
       }).then((t) => { traductor = t; return t; }, (e) => { creando = null; throw e; });

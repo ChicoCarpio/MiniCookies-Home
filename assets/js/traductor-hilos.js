@@ -39,7 +39,16 @@
   };
 
   // Baja un archivo informando el avance (bytes recibidos) para la barra de carga del modelo.
+  // `url` puede ser una lista de trozos del mismo archivo (Cloudflare Pages no admite archivos de más de 25 MiB): se bajan en orden y se juntan.
   async function bajar(url, alAvanzar) {
+    if (Array.isArray(url)) {
+      const partes = [];
+      for (const u of url) partes.push(await bajar(u, alAvanzar));
+      const datos = new Uint8Array(partes.reduce((s, p) => s + p.length, 0));
+      let k = 0;
+      for (const p of partes) { datos.set(p, k); k += p.length; }
+      return datos;
+    }
     const r = await fetch(url);
     if (!r.ok) throw new Error(`No se pudo bajar ${url} (${r.status})`);
     const total = Number(r.headers.get('content-length')) || 0;
