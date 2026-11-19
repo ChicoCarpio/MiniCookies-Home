@@ -200,6 +200,16 @@
       X().analizar(nuevo);                        // el XML tiene que seguir bien formado; si no, se corta acá con un error claro
       zip.file(a.ruta, nuevo);
     }
+    // Marca de contenido generado con IA en las propiedades del documento (Archivo > Información).
+    const nucleo = zip.file('docProps/core.xml');
+    if (nucleo) {
+      let xml = await nucleo.async('string');
+      const marca = 'Translated with AI (Interpres Phone V1), minicookies.net';
+      if (/<dc:description[^>]*\/>/.test(xml)) xml = xml.replace(/<dc:description[^>]*\/>/, `<dc:description>${marca}</dc:description>`);
+      else if (/<dc:description[^>]*>/.test(xml)) xml = xml.replace(/(<dc:description[^>]*>)/, `$1${marca}. `);
+      else if (xml.includes('</cp:coreProperties>')) xml = xml.replace('</cp:coreProperties>', `<dc:description>${marca}</dc:description></cp:coreProperties>`);
+      zip.file('docProps/core.xml', xml);
+    }
     const bytes = await zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
     return { bytes, estadistica: r.estadistica };
   }

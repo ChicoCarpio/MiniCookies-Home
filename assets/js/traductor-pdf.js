@@ -418,10 +418,17 @@
         });
       }
     }
+    marcarIA(doc);
     const salida = await doc.save();
     const texto = paginas.map((p) => p.bloques.map((b) => b.traduccion).filter(Boolean).join('\n\n')).join('\n\n\f\n\n');
     return { bytes: salida, texto, paginas, estadistica: { ...r.estadistica, bloques: todos.length, sinCaber: sinCaber.length,
       escaneadas: paginas.filter((p) => p.escaneada).length, modo: quitar ? 'quitar' : 'tapar', tapados: aTapar.size, textosQuitados: quitados } };
+  }
+
+  // Marca de contenido generado con IA, solo en los metadatos del PDF (Asunto y Palabras clave), como en Word y EPUB.
+  function marcarIA(doc) {
+    doc.setSubject('Translated with AI (Interpres Phone V1), minicookies.net');
+    doc.setKeywords(['AI-translated', 'Interpres Phone V1', 'Mini Cookies']);
   }
 
   // Los bloques traducidos como documento para el escritor de Word del sitio (EscritorDocx): títulos por tamaño de letra.
@@ -439,6 +446,6 @@
     return { hijos };
   }
 
-  raiz.TraductorPdf = Object.assign(raiz.TraductorPdf || {}, { bloques, acomodar, traducir, comoDocx,
+  raiz.TraductorPdf = Object.assign(raiz.TraductorPdf || {}, { bloques, acomodar, traducir, comoDocx, marcarIA,
     _nucleo: { lineas, unirLinea, cortar, colores, itemsDePagina, quitarTextoDeContenido } });
 })(typeof self !== 'undefined' ? self : globalThis);

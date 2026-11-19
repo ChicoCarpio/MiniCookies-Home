@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Traducir un Word, PDF o EPUB sin perder el formato (guía) — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Qué se traduce en cada formato, cómo elegir «Quitar el original» o «Tapar el original» en un PDF y qué revisar antes de usar la traducción.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Traducir un Word, PDF o EPUB sin perder el formato (guía) — Mini Cookies',
+    'meta-descripcion': 'Qué se traduce en cada formato, cómo elegir «Quitar el original» o «Tapar el original» en un PDF y qué revisar antes de usar la traducción.',
+    'h1': 'Cómo traducir un Word, PDF o EPUB sin perder el formato',
+    'b1': 'Te llegó un manual en inglés y lo necesitás en español para el equipo de mañana. Pegarlo en un traductor párrafo por párrafo lleva horas, y después hay que rehacer los títulos, las negritas y las tablas. <a href="../herramientas/traducir-documentos.html">Traductor de documentos (Beta)</a> devuelve el archivo en el mismo formato, con cada cosa en su lugar. Acá va qué se traduce en cada formato, cómo elegir la opción del PDF y qué revisar antes de usar el resultado.',
+    'b2': 'Qué se traduce en cada formato',
+    'b3': 'La herramienta acepta .docx, .pdf, .epub, .md, .markdown y .txt. Un .doc viejo o un .odt se rechazan con el aviso de formato: guardalo como .docx desde tu programa de textos.',
+    'b4-c1': 'Formato',
+    'b4-c2': 'Se traduce',
+    'b4-c3': 'Queda igual',
+    'b4-f1c1': 'Word (.docx)',
+    'b4-f1c2': 'Cuerpo, encabezados y pies de página, notas al pie y cuadros de texto',
+    'b4-f1c3': 'Estilos, tablas, imágenes, numeración y secciones',
+    'b4-f2c1': 'PDF',
+    'b4-f2c2': 'El texto de cada párrafo, en el mismo lugar',
+    'b4-f2c3': 'Imágenes, fondos, líneas y colores',
+    'b4-f3c1': 'EPUB',
+    'b4-f3c2': 'Capítulos e índice',
+    'b4-f3c3': 'Portada, imágenes, hojas de estilo y orden de lectura',
+    'b4-f4c1': 'Markdown (.md)',
+    'b4-f4c2': 'Títulos, párrafos, elementos de lista y celdas de tablas',
+    'b4-f4c3': 'Bloques de código, direcciones de enlaces e imágenes',
+    'b4-f5c1': 'Texto (.txt)',
+    'b4-f5c2': 'Cada línea y los párrafos cortados a mano',
+    'b4-f5c3': 'Saltos de línea y sangrías',
+    'b5': 'En Word, las fórmulas, los códigos de campo (como el número de página) y los comentarios quedan como estaban. Como se edita el mismo archivo, los estilos y las negritas siguen donde estaban. Si la traducción es más larga, el documento puede ocupar más páginas.',
+    'b6': 'Elegir «Quitar el original» o «Tapar el original»',
+    'b7': 'Un PDF no tiene párrafos, sino trozos de texto sueltos. La herramienta los junta en párrafos, escribe la traducción en el mismo lugar y te deja elegir qué pasa con el texto original. Esa opción está en «En el PDF, el texto original».',
+    'b8': '«Quitar el original» borra el texto de cada página y deja las imágenes, los fondos y las líneas como estaban. Es la opción por defecto y da el resultado más limpio. Si un párrafo no se puede borrar, la herramienta lo tapa y el aviso del final dice cuántos.',
+    'b9': '«Tapar el original» pone un recuadro del color del fondo sobre cada párrafo y escribe encima. Sirve con cualquier PDF, pero el texto original queda debajo: al copiar o buscar en el archivo aparece también, y sobre un fondo con foto o degradado se ve el recuadro.',
+    'b10': 'Probá «Quitar el original» primero y mirá dos o tres páginas con fondos de color o fotos. Si se ven bien, seguí. Si no, traducí otra vez con «Tapar el original» y compará.',
+    'b11': 'Si la traducción de un párrafo es más larga que el original, la letra se achica hasta cerca de la mitad del tamaño. Si ni así entra, el recuadro crece hacia abajo y puede tapar lo que hay debajo. El aviso del final cuenta esos párrafos.',
+    'b12': 'Del PDF también sale una copia en Word, con el botón «Descargar también como Word». Es un documento nuevo con los párrafos, los títulos (según el tamaño de la letra) y las negritas, sin imágenes ni el diseño de la página. Sirve para corregir el texto en tu programa de textos.',
+    'b13': 'Antes de traducir un PDF escaneado',
+    'b14': 'Un escaneo no tiene texto que leer. La herramienta lee con el OCR del sitio las páginas que tienen menos de 20 caracteres de texto, y el OCR necesita saber en qué idioma está el documento. Elegilo en «Idioma del documento (para páginas escaneadas)», no el de destino.',
+    'b15': 'Ese campo empieza con el idioma de la página. Si el documento y el destino coinciden, la herramienta no traduce el PDF y muestra «Elegí un idioma distinto del original.» Si tu PDF está en francés y lo querés en español, cambiá primero el idioma del documento a francés.',
+    'b16': 'Revisar la traducción antes de usarla',
+    'b17': 'La traducción sale oración por oración, y cada oración se traduce con la anterior como contexto. Eso ayuda a mantener los términos repetidos, pero no asegura que se repitan igual en todo el documento. Revisá, en este orden:',
+    'b18-1': 'Títulos, etiquetas de tablas y textos de botones. Son frases cortas, y ahí la traducción sale peor.',
+    'b18-2': 'Nombres de personas, empresas y lugares, comparados con el original.',
+    'b18-3': 'Cifras, fechas, montos y unidades.',
+    'b18-4': 'Términos de tu rubro. El modelo puede usar dos palabras distintas para el mismo término en lugares distintos.',
+    'b19': 'Si el aviso del final dice que en algunas oraciones el formato no se pudo ubicar, la palabra está bien pero perdió la negrita o el enlace. Buscá esas oraciones y reponé el formato a mano. El aviso no cuenta las oraciones con más de ocho tramos de formato distinto: esas salen enteras sin las negritas ni los enlaces que tenían dentro, así que revisá también las frases largas que se ven con negritas de más o de menos.',
+    'b20': 'Sale mejor con texto formal y largo: informes, contratos, manuales y artículos de enciclopedia. Le cuesta más la frase corta de todos los días, la jerga y los títulos. Con chino, japonés y coreano la calidad es menor que con los idiomas de alfabeto latino, así que para esos pedí a alguien que lo lea antes de usarlo.',
+    'b21': 'Para un contrato o un documento médico, usá la traducción como borrador y pedí que la revise alguien que domine los dos idiomas.',
+    'b22': 'Qué queda en el archivo',
+    'b23': 'La primera vez, la herramienta baja el traductor, unos 83 MB, con la barra «Preparando el traductor… (solo la primera vez)». Después queda guardado en el navegador. El documento no se sube a ningún lado: se lee, se traduce y se arma otra vez en tu computadora.',
+    'b24': 'Los Word, PDF y EPUB traducidos llevan una marca de «traducido con IA (Interpres Phone V1)», en inglés, que no se ve en las páginas: está en las propiedades del documento (el Asunto y las Palabras clave en un PDF, la descripción en un Word) o en los metadatos del libro. Los .md y .txt no llevan ninguna marca.',
+    'b25': 'El mismo traductor está como módulo «Traducir documento» en <a href="../herramientas/flujos.html">Flujos: encadená herramientas</a>, para usarlo después de otros pasos con la misma opción para el PDF.',
+    'b26': 'Preguntas frecuentes',
+    'b27': '<strong>¿Tengo que decir en qué idioma está el original?</strong> No. La herramienta pide solo el idioma de destino. En un PDF pide además el idioma del documento: se usa para las páginas escaneadas y tiene que ser distinto del destino.',
+    'b28': '<strong>¿Por qué no se traduce el texto que está dentro de una imagen?</strong> En un PDF con texto, la herramienta traduce el texto que trae el archivo. Un rótulo dentro de una foto, un gráfico con palabras o un texto girado quedan como están. Solo las páginas casi sin texto, es decir, los escaneos, pasan por el OCR.',
+    'b29': 'Resumen',
+    'b30': 'El resultado sale en el mismo formato que el original. En un PDF, «Quitar el original» deja la página más limpia. Revisá títulos, nombres y cifras, reponé las negritas que marca el aviso y, si el documento es importante, pedí una segunda lectura.',
+    'rel1': 'Traductor de documentos (Beta)',
+    'rel2': 'OCR de PDF e imágenes escaneadas',
+    'rel3': 'Word ↔ PDF',
+    'rel4': 'Flujos: encadená herramientas'
+  },
+  en: {
+    'titulo-pagina': 'Translate a Word, PDF or EPUB without losing its formatting (guide) — Mini Cookies',
+    'meta-descripcion': 'What gets translated in each format, how to choose “Remove the original” or “Cover the original” in a PDF, and what to check before using it.',
+    'h1': 'How to translate a Word, PDF or EPUB without losing its formatting',
+    'b1': 'You got a manual in English and you need it in Spanish for the team tomorrow. Pasting it into a translator paragraph by paragraph takes hours, and then you have to rebuild the headings, bold text and tables. <a href="../herramientas/traducir-documentos.html">Document translator (Beta)</a> returns the file in the same format, with everything in its place. Here is what gets translated in each format, how to choose the PDF option and what to check before you use the result.',
+    'b2': 'What gets translated in each format',
+    'b3': 'The tool accepts .docx, .pdf, .epub, .md, .markdown and .txt. An old .doc or an .odt is rejected with the format warning: save it as .docx from your word processor.',
+    'b4-c1': 'Format',
+    'b4-c2': 'What gets translated',
+    'b4-c3': 'What stays the same',
+    'b4-f1c1': 'Word (.docx)',
+    'b4-f1c2': 'Body text, page headers and footers, footnotes and text boxes',
+    'b4-f1c3': 'Styles, tables, pictures, numbering and sections',
+    'b4-f2c1': 'PDF',
+    'b4-f2c2': 'The text of each paragraph, in the same place',
+    'b4-f2c3': 'Pictures, backgrounds, lines and colors',
+    'b4-f3c1': 'EPUB',
+    'b4-f3c2': 'Chapters and table of contents',
+    'b4-f3c3': 'Cover, pictures, style sheets and reading order',
+    'b4-f4c1': 'Markdown (.md)',
+    'b4-f4c2': 'Headings, paragraphs, list items and table cells',
+    'b4-f4c3': 'Code blocks, link addresses and image addresses',
+    'b4-f5c1': 'Text (.txt)',
+    'b4-f5c2': 'Each line, and paragraphs wrapped by hand',
+    'b4-f5c3': 'Line breaks and indents',
+    'b5': 'In Word, formulas, field codes (such as the page number) and comments stay as they were. Because the same file is edited, styles and bold text stay where they were. If the translation is longer, the document may run to more pages.',
+    'b6': 'Choose “Remove the original” or “Cover the original”',
+    'b7': 'A PDF has no paragraphs, only loose pieces of text. The tool joins them into paragraphs, writes the translation in the same place and lets you choose what happens to the original text. You pick it under “In the PDF, the original text”.',
+    'b8': '“Remove the original” deletes the text from each page and leaves the pictures, backgrounds and lines as they were. It is the default and gives the cleanest result. If a paragraph can’t be deleted, the tool covers it, and the notice at the end says how many.',
+    'b9': '“Cover the original” puts a box in the background color over each paragraph and writes on top. It works with any PDF, but the original text stays underneath: it shows up when you copy or search, and the box is visible on photo or gradient backgrounds.',
+    'b10': 'Try “Remove the original” first and look at two or three pages with colored backgrounds or photos. If they look right, keep it. If not, translate again with “Cover the original” and compare.',
+    'b11': 'If a translated paragraph is longer than the original, the text shrinks to about half its original size at most. If it still doesn’t fit, the box grows downward and can cover what is below it. The notice at the end counts those paragraphs.',
+    'b12': 'A PDF also gives you a Word copy, through the “Also download as Word” button. It is a new document with the paragraphs, the headings (chosen by font size) and the bold text, without pictures or the page layout. Use it to correct the text in your word processor.',
+    'b13': 'Before you translate a scanned PDF',
+    'b14': 'A scan has no text to read. The tool reads the pages that have fewer than 20 characters of text with the site’s OCR, and the OCR needs to know the document’s language. Pick it in “Language of the document (for scanned pages)”, not the target language.',
+    'b15': 'That field starts with the language of the page. If the document and the target are the same, the tool doesn’t translate the PDF and shows “Choose a language other than the original.” If your PDF is in French and you want English, change the document language to French first.',
+    'b16': 'Check the translation before you use it',
+    'b17': 'The text is translated sentence by sentence, and each sentence gets the one before it as context. That keeps repeated terms consistent in most cases, but it does not guarantee they match across the whole document. Check, in this order:',
+    'b18-1': 'Titles, table labels and button texts. They are short phrases, and the translation does worst there.',
+    'b18-2': 'Names of people, companies and places, against the original.',
+    'b18-3': 'Figures, dates, amounts and units.',
+    'b18-4': 'Technical terms from your field. The model can use two different words for the same term in different places.',
+    'b19': 'If the notice at the end says that in some sentences the formatting couldn’t be placed, the words are right but lost their bold or their link. Find those sentences and restore the formatting by hand. The notice doesn’t count sentences with more than eight runs of different formatting: those come out without the bold and links they had inside, so check long sentences that show too much or too little bold.',
+    'b20': 'It works best with formal, long text: reports, contracts, manuals and encyclopedia articles. It does worse with short everyday sentences, slang and titles. With Chinese, Japanese and Korean the quality is lower than with Latin-script languages, so ask someone who reads them to check before you use the result.',
+    'b21': 'For a contract or a medical document, use the translation as a draft and ask someone who knows both languages to review it.',
+    'b22': 'What stays in the file',
+    'b23': 'The first time, the tool downloads the translator, about 83 MB, with the bar “Getting the translator ready… (first time only)”. It stays saved in the browser after that. The document is never uploaded: it is read, translated and rebuilt on your computer.',
+    'b24': 'Translated Word, PDF and EPUB files carry a “translated with AI (Interpres Phone V1)” mark, in English, that doesn’t show on the pages: it is in the document properties (Subject and Keywords in a PDF, the description in a Word file) or in the book metadata. Markdown and text files get no mark.',
+    'b25': 'The same translator is available as the “Translate document” module in <a href="../herramientas/flujos.html">Flows: chain tools together</a>, to use after other steps with the same PDF option.',
+    'b26': 'Frequently asked questions',
+    'b27': '<strong>Do I have to say what language the original is in?</strong> No. The tool asks only for the target language. For a PDF it also asks for the document’s language, which is used for scanned pages and must differ from the target.',
+    'b28': '<strong>Why isn’t the text inside a picture translated?</strong> In a PDF with text, the tool translates the text the file contains. A sign inside a photo, a chart with words or rotated text stays as it is. Only pages with almost no text, that is, scans, go through OCR.',
+    'b29': 'Summary',
+    'b30': 'The result comes out in the same format as the original. For a PDF, “Remove the original” gives the cleanest page. Check titles, names and figures, restore the bold text the notice names, and ask for a second reading if the document matters.',
+    'rel1': 'Document translator (Beta)',
+    'rel2': 'OCR for scanned PDFs and images',
+    'rel3': 'Word ↔ PDF',
+    'rel4': 'Flows: chain tools together'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo traducir un Word, PDF o EPUB sin perder el formato</h1>
+    <p data-i18n-html="b1">Te llegó un manual en inglés y lo necesitás en español para el equipo de mañana. Pegarlo en un traductor párrafo por párrafo lleva horas, y después hay que rehacer los títulos, las negritas y las tablas. <a href="../herramientas/traducir-documentos.html">Traductor de documentos (Beta)</a> devuelve el archivo en el mismo formato, con cada cosa en su lugar. Acá va qué se traduce en cada formato, cómo elegir la opción del PDF y qué revisar antes de usar el resultado.</p>
+    <h2 data-i18n="b2">Qué se traduce en cada formato</h2>
+    <p data-i18n-html="b3">La herramienta acepta .docx, .pdf, .epub, .md, .markdown y .txt. Un .doc viejo o un .odt se rechazan con el aviso de formato: guardalo como .docx desde tu programa de textos.</p>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b4-c1">Formato</th><th data-i18n-html="b4-c2">Se traduce</th><th data-i18n-html="b4-c3">Queda igual</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b4-f1c1">Word (.docx)</td><td data-i18n-html="b4-f1c2">Cuerpo, encabezados y pies de página, notas al pie y cuadros de texto</td><td data-i18n-html="b4-f1c3">Estilos, tablas, imágenes, numeración y secciones</td></tr>
+        <tr><td data-i18n-html="b4-f2c1">PDF</td><td data-i18n-html="b4-f2c2">El texto de cada párrafo, en el mismo lugar</td><td data-i18n-html="b4-f2c3">Imágenes, fondos, líneas y colores</td></tr>
+        <tr><td data-i18n-html="b4-f3c1">EPUB</td><td data-i18n-html="b4-f3c2">Capítulos e índice</td><td data-i18n-html="b4-f3c3">Portada, imágenes, hojas de estilo y orden de lectura</td></tr>
+        <tr><td data-i18n-html="b4-f4c1">Markdown (.md)</td><td data-i18n-html="b4-f4c2">Títulos, párrafos, elementos de lista y celdas de tablas</td><td data-i18n-html="b4-f4c3">Bloques de código, direcciones de enlaces e imágenes</td></tr>
+        <tr><td data-i18n-html="b4-f5c1">Texto (.txt)</td><td data-i18n-html="b4-f5c2">Cada línea y los párrafos cortados a mano</td><td data-i18n-html="b4-f5c3">Saltos de línea y sangrías</td></tr>
+      </tbody>
+    </table></div>
+    <p data-i18n-html="b5">En Word, las fórmulas, los códigos de campo (como el número de página) y los comentarios quedan como estaban. Como se edita el mismo archivo, los estilos y las negritas siguen donde estaban. Si la traducción es más larga, el documento puede ocupar más páginas.</p>
+    <h2 data-i18n="b6">Elegir «Quitar el original» o «Tapar el original»</h2>
+    <p data-i18n-html="b7">Un PDF no tiene párrafos, sino trozos de texto sueltos. La herramienta los junta en párrafos, escribe la traducción en el mismo lugar y te deja elegir qué pasa con el texto original. Esa opción está en «En el PDF, el texto original».</p>
+    <p data-i18n-html="b8">«Quitar el original» borra el texto de cada página y deja las imágenes, los fondos y las líneas como estaban. Es la opción por defecto y da el resultado más limpio. Si un párrafo no se puede borrar, la herramienta lo tapa y el aviso del final dice cuántos.</p>
+    <p data-i18n-html="b9">«Tapar el original» pone un recuadro del color del fondo sobre cada párrafo y escribe encima. Sirve con cualquier PDF, pero el texto original queda debajo: al copiar o buscar en el archivo aparece también, y sobre un fondo con foto o degradado se ve el recuadro.</p>
+    <p data-i18n-html="b10">Probá «Quitar el original» primero y mirá dos o tres páginas con fondos de color o fotos. Si se ven bien, seguí. Si no, traducí otra vez con «Tapar el original» y compará.</p>
+    <p data-i18n-html="b11">Si la traducción de un párrafo es más larga que el original, la letra se achica hasta cerca de la mitad del tamaño. Si ni así entra, el recuadro crece hacia abajo y puede tapar lo que hay debajo. El aviso del final cuenta esos párrafos.</p>
+    <p data-i18n-html="b12">Del PDF también sale una copia en Word, con el botón «Descargar también como Word». Es un documento nuevo con los párrafos, los títulos (según el tamaño de la letra) y las negritas, sin imágenes ni el diseño de la página. Sirve para corregir el texto en tu programa de textos.</p>
+    <h2 data-i18n="b13">Antes de traducir un PDF escaneado</h2>
+    <p data-i18n-html="b14">Un escaneo no tiene texto que leer. La herramienta lee con el OCR del sitio las páginas que tienen menos de 20 caracteres de texto, y el OCR necesita saber en qué idioma está el documento. Elegilo en «Idioma del documento (para páginas escaneadas)», no el de destino.</p>
+    <p data-i18n-html="b15">Ese campo empieza con el idioma de la página. Si el documento y el destino coinciden, la herramienta no traduce el PDF y muestra «Elegí un idioma distinto del original.» Si tu PDF está en francés y lo querés en español, cambiá primero el idioma del documento a francés.</p>
+    <h2 data-i18n="b16">Revisar la traducción antes de usarla</h2>
+    <p data-i18n-html="b17">La traducción sale oración por oración, y cada oración se traduce con la anterior como contexto. Eso ayuda a mantener los términos repetidos, pero no asegura que se repitan igual en todo el documento. Revisá, en este orden:</p>
+    <ul>
+      <li data-i18n-html="b18-1">Títulos, etiquetas de tablas y textos de botones. Son frases cortas, y ahí la traducción sale peor.</li>
+      <li data-i18n-html="b18-2">Nombres de personas, empresas y lugares, comparados con el original.</li>
+      <li data-i18n-html="b18-3">Cifras, fechas, montos y unidades.</li>
+      <li data-i18n-html="b18-4">Términos de tu rubro. El modelo puede usar dos palabras distintas para el mismo término en lugares distintos.</li>
+    </ul>
+    <p data-i18n-html="b19">Si el aviso del final dice que en algunas oraciones el formato no se pudo ubicar, la palabra está bien pero perdió la negrita o el enlace. Buscá esas oraciones y reponé el formato a mano. El aviso no cuenta las oraciones con más de ocho tramos de formato distinto: esas salen enteras sin las negritas ni los enlaces que tenían dentro, así que revisá también las frases largas que se ven con negritas de más o de menos.</p>
+    <p data-i18n-html="b20">Sale mejor con texto formal y largo: informes, contratos, manuales y artículos de enciclopedia. Le cuesta más la frase corta de todos los días, la jerga y los títulos. Con chino, japonés y coreano la calidad es menor que con los idiomas de alfabeto latino, así que para esos pedí a alguien que lo lea antes de usarlo.</p>
+    <p data-i18n-html="b21">Para un contrato o un documento médico, usá la traducción como borrador y pedí que la revise alguien que domine los dos idiomas.</p>
+    <h2 data-i18n="b22">Qué queda en el archivo</h2>
+    <p data-i18n-html="b23">La primera vez, la herramienta baja el traductor, unos 83 MB, con la barra «Preparando el traductor… (solo la primera vez)». Después queda guardado en el navegador. El documento no se sube a ningún lado: se lee, se traduce y se arma otra vez en tu computadora.</p>
+    <p data-i18n-html="b24">Los Word, PDF y EPUB traducidos llevan una marca de «traducido con IA (Interpres Phone V1)», en inglés, que no se ve en las páginas: está en las propiedades del documento (el Asunto y las Palabras clave en un PDF, la descripción en un Word) o en los metadatos del libro. Los .md y .txt no llevan ninguna marca.</p>
+    <p data-i18n-html="b25">El mismo traductor está como módulo «Traducir documento» en <a href="../herramientas/flujos.html">Flujos: encadená herramientas</a>, para usarlo después de otros pasos con la misma opción para el PDF.</p>
+    <h2 data-i18n="b26">Preguntas frecuentes</h2>
+    <p data-i18n-html="b27"><strong>¿Tengo que decir en qué idioma está el original?</strong> No. La herramienta pide solo el idioma de destino. En un PDF pide además el idioma del documento: se usa para las páginas escaneadas y tiene que ser distinto del destino.</p>
+    <p data-i18n-html="b28"><strong>¿Por qué no se traduce el texto que está dentro de una imagen?</strong> En un PDF con texto, la herramienta traduce el texto que trae el archivo. Un rótulo dentro de una foto, un gráfico con palabras o un texto girado quedan como están. Solo las páginas casi sin texto, es decir, los escaneos, pasan por el OCR.</p>
+    <h2 data-i18n="b29">Resumen</h2>
+    <p data-i18n-html="b30">El resultado sale en el mismo formato que el original. En un PDF, «Quitar el original» deja la página más limpia. Revisá títulos, nombres y cifras, reponé las negritas que marca el aviso y, si el documento es importante, pedí una segunda lectura.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/traducir-documentos.html" data-i18n="rel1">Traductor de documentos (Beta)</a></li>
+      <li><a href="../herramientas/ocr-pdf.html" data-i18n="rel2">OCR de PDF e imágenes escaneadas</a></li>
+      <li><a href="../herramientas/word-pdf.html" data-i18n="rel3">Word ↔ PDF</a></li>
+      <li><a href="../herramientas/flujos.html" data-i18n="rel4">Flujos: encadená herramientas</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>
