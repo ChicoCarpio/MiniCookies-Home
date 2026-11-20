@@ -6,6 +6,8 @@
 // Es todo asíncrono porque medir el ancho/alto real de una imagen incrustada
 // requiere esperar a que el navegador la decodifique.
 
+const ETIQUETAS_CODIGO = new Set(['CODE', 'PRE', 'KBD', 'TT']);
+
 function leerFormatoDeAncestros(nodo, raiz) {
   const formato = { negrita: false, cursiva: false, subrayado: false };
   let actual = nodo.parentElement;
@@ -14,8 +16,10 @@ function leerFormatoDeAncestros(nodo, raiz) {
     if (etiqueta === 'B' || etiqueta === 'STRONG') formato.negrita = true;
     if (etiqueta === 'I' || etiqueta === 'EM') formato.cursiva = true;
     if (etiqueta === 'U') formato.subrayado = true;
+    if (ETIQUETAS_CODIGO.has(etiqueta)) formato.fuente = 'Consolas';
     actual = actual.parentElement;
   }
+  if (raiz && ETIQUETAS_CODIGO.has(raiz.tagName)) formato.fuente = 'Consolas';
   return formato;
 }
 
@@ -99,8 +103,14 @@ async function extraerRuns(elementoBloque, omitirListas, nodos) {
         return;
       }
       if (omitirListas && (nodo.tagName === 'UL' || nodo.tagName === 'OL')) return;
+      const desde = runs.length;
       for (const hijo of nodo.childNodes) {
         await recorrer(hijo);
+      }
+      // Un enlace a una página o a un correo (los internos, como una nota al pie, quedan como texto).
+      const direccion = nodo.tagName === 'A' ? (nodo.getAttribute('href') || '').trim() : '';
+      if (/^(https?:|mailto:)/i.test(direccion)) {
+        for (const run of runs.slice(desde)) if (run.texto !== undefined && !run.enlace) run.enlace = direccion;
       }
     }
   }
@@ -196,6 +206,17 @@ async function contenidoAParrafos(contenedor) {
     } else if (etiqueta === 'TABLE') {
       const tabla = await convertirTablaADocx(elemento);
       if (tabla) bloques.push(tabla);
+    } else if (etiqueta === 'HR') {
+      bloques.push({ tipo: 'parrafo', bordeAbajo: { tam: 6, color: '808080', espacio: 1 }, hijos: [] });
+    } else if (etiqueta === 'BLOCKQUOTE') {
+      // Una cita: sangrada y con una raya a la izquierda; una cita dentro de otra se sangra más.
+      const interior = tieneBloques(elemento) ? await contenidoAParrafos(elemento) : [{ tipo: 'parrafo', hijos: await extraerRuns(elemento) }];
+      for (const b of interior) {
+        if (b.tipo !== 'parrafo') continue;
+        if (!b.lista) b.sangria = { ...b.sangria, izquierda: ((b.sangria && b.sangria.izquierda) || 0) + 720 };
+        b.bordeIzquierda = { tam: 12, color: 'A6A6A6', espacio: 8 };
+      }
+      bloques.push(...interior);
     } else if (NIVELES_TITULO_DOCX[etiqueta]) {
       bloques.push({ tipo: 'parrafo', titulo: NIVELES_TITULO_DOCX[etiqueta], hijos: await extraerRuns(elemento) });
     } else if (etiqueta !== 'PRE' && tieneBloques(elemento)) {

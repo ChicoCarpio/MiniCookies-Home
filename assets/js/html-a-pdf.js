@@ -17,6 +17,9 @@
 //  - Lo que esas fuentes no tienen (griego, cirílico...) va con Noto Sans
 //    completa. No con subset: fontkit no sabe recortar una fuente variable y
 //    las letras salían como cuadrados vacíos.
+//  - Chino, japonés y coreano (2026-11-19) van con Noto Sans CJK (SC, JP o KR; recortada a las letras usadas, se
+//    baja solo si el documento las trae): kana → japonés, hangul → coreano, y los caracteres Han sueltos con el
+//    idioma que muestre el resto del documento (japonés o coreano si hay kana o hangul; si no, chino simplificado).
 //  - El contenido puede ser más alto que una página (el maquetador de Word no corta
 //    páginas; un EPUB es un solo rollo): se pagina buscando cortes que no
 //    partan ninguna línea ni imagen.
@@ -40,6 +43,9 @@
 
   let fontkitListo = null;
   let bytesNoto = null;
+  const bytesCjk = new Map(); // 'SC-Regular' → bytes
+  const KANA = /[\u3040-\u30ff\u31f0-\u31ff\uff66-\uff9f]/, HANGUL = /[\u1100-\u11ff\u3130-\u318f\uac00-\ud7af]/;
+  const HAN = /[\u2e80-\u2fdf\u3000-\u303f\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff00-\uffef]|[\ud840-\ud87f][\udc00-\udfff]/;
 
   function cargarScript(src) {
     return new Promise((resolver, rechazar) => {
@@ -56,6 +62,13 @@
     if (!window.fontkit) await (fontkitListo ||= cargarScript(URL_FONTKIT));
     if (!bytesNoto) bytesNoto = new Uint8Array(await (await fetch(URL_FUENTE)).arrayBuffer());
     return bytesNoto;
+  }
+
+  async function cargarCjk(region, peso) {
+    if (!window.fontkit) await (fontkitListo ||= cargarScript(URL_FONTKIT));
+    const clave = `${region}-${peso}`;
+    if (!bytesCjk.has(clave)) bytesCjk.set(clave, new Uint8Array(await (await fetch(rutaVendor(`noto-sans-cjk/2.004/NotoSans${clave}.ttf`))).arrayBuffer()));
+    return bytesCjk.get(clave);
   }
 
   // Dónde cae la línea base dentro del rectángulo de una palabra: depende de la
@@ -280,6 +293,33 @@
       return noto;
     }
 
+    const cjk = new Map(); // 'SC-Regular' → fuente incrustada
+    async function fuenteCjk(region, negrita) {
+      const clave = `${region}-${negrita ? 'Bold' : 'Regular'}`;
+      if (!cjk.has(clave)) {
+        const bytes = await cargarCjk(region, negrita ? 'Bold' : 'Regular');
+        pdf.registerFontkit(window.fontkit);
+        cjk.set(clave, await pdf.embedFont(bytes, { subset: true }));
+      }
+      return cjk.get(clave);
+    }
+    // Idioma de los caracteres Han: el que muestre el resto del documento (se decide en la pasada 1).
+    let hanPorDefecto = 'SC';
+    const cubre = (f, texto) => [...texto].every((c) => f.embedder.font.hasGlyphForCodePoint(c.codePointAt(0)));
+    const regionDe = (texto) => (KANA.test(texto) ? 'JP' : HANGUL.test(texto) ? 'KR' : hanPorDefecto);
+    // La fuente de su idioma; si le faltan caracteres (un texto chino dentro de un documento japonés: la japonesa no
+    // trae los simplificados), la primera de las otras que los tenga todos.
+    async function fuenteCjkQueCubra(texto, negrita) {
+      const primera = regionDe(texto);
+      let elegida = null;
+      for (const region of [primera, ...['SC', 'JP', 'KR'].filter((r) => r !== primera)]) {
+        const f = await fuenteCjk(region, negrita);
+        elegida ||= f;
+        if (cubre(f, texto)) return f;
+      }
+      return elegida;
+    }
+
     const imagenesIncrustadas = new Map();
 
     // Dibuja una lista de piezas en una hoja. aX/aY pasan de px a pt de la hoja; `recorte` (solo para el
@@ -315,6 +355,8 @@
         } catch {
           // Un carácter fuera de WinAnsi: la fuente estándar no lo puede escribir.
           fuente = await fuenteNoto();
+          // Ni Noto Sans lo tiene: chino, japonés o coreano.
+          if ((HAN.test(p.texto) || KANA.test(p.texto) || HANGUL.test(p.texto)) && !cubre(fuente, p.texto)) fuente = await fuenteCjkQueCubra(p.texto, e.negrita);
           anchoNatural = fuente.widthOfTextAtSize(p.texto, tamano);
         }
         // Tz: la palabra ocupa en el PDF el mismo ancho que en pantalla.
@@ -344,6 +386,11 @@
       const origen = { x: r.left, y: r.top + margenArriba };
       const { piezas, saltos } = recogerPiezas(elemento, origen);
       const fondos = piezas.filter((p) => p.tipo === 'fondo');
+      for (const p of piezas) {
+        if (p.tipo === 'fondo' || p.tipo === 'imagen' || !p.texto) continue;
+        if (KANA.test(p.texto)) hanPorDefecto = 'JP';
+        else if (HANGUL.test(p.texto) && hanPorDefecto === 'SC') hanPorDefecto = 'KR';
+      }
       const ordenadas = piezas.filter((p) => p.tipo !== 'fondo').sort((a, b) => a.y - b.y);
       // Un encabezado o pie más alto que su margen empuja el texto (como en Word): el contenido de cada hoja empieza
       // después del encabezado y termina antes del pie.
