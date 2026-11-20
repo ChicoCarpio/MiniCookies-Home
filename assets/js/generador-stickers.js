@@ -7,7 +7,7 @@
 // sale del navegador: solo el modelo de recorte (un archivo estático, ~42 MB)
 // se descarga una vez desde la CDN de Hugging Face y queda cacheado.
 // Requiere, cargados antes como <script>: ajuste-por-color.js, filtros-color.js,
-// efectos-textura.js, paleta-color.js, vendor/imagetracerjs, efectos-mosaico.js,
+// efectos-textura.js, paleta-color.js, trazador-contornos.js, efectos-mosaico.js,
 // procesar-filtros.js, mascaras-capa.js, borde-sticker.js. El panel lateral usa el mismo
 // esqueleto de 2 columnas que Editor-de-color-de-imagen.html (clase
 // .editor-color-layout, sin el panel plegable de ese editor: acá el panel

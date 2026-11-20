@@ -11,8 +11,8 @@
 //           encabezado?: [parrafo], pie?: [parrafo], hijos: [parrafo | tabla] }
 //   parrafo = { tipo: 'parrafo', titulo?: 1..6, alineacion?, sangria?: { izquierda, primeraLinea, colgante },
 //               espaciado?: { antes, despues, linea, regla: 'minimo'|'exacto'|'auto' }, tabs?: [{ tipo, pos }],
-//               bordeAbajo?: { tam, color, espacio }, saltoAntes?, lista?: { id, nivel, instancia? } | { vineta: true, nivel }, hijos: [run] }
-//   run     = { texto, negrita?, cursiva?, subrayado?, tamano?, fuente?, color? }       // '\t' = tabulación, '\n' = salto de línea
+//               bordeAbajo?: { tam, color, espacio }, bordeIzquierda?: { tam, color, espacio }, saltoAntes?, lista?: { id, nivel, instancia? } | { vineta: true, nivel }, hijos: [run] }
+//   run     = { texto, negrita?, cursiva?, subrayado?, tamano?, fuente?, color?, enlace? }  // '\t' = tabulación, '\n' = salto de línea
 //           | { salto: 'pagina' } | { campo: 'pagina'|'paginas', …formato }
 //           | { imagen: { datos: Uint8Array, tipo?, ancho, alto, flotante?: { x, y } } } // ancho/alto en px; x, y en EMU desde la hoja
 //   tabla   = { tipo: 'tabla', anchoPct, filas: [{ celdas: [{ hijos: [parrafo] }] }] }
@@ -108,6 +108,8 @@
   async function generar(doc) {
     const medios = []; // { nombre, bytes, tipo }
     let idDibujo = 0;
+    const enlaces = []; // direcciones de los enlaces del cuerpo; la relación de cada una es rIdLnk<posición + 1>
+    let sinEnlaces = false; // encabezado y pie tienen sus propias relaciones: ahí un enlace queda como texto
     let alturaRel = 251658240;
 
     // numeración: abstractNum 0 = viñetas de Word; luego una por cada numeraciones[]
@@ -165,6 +167,8 @@
       if (r.salto === 'pagina') return '<w:r><w:br w:type="page"/></w:r>';
       if (r.campo) return campo(r.campo === 'pagina' ? 'PAGE' : 'NUMPAGES', r);
       if (r.imagen) return dibujo(r.imagen);
+      const url = r.enlace && !sinEnlaces && /^(https?:|mailto:)/i.test(limpiar(String(r.enlace)).trim()) ? limpiar(String(r.enlace)).trim() : null;
+      if (url) r = { ...r, color: r.color || '0563C1', subrayado: true }; // el aspecto de un enlace de Word
       const rpr = propiedadesRun(r);
       const lineas = limpiar(String(r.texto == null ? '' : r.texto).replace(/\r\n?/g, '\n')).split('\n');
       let x = '';
@@ -175,7 +179,10 @@
           if (trozo !== '') x += `<w:r>${rpr}<w:t xml:space="preserve">${esc(trozo)}</w:t></w:r>`;
         });
       });
-      return x;
+      if (!url) return x;
+      let n = enlaces.indexOf(url) + 1;
+      if (!n) n = enlaces.push(url);
+      return `<w:hyperlink r:id="rIdLnk${n}" w:history="1">${x}</w:hyperlink>`;
     }
 
     const ALINEACION = { izquierda: 'left', centro: 'center', derecha: 'right', justificado: 'both' };
@@ -194,7 +201,10 @@
         else throw new Error(`EscritorDocx: la lista «${l.id}» no está en numeraciones`);
         ppr += `<w:numPr><w:ilvl w:val="${Math.min(8, Math.max(0, entero(l.nivel)))}"/><w:numId w:val="${id}"/></w:numPr>`;
       }
-      if (p.bordeAbajo) { const b = p.bordeAbajo; ppr += `<w:pBdr><w:bottom w:val="single" w:sz="${entero(b.tam)}" w:space="${entero(b.espacio)}" w:color="${escAttr(b.color || '000000')}"/></w:pBdr>`; }
+      if (p.bordeAbajo || p.bordeIzquierda) { // en el orden del esquema: izquierda antes que abajo
+        const borde = (lado, b) => `<w:${lado} w:val="single" w:sz="${entero(b.tam)}" w:space="${entero(b.espacio)}" w:color="${escAttr(b.color || '000000')}"/>`;
+        ppr += `<w:pBdr>${p.bordeIzquierda ? borde('left', p.bordeIzquierda) : ''}${p.bordeAbajo ? borde('bottom', p.bordeAbajo) : ''}</w:pBdr>`;
+      }
       if (p.tabs && p.tabs.length) ppr += `<w:tabs>${p.tabs.map((t) => `<w:tab w:val="${t.tipo === 'centro' ? 'center' : t.tipo === 'derecha' ? 'right' : 'left'}" w:pos="${entero(t.pos)}"/>`).join('')}</w:tabs>`;
       if (p.espaciado) {
         const e = p.espaciado;
@@ -246,7 +256,9 @@
     const refs = [];
     const bloque = (lista, raiz, ruta, tipoRel, tipoContenido, etiqueta, rid) => {
       const desde = medios.length;
+      sinEnlaces = true;
       const contenido = lista.map(parrafo).join('') || '<w:p/>'; // Word exige al menos un párrafo
+      sinEnlaces = false;
       const imagenes = medios.map((x, i) => [x, i + 1]).slice(desde); // sus imágenes van en las relaciones de la parte, no en las de document.xml
       partes.push({ ruta, tipo: tipoContenido, rid, tipoRel, imagenes, xml: `${CABECERA}<${raiz} xmlns:w="${NS_W}" xmlns:r="${NS_R}" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">${contenido}</${raiz}>` });
       refs.push(`<w:${etiqueta}Reference w:type="default" r:id="${rid}"/>`);
@@ -296,6 +308,7 @@
       + (numeracion ? `<Relationship Id="rIdNum" Type="${REL}/numbering" Target="numbering.xml"/>` : '')
       + partes.map((p) => `<Relationship Id="${p.rid}" Type="${REL}/${p.tipoRel}" Target="${p.ruta.replace('word/', '')}"/>`).join('')
       + medios.map((x, i) => `<Relationship Id="rIdImg${i + 1}" Type="${REL}/image" Target="media/${x.nombre}"/>`).join('')
+      + enlaces.map((u, i) => `<Relationship Id="rIdLnk${i + 1}" Type="${REL}/hyperlink" Target="${escAttr(u)}" TargetMode="External"/>`).join('')
       + '</Relationships>';
     const ahora = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
     const core = `${CABECERA}<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">`

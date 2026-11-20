@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Validar EPUB gratis — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Revisá un libro EPUB y mirá qué le falla: paquete, índice, capítulos, imágenes y enlaces. Gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'archivo-informe-epub': 'informe-epub.txt',
+    'titulo-pagina': 'Validar EPUB gratis — Mini Cookies',
+    'meta-descripcion': 'Revisá un libro EPUB y mirá qué le falla: paquete, índice, capítulos, imágenes y enlaces. Gratis y sin subir tu archivo a ningún servidor.',
+    'zona-arrastre': '📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo',
+    'h1': 'Validar EPUB',
+    'intro': 'Elegí un libro .epub y revisamos su estructura, su índice, sus capítulos, imágenes y enlaces.',
+    'boton-validar': 'Validar',
+    'boton-validar-procesando': 'Revisando...',
+    'resumen-libro': 'EPUB {version} · «{titulo}» · {capitulos} capítulos en el orden de lectura · {recursos} archivos listados',
+    'resumen-sin-titulo': 'sin título',
+    'resumen-ok': '✅ No se encontraron errores.',
+    'resumen-ok-avisos': '✅ No se encontraron errores, pero hay {avisos} aviso(s).',
+    'resumen-error': '❌ Se encontraron {errores} error(es) y {avisos} aviso(s).',
+    'resumen-nada': 'Nada que señalar: el libro pasó todas las revisiones de esta herramienta.',
+    'nivel-error': 'Error',
+    'nivel-aviso': 'Aviso',
+    'nivel-info': 'Nota',
+    'descargar-informe': 'Descargar informe (.txt)',
+    'error-validar': 'No se pudo revisar el libro',
+    'limitaciones-titulo': 'Limitaciones',
+    'item1': 'Es una revisión básica: no reemplaza a epubcheck, la herramienta oficial que usan las tiendas de libros. Un libro sin errores acá todavía puede ser rechazado por una tienda.',
+    'item2': 'No revisa el CSS por dentro ni la accesibilidad completa del libro, y con libros con DRM no puede leer el contenido.',
+    'm-zip-invalido': 'El archivo no se pudo abrir como paquete .zip: {detalle}',
+    'm-sin-mimetype': 'Falta el archivo «mimetype» en la raíz del paquete.',
+    'm-mimetype-no-primero': 'El archivo «mimetype» tiene que ser el primero del paquete; hoy el primero es «{primero}». Algunos lectores no reconocen así el libro.',
+    'm-mimetype-comprimido': '«mimetype» está comprimido; tiene que guardarse sin comprimir.',
+    'm-mimetype-contenido': '«mimetype» dice «{valor}»; tiene que decir exactamente «application/epub+zip», sin espacios ni saltos de línea.',
+    'm-mimetype-extra': '«mimetype» trae datos extra en su cabecera ZIP; el estándar pide que no los tenga.',
+    'm-nombre-repetido': 'Dos archivos se llaman igual si no se distinguen las mayúsculas: «{otro}».',
+    'm-nombre-prohibido': 'El nombre del archivo tiene caracteres que EPUB no permite (\\ : * ? " < > | o un punto al final).',
+    'm-drm': 'El libro tiene cifrado que no es solo la ofuscación de fuentes (probablemente DRM): su contenido no se puede revisar.',
+    'm-sin-container': 'Falta META-INF/container.xml: sin él ningún lector sabe dónde está el libro.',
+    'm-xml-mal-formado': 'El XML está mal formado (línea {linea}, columna {col}): {detalle}',
+    'm-container-sin-rootfile': 'container.xml no indica ningún archivo de paquete (rootfile).',
+    'm-opf-no-existe': 'container.xml apunta al archivo de paquete «{ruta}», que no existe.',
+    'm-opf-sin-package': 'El archivo de paquete no empieza con el elemento «package».',
+    'm-version-desconocida': 'La versión de EPUB «{version}» no se reconoce (se espera 2.0 o 3.x).',
+    'm-sin-metadata': 'El paquete no tiene «metadata».',
+    'm-sin-titulo': 'Falta el título del libro (dc:title).',
+    'm-sin-idioma': 'Falta el idioma del libro (dc:language).',
+    'm-idioma-raro': 'El idioma «{idioma}» no parece un código válido (por ejemplo «es» o «en-US»).',
+    'm-sin-identificador': 'Falta el identificador del libro (dc:identifier).',
+    'm-sin-unique-identifier': 'El paquete no declara «unique-identifier».',
+    'm-unique-identifier-roto': '«unique-identifier» apunta a «{id}», pero ningún dc:identifier tiene ese id.',
+    'm-sin-modificado': 'Falta la fecha de modificación (meta dcterms:modified), obligatoria en EPUB 3.',
+    'm-modificado-formato': 'La fecha de modificación «{valor}» no tiene el formato AAAA-MM-DDThh:mm:ssZ.',
+    'm-falta-manifest': 'El paquete no tiene «manifest» (la lista de archivos del libro).',
+    'm-item-sin-id': 'Un archivo del manifest no tiene id: {href}',
+    'm-item-sin-href': 'El archivo «{id}» del manifest no tiene dirección (href).',
+    'm-item-sin-tipo': 'El archivo «{id}» del manifest no tiene tipo (media-type).',
+    'm-id-repetido-opf': 'El id «{id}» está repetido en el manifest.',
+    'm-recurso-remoto-manifest': 'El manifest lista un recurso de internet ({href}) sin la propiedad «remote-resources».',
+    'm-manifest-falta': 'El manifest lista «{href}», pero ese archivo no está en el libro.',
+    'm-archivo-vacio': 'El archivo está vacío.',
+    'm-imagen-ilegible': 'Se declara como {tipo}, pero no parece una imagen de ese tipo.',
+    'm-tipo-no-coincide': 'Se declara como {declarado}, pero su contenido es {real}.',
+    'm-extension-html': 'Es XHTML pero termina en .html; lo normal es .xhtml.',
+    'm-sin-manifest': 'El archivo está en el libro, pero no está en el manifest.',
+    'm-sin-spine': 'El paquete no tiene «spine» (el orden de lectura).',
+    'm-spine-vacio': 'El orden de lectura (spine) no tiene ningún capítulo.',
+    'm-spine-ref-rota': 'El orden de lectura nombra «{idref}», que no está en el manifest.',
+    'm-spine-tipo': 'El capítulo «{id}» es de tipo {tipo}; un capítulo tiene que ser XHTML (o tener un sustituto).',
+    'm-spine-toc-roto': 'El orden de lectura apunta a un índice «{id}» que no está en el manifest.',
+    'm-epub2-sin-toc': 'Un EPUB 2 necesita que el orden de lectura (spine) indique su índice NCX (atributo «toc»).',
+    'm-sin-portada': 'El libro no declara portada.',
+    'm-portada-rota': 'La portada apunta a «{id}», que no está en el manifest.',
+    'm-xhtml-espacio': 'El capítulo no usa el espacio de nombres XHTML (http://www.w3.org/1999/xhtml).',
+    'm-id-repetido': 'El id «{id}» aparece más de una vez en el capítulo.',
+    'm-nav-varios': 'Hay más de un archivo de navegación (propiedad «nav») en el manifest; tiene que haber uno solo.',
+    'm-sin-nav': 'Un EPUB 3 necesita un archivo de navegación (propiedad «nav» en el manifest).',
+    'm-nav-tipo': 'El archivo de navegación es de tipo {tipo}; tiene que ser XHTML.',
+    'm-nav-sin-toc': 'El archivo de navegación no tiene el índice (un «nav» con epub:type="toc").',
+    'm-nav-vacio': 'El índice del libro no tiene ningún enlace.',
+    'm-indice-enlace-roto': 'El índice enlaza a «{href}», que no está en el libro.',
+    'm-indice-ancla-rota': 'El índice enlaza a «{href}», pero esa parte no existe en el capítulo.',
+    'm-ncx-vacio': 'El índice NCX no tiene ninguna entrada.',
+    'm-capitulos-sin-titulo': '{n} capítulo(s) sin título (el elemento «title» está vacío o falta); algunos lectores muestran entonces el nombre del archivo.',
+    'm-img-sin-src': 'Hay una imagen sin dirección (src).',
+    'm-recurso-remoto': 'Pide un recurso de internet ({href}); el libro se vería roto sin conexión.',
+    'm-recurso-falta': 'Pide «{href}», que no está en el libro.',
+    'm-img-sin-alt': '{n} imagen(es) sin texto alternativo (alt): las personas que usan lector de pantalla no sabrán qué muestran.',
+    'm-enlace-javascript': 'Hay un enlace con «javascript:»; EPUB no lo permite.',
+    'm-enlace-roto': 'Enlaza a «{href}», que no está en el libro.',
+    'm-ancla-rota': 'Enlaza a «{href}», pero esa parte no existe en el capítulo de destino.',
+    'm-script': 'El capítulo trae scripts y el manifest no lo marca con la propiedad «scripted»; muchos lectores no los ejecutan.',
+    'm-iframe': 'El capítulo trae un marco incrustado (iframe), que la mayoría de los lectores no muestra.',
+    'm-formulario': 'El capítulo trae un formulario, que no funciona en la mayoría de los lectores.',
+    'm-css-remoto': 'La hoja de estilo pide un recurso de internet: {href}',
+    'm-css-recurso-falta': 'La hoja de estilo pide «{href}», que no está en el libro.',
+    'm-recortado': 'Hay {n} hallazgos más de este tipo que no se muestran: «{tipo}»',
+    'guia-titulo': 'Cómo validar un libro EPUB',
+    'guia-intro': 'Un EPUB es un paquete de archivos con reglas estrictas: si falta una pieza, algunos lectores lo abren y otros lo rechazan. Esta herramienta lo revisa por dentro y te dice qué encontró, separado en errores (lo que conviene arreglar), avisos (cosas dudosas) y notas.',
+    'guia-paso-1': 'Arrastrá tu archivo .epub a la zona de carga o hacé clic para elegirlo.',
+    'guia-paso-2': 'Tocá «Validar». Mientras trabaja el botón dice «Revisando...».',
+    'guia-paso-3': 'Leé el resumen y la lista: cada línea dice qué pasa y, debajo, en qué archivo del libro.',
+    'guia-paso-4': 'Si querés guardar o enviar lo que encontró, tocá «Descargar informe (.txt)».',
+    'guia-consejo-1': 'Empezá por los errores: son lo que más seguido hace que un lector no abra el libro o lo muestre mal.',
+    'guia-consejo-2': 'Los avisos no impiden leer el libro, pero una tienda de libros puede pedir arreglarlos.',
+    'guia-consejo-3': 'Para corregir los problemas del paquete, probá «Reparar EPUB»; para el título, el autor o el idioma, «Editar metadatos EPUB».',
+    'guia-p1': '¿Esto reemplaza a epubcheck?',
+    'guia-r1': 'No. epubcheck es la herramienta oficial y revisa mucho más, como los esquemas completos de EPUB. Esta es una revisión rápida de lo más común.',
+    'guia-p2': '¿Se modifica mi libro?',
+    'guia-r2': 'No: solo se lee. Nada se guarda ni se cambia.',
+    'guia-p3': '¿Qué hago si el libro tiene DRM?',
+    'guia-r3': 'La herramienta avisa que el contenido está cifrado y no puede revisarlo.'
+  },
+  en: {
+    'archivo-informe-epub': 'epub-report.txt',
+    'titulo-pagina': 'Validate EPUB Free — Mini Cookies',
+    'meta-descripcion': 'Check an EPUB book and see what is wrong with it: package, table of contents, chapters, images and links. Free and without uploading your file anywhere.',
+    'zona-arrastre': '📚 Drag your .epub file here or click to choose it',
+    'h1': 'Validate EPUB',
+    'intro': 'Pick a .epub book and we check its structure, table of contents, chapters, images and links.',
+    'boton-validar': 'Validate',
+    'boton-validar-procesando': 'Checking...',
+    'resumen-libro': 'EPUB {version} · “{titulo}” · {capitulos} chapters in reading order · {recursos} files listed',
+    'resumen-sin-titulo': 'untitled',
+    'resumen-ok': '✅ No errors found.',
+    'resumen-ok-avisos': '✅ No errors found, but there are {avisos} warning(s).',
+    'resumen-error': '❌ Found {errores} error(s) and {avisos} warning(s).',
+    'resumen-nada': 'Nothing to report: the book passed every check this tool has.',
+    'nivel-error': 'Error',
+    'nivel-aviso': 'Warning',
+    'nivel-info': 'Note',
+    'descargar-informe': 'Download report (.txt)',
+    'error-validar': 'Couldn’t check the book',
+    'limitaciones-titulo': 'Limitations',
+    'item1': 'This is a basic check: it does not replace epubcheck, the official tool that book stores use. A book with no errors here can still be rejected by a store.',
+    'item2': 'It does not look inside the CSS or check the book’s full accessibility, and with DRM-protected books it cannot read the content.',
+    'm-zip-invalido': 'The file could not be opened as a .zip package: {detalle}',
+    'm-sin-mimetype': 'The “mimetype” file is missing from the root of the package.',
+    'm-mimetype-no-primero': 'The “mimetype” file has to be the first one in the package; right now the first is “{primero}”. Some readers won’t recognize the book like this.',
+    'm-mimetype-comprimido': '“mimetype” is compressed; it has to be stored uncompressed.',
+    'm-mimetype-contenido': '“mimetype” says “{valor}”; it has to say exactly “application/epub+zip”, with no spaces or line breaks.',
+    'm-mimetype-extra': '“mimetype” has extra data in its ZIP header; the standard asks for none.',
+    'm-nombre-repetido': 'Two files have the same name if capitalization is ignored: “{otro}”.',
+    'm-nombre-prohibido': 'The file name has characters EPUB does not allow (\\ : * ? " < > | or a trailing dot).',
+    'm-drm': 'The book has encryption that is not just font obfuscation (probably DRM): its content cannot be checked.',
+    'm-sin-container': 'META-INF/container.xml is missing: without it no reader knows where the book is.',
+    'm-xml-mal-formado': 'The XML is malformed (line {linea}, column {col}): {detalle}',
+    'm-container-sin-rootfile': 'container.xml does not name any package file (rootfile).',
+    'm-opf-no-existe': 'container.xml points to the package file “{ruta}”, which does not exist.',
+    'm-opf-sin-package': 'The package file does not start with the “package” element.',
+    'm-version-desconocida': 'The EPUB version “{version}” is not recognized (2.0 or 3.x expected).',
+    'm-sin-metadata': 'The package has no “metadata”.',
+    'm-sin-titulo': 'The book title (dc:title) is missing.',
+    'm-sin-idioma': 'The book language (dc:language) is missing.',
+    'm-idioma-raro': 'The language “{idioma}” does not look like a valid code (for example “es” or “en-US”).',
+    'm-sin-identificador': 'The book identifier (dc:identifier) is missing.',
+    'm-sin-unique-identifier': 'The package does not declare “unique-identifier”.',
+    'm-unique-identifier-roto': '“unique-identifier” points to “{id}”, but no dc:identifier has that id.',
+    'm-sin-modificado': 'The modification date (meta dcterms:modified), required in EPUB 3, is missing.',
+    'm-modificado-formato': 'The modification date “{valor}” is not in the format CCYY-MM-DDThh:mm:ssZ.',
+    'm-falta-manifest': 'The package has no “manifest” (the list of the book’s files).',
+    'm-item-sin-id': 'A manifest file has no id: {href}',
+    'm-item-sin-href': 'The manifest file “{id}” has no address (href).',
+    'm-item-sin-tipo': 'The manifest file “{id}” has no type (media-type).',
+    'm-id-repetido-opf': 'The id “{id}” is repeated in the manifest.',
+    'm-recurso-remoto-manifest': 'The manifest lists an internet resource ({href}) without the “remote-resources” property.',
+    'm-manifest-falta': 'The manifest lists “{href}”, but that file is not in the book.',
+    'm-archivo-vacio': 'The file is empty.',
+    'm-imagen-ilegible': 'It is declared as {tipo}, but it does not look like an image of that type.',
+    'm-tipo-no-coincide': 'It is declared as {declarado}, but its content is {real}.',
+    'm-extension-html': 'It is XHTML but ends in .html; .xhtml is the usual extension.',
+    'm-sin-manifest': 'The file is in the book but is not in the manifest.',
+    'm-sin-spine': 'The package has no “spine” (the reading order).',
+    'm-spine-vacio': 'The reading order (spine) has no chapters.',
+    'm-spine-ref-rota': 'The reading order names “{idref}”, which is not in the manifest.',
+    'm-spine-tipo': 'The chapter “{id}” is of type {tipo}; a chapter has to be XHTML (or have a fallback).',
+    'm-spine-toc-roto': 'The reading order points to a table of contents “{id}” that is not in the manifest.',
+    'm-epub2-sin-toc': 'An EPUB 2 needs its reading order (spine) to name the NCX table of contents (“toc” attribute).',
+    'm-sin-portada': 'The book does not declare a cover.',
+    'm-portada-rota': 'The cover points to “{id}”, which is not in the manifest.',
+    'm-xhtml-espacio': 'The chapter does not use the XHTML namespace (http://www.w3.org/1999/xhtml).',
+    'm-id-repetido': 'The id “{id}” appears more than once in the chapter.',
+    'm-nav-varios': 'There is more than one navigation file (“nav” property) in the manifest; there has to be exactly one.',
+    'm-sin-nav': 'An EPUB 3 needs a navigation file (“nav” property in the manifest).',
+    'm-nav-tipo': 'The navigation file is of type {tipo}; it has to be XHTML.',
+    'm-nav-sin-toc': 'The navigation file has no table of contents (a “nav” with epub:type="toc").',
+    'm-nav-vacio': 'The book’s table of contents has no links.',
+    'm-indice-enlace-roto': 'The table of contents links to “{href}”, which is not in the book.',
+    'm-indice-ancla-rota': 'The table of contents links to “{href}”, but that part does not exist in the chapter.',
+    'm-ncx-vacio': 'The NCX table of contents has no entries.',
+    'm-capitulos-sin-titulo': '{n} chapter(s) without a title (the “title” element is empty or missing); some readers then show the file name.',
+    'm-img-sin-src': 'There is an image with no address (src).',
+    'm-recurso-remoto': 'It asks for an internet resource ({href}); the book would look broken offline.',
+    'm-recurso-falta': 'It asks for “{href}”, which is not in the book.',
+    'm-img-sin-alt': '{n} image(s) without alternative text (alt): people who use a screen reader won’t know what they show.',
+    'm-enlace-javascript': 'There is a link using “javascript:”; EPUB does not allow it.',
+    'm-enlace-roto': 'It links to “{href}”, which is not in the book.',
+    'm-ancla-rota': 'It links to “{href}”, but that part does not exist in the target chapter.',
+    'm-script': 'The chapter has scripts and the manifest does not mark it with the “scripted” property; many readers do not run them.',
+    'm-iframe': 'The chapter has an embedded frame (iframe), which most readers do not show.',
+    'm-formulario': 'The chapter has a form, which does not work in most readers.',
+    'm-css-remoto': 'The stylesheet asks for an internet resource: {href}',
+    'm-css-recurso-falta': 'The stylesheet asks for “{href}”, which is not in the book.',
+    'm-recortado': 'There are {n} more findings of this kind that are not shown: “{tipo}”',
+    'guia-titulo': 'How to validate an EPUB book',
+    'guia-intro': 'An EPUB is a package of files with strict rules: if a piece is missing, some readers open it and others reject it. This tool checks it from the inside and tells you what it found, split into errors (worth fixing), warnings (doubtful things) and notes.',
+    'guia-paso-1': 'Drag your .epub file to the upload area or click to choose it.',
+    'guia-paso-2': 'Tap “Validate”. While it works the button says “Checking...”.',
+    'guia-paso-3': 'Read the summary and the list: each line says what is wrong and, below it, in which file of the book.',
+    'guia-paso-4': 'If you want to save or send what it found, tap “Download report (.txt)”.',
+    'guia-consejo-1': 'Start with the errors: they are what most often makes a reader fail to open the book or show it wrong.',
+    'guia-consejo-2': 'Warnings do not stop the book from being read, but a book store may ask you to fix them.',
+    'guia-consejo-3': 'To fix package problems, try “Repair EPUB”; for the title, author or language, “Edit EPUB metadata”.',
+    'guia-p1': 'Does this replace epubcheck?',
+    'guia-r1': 'No. epubcheck is the official tool and checks much more, such as the full EPUB schemas. This is a quick check of the most common problems.',
+    'guia-p2': 'Is my book modified?',
+    'guia-r2': 'No: it is only read. Nothing is saved or changed.',
+    'guia-p3': 'What if the book has DRM?',
+    'guia-r3': 'The tool warns that the content is encrypted and cannot check it.'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../epub.html" data-i18n="nav-cat-epub">Herramientas de EPUB</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Validar EPUB</h1>
+  <p data-i18n="intro">Elegí un libro .epub y revisamos su estructura, su índice, sus capítulos, imágenes y enlaces.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept=".epub" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles">
+      <button class="boton" id="botonValidar" disabled data-i18n="boton-validar">Validar</button>
+    </div>
+
+    <div id="informe" style="display:none;">
+      <p id="resumenLibro" style="color:var(--texto-suave); font-size:0.85rem;"></p>
+      <p id="resumenEstado" style="font-weight:600;"></p>
+      <ul id="listaHallazgos" style="list-style:none; padding:0; margin:0;"></ul>
+      <p class="controles"><a class="boton" id="enlaceInforme" data-i18n-attr="download:archivo-informe-epub" download="informe-epub.txt" data-i18n="descargar-informe">Descargar informe (.txt)</a></p>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;" data-i18n="limitaciones-titulo">Limitaciones</h3>
+    <ul style="color:var(--texto-suave);">
+      <li data-i18n="item1">Es una revisión básica: no reemplaza a epubcheck, la herramienta oficial que usan las tiendas de libros. Un libro sin errores acá todavía puede ser rechazado por una tienda.</li>
+      <li data-i18n="item2">No revisa el CSS por dentro ni la accesibilidad completa del libro, y con libros con DRM no puede leer el contenido.</li>
+    </ul>
+  </div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo validar un libro EPUB</h2>
+    <p data-i18n="guia-intro">Un EPUB es un paquete de archivos con reglas estrictas: si falta una pieza, algunos lectores lo abren y otros lo rechazan. Esta herramienta lo revisa por dentro y te dice qué encontró, separado en errores (lo que conviene arreglar), avisos (cosas dudosas) y notas.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá tu archivo .epub a la zona de carga o hacé clic para elegirlo.</li>
+      <li data-i18n="guia-paso-2">Tocá «Validar». Mientras trabaja el botón dice «Revisando...».</li>
+      <li data-i18n="guia-paso-3">Leé el resumen y la lista: cada línea dice qué pasa y, debajo, en qué archivo del libro.</li>
+      <li data-i18n="guia-paso-4">Si querés guardar o enviar lo que encontró, tocá «Descargar informe (.txt)».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Empezá por los errores: son lo que más seguido hace que un lector no abra el libro o lo muestre mal.</li>
+      <li data-i18n="guia-consejo-2">Los avisos no impiden leer el libro, pero una tienda de libros puede pedir arreglarlos.</li>
+      <li data-i18n="guia-consejo-3">Para corregir los problemas del paquete, probá «Reparar EPUB»; para el título, el autor o el idioma, «Editar metadatos EPUB».</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Esto reemplaza a epubcheck?</summary>
+      <p data-i18n="guia-r1">No. epubcheck es la herramienta oficial y revisa mucho más, como los esquemas completos de EPUB. Esta es una revisión rápida de lo más común.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Se modifica mi libro?</summary>
+      <p data-i18n="guia-r2">No: solo se lee. Nada se guarda ni se cambia.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Qué hago si el libro tiene DRM?</summary>
+      <p data-i18n="guia-r3">La herramienta avisa que el contenido está cifrado y no puede revisarlo.</p>
+    </details>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
+<script src="../assets/js/validador-epub.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonValidar = document.getElementById('botonValidar');
+const informe = document.getElementById('informe');
+const resumenLibro = document.getElementById('resumenLibro');
+const resumenEstado = document.getElementById('resumenEstado');
+const listaHallazgos = document.getElementById('listaHallazgos');
+const enlaceInforme = document.getElementById('enlaceInforme');
+
+let archivoActual = null;
+let ultimoResultado = null;
+
+function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+  botonValidar.disabled = false;
+  informe.style.display = 'none';
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.epub'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
+
+const ICONOS = { error: '❌', aviso: '⚠️', info: 'ℹ️' };
+const COLORES = { error: '#b91c1c', aviso: '#92400e', info: 'var(--texto-suave)' };
+
+// El texto de un hallazgo en el idioma de la página, con sus datos puestos.
+function textoDe(h) {
+  const llenar = (clave, datos) => t('m-' + clave).replace(/\{(\w+)\}/g, (m, k) => (datos[k] !== undefined ? String(datos[k]) : m));
+  if (h.codigo === 'recortado') {
+    const tipo = llenar(h.p.codigo, {}).replace(/\{\w+\}/g, '…');
+    return llenar('recortado', { n: h.p.n, tipo: tipo.length > 70 ? tipo.slice(0, 67) + '…' : tipo });
+  }
+  return llenar(h.codigo, h.p);
+}
+
+function mostrarResultado(r) {
+  ultimoResultado = r;
+  const rotulo = (t('resumen-libro'))
+    .replace('{version}', r.version || '?').replace('{titulo}', r.titulo || t('resumen-sin-titulo'))
+    .replace('{capitulos}', r.capitulos).replace('{recursos}', r.recursos);
+  resumenLibro.textContent = r.version ? rotulo : '';
+  const { error, aviso } = r.conteo;
+  resumenEstado.textContent = error ? t('resumen-error').replace('{errores}', error).replace('{avisos}', aviso)
+    : aviso ? t('resumen-ok-avisos').replace('{avisos}', aviso) : t('resumen-ok') + ' ' + t('resumen-nada');
+  resumenEstado.style.color = error ? COLORES.error : '#166534';
+  listaHallazgos.innerHTML = r.hallazgos.map((h) => `<li style="padding:8px 0; border-top:1px solid var(--gris-borde);">`
+    + `<span style="color:${COLORES[h.nivel]}; font-weight:600;">${ICONOS[h.nivel]} ${escaparHtml(t('nivel-' + h.nivel))}</span> ${escaparHtml(textoDe(h))}`
+    + (h.ruta ? `<br><code style="font-size:0.8rem; color:var(--texto-suave); word-break:break-all;">${escaparHtml(h.ruta)}</code>` : '') + `</li>`).join('');
+  const lineas = [resumenLibro.textContent, resumenEstado.textContent, '']
+    .concat(r.hallazgos.map((h) => `[${t('nivel-' + h.nivel).toUpperCase()}] ${textoDe(h)}${h.ruta ? ' (' + h.ruta + ')' : ''}`));
+  if (enlaceInforme.dataset.url) URL.revokeObjectURL(enlaceInforme.dataset.url);
+  enlaceInforme.dataset.url = enlaceInforme.href = URL.createObjectURL(new Blob([lineas.join('\n') + '\n'], { type: 'text/plain;charset=utf-8' }));
+  enlaceInforme.style.display = r.hallazgos.length ? '' : 'none';
+  informe.style.display = 'block';
+}
+
+botonValidar.addEventListener('click', async () => {
+  botonValidar.disabled = true;
+  botonValidar.textContent = t('boton-validar-procesando');
+  try {
+    mostrarResultado(await ValidadorEpub.validar(archivoActual));
+  } catch (error) {
+    alert(t('error-validar') + ': ' + detalleError(error));
+  } finally {
+    botonValidar.disabled = false;
+    botonValidar.textContent = t('boton-validar');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>
