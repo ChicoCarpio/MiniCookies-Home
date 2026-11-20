@@ -8,7 +8,7 @@
 //   cada celda se dibuja con el "sprite" de su estilo. Lo que hace que se
 //   parezcan a los de verdad es la paleta corta, no tanto la separación.
 // - Cómic: suavizado Kuwahara, pocos colores, limpieza de manchas y cada zona
-//   de color vectorizada (ImageTracer, vendor/imagetracerjs) para que los
+//   de color vectorizada (trazador-contornos.js) para que los
 //   bordes sean curvas y no escalones; la línea va solo entre colores que se
 //   diferencian de verdad.
 //
@@ -21,7 +21,7 @@
 // EfectosTextura.crearGaleria (con los nombres de TEXTOS de acá).
 //
 // Necesita, cargados antes: paleta-color.js y, para el cómic,
-// vendor/imagetracerjs/1.2.6/imagetracer_v1.2.6.js.
+// trazador-contornos.js.
 window.EfectosMosaico = (function () {
   const { A_LINEAL, linealAOklab, oklabARgb, tono, dist2, masCercano, paleta: calcularPaleta } = PaletaColor;
 
@@ -417,36 +417,10 @@ window.EfectosMosaico = (function () {
     return grupo;
   }
 
-  // Figuras vectoriales de cada color. Se le pasa a ImageTracer el mapa de
-  // colores ya limpio (su formato: una matriz con un borde de -1), así no
-  // repite su propia reducción de colores. Devuelve [{ color, d }] con "d" en
-  // el formato de SVG, de la figura más grande a la más chica.
-  function vectorizar(indice, w, h, k) {
-    if (!window.ImageTracer) throw new Error('El cómic necesita vendor/imagetracerjs cargado antes que efectos-mosaico.js');
-    const array = [];
-    for (let y = -1; y <= h; y++) {
-      const fila = new Array(w + 2).fill(-1);
-      if (y >= 0 && y < h) for (let x = 0; x < w; x++) fila[x + 1] = indice[y * w + x];
-      array.push(fila);
-    }
-    const ii = { array, palette: [] };
-    const op = ImageTracer.checkoptions({ ltres: 1, qtres: 1, pathomit: 8, rightangleenhance: false, roundcoords: -1, scale: 1 });
-    const capas = [];
-    for (let c = 0; c < k; c++) {
-      capas.push(ImageTracer.batchtracepaths(
-        ImageTracer.internodes(ImageTracer.pathscan(ImageTracer.layeringstep(ii, c), op.pathomit), op), op.ltres, op.qtres));
-    }
-    const td = { layers: capas, palette: capas.map(() => ({ r: 0, g: 0, b: 0, a: 255 })) };
-    const figuras = [];
-    capas.forEach((capa, c) => capa.forEach((fig, f) => {
-      if (fig.isholepath) return;
-      const m = /d="([^"]*)"/.exec(ImageTracer.svgpathstring(td, c, f, op));
-      const [x0, y0, x1, y1] = fig.boundingbox;
-      if (m) figuras.push({ color: c, d: m[1], area: (x1 - x0) * (y1 - y0) });
-    }));
-    // Las chicas encima: tapan las uniones de las grandes
-    return figuras.sort((a, b) => b.area - a.area);
-  }
+  // Figuras vectoriales de cada color (trazador-contornos.js). Devuelve
+  // [{ color, d }] con "d" en el formato de SVG, de la figura más grande a la
+  // más chica; el origen va corrido (-1, -1) por el borde de relleno.
+  const vectorizar = (indice, w, h, k) => TrazadorContornos.vectorizar(indice, w, h, k);
 
   function comic(fuente, o) {
     const ancho = fuente.width, alto = fuente.height;
@@ -477,7 +451,7 @@ window.EfectosMosaico = (function () {
     const salida = document.createElement('canvas');
     salida.width = ancho; salida.height = alto;
     const ctx = salida.getContext('2d');
-    ctx.setTransform(ancho / w, 0, 0, alto / h, -ancho / w, -alto / h); // el borde de -1 de ImageTracer
+    ctx.setTransform(ancho / w, 0, 0, alto / h, -ancho / w, -alto / h); // el borde de -1 del trazador
     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     // Relleno + un trazo fino del mismo color, que tapa las rendijas
     const figuras = vectorizar(indice, w, h, paleta.length);
