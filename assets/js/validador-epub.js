@@ -310,10 +310,11 @@ const ValidadorEpub = (function () {
     }
 
     // --- Cada capítulo ---
+    let sinTituloN = 0; // los libros de conversión suelen traer todos sus capítulos así: un solo aviso con la cuenta
     for (const [ruta, { doc, item }] of capitulos) {
       const cabeza = todos(doc, 'head')[0];
       const titulo = cabeza ? todos(cabeza, 'title')[0] : null;
-      if (!titulo || !txt(titulo)) marca('aviso', 'capitulo-sin-titulo', ruta);
+      if (!titulo || !txt(titulo)) sinTituloN++;
       let sinAlt = 0;
       for (const img of todos(doc, 'img')) {
         const src = img.getAttribute('src') || '';
@@ -348,6 +349,8 @@ const ValidadorEpub = (function () {
       // Estilos escritos dentro del capítulo
       for (const est of todos(doc, 'style')) revisarCss(est.textContent || '', ruta, ruta);
     }
+
+    if (sinTituloN) marca('aviso', 'capitulos-sin-titulo', '', { n: sinTituloN });
 
     // --- Hojas de estilo ---
     function revisarCss(css, desde, ruta) {
