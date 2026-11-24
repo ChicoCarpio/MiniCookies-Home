@@ -19,7 +19,7 @@ import { inyectarSeo, generarRobotsYSitemap, indiceDeCategorias, esNoIndex } fro
 import { traducir, diccionarioComun, paginasConIngles, tieneIngles } from './ingles.mjs';
 import { DESTINO, ES_SEGURO, SEGURAS, CARPETA_SALIDA, SITIO_PRINCIPAL, esHerramientaSegura, urlSegura } from './destinos.mjs';
 import { contarHerramientas, aplicarConteos } from './conteo.mjs';
-import { leerCatalogo, aplicarCatalogo } from './catalogo.mjs';
+import { leerCatalogo, aplicarCatalogo, quitarDesactivadas } from './catalogo.mjs';
 import { revisarTerceros } from './terceros.mjs';
 import { revisarReferenciasVendor } from './referencias-vendor.mjs';
 import { revisarMotorPptx } from './motor-pptx.mjs';
@@ -295,6 +295,7 @@ function procesarArchivo(origen, rel, relSalida = rel) {
   else if (ext === '.html') {
     const rutaWeb = relSalida.replace(/\\/g, '/');
     let fuente = readFileSync(origen, 'utf8');
+    fuente = quitarDesactivadas(fuente, catalogo, rutaWeb);
     if (ES_SEGURO) {
       anotarRecursos(fuente, rel);
       fuente = enlacesAlPrincipal(fuente, rel.replace(/\\/g, '/'), rutaWeb);
@@ -338,6 +339,8 @@ function recorrer(carpeta) {
     if (EXCLUIR_EXTENSIONES.has(extname(nombre).toLowerCase())) continue;
     // Las herramientas seguras solo se publican en el sitio seguro.
     if (esHerramientaSegura(rel)) continue;
+    // Herramientas desactivadas (catalogo.json, "desactivadas"): su código queda en el repo, pero no se publica.
+    if (catalogo.archivosDesactivados.has(rel.replace(/\\/g, '/'))) continue;
     procesarArchivo(origen, rel);
   }
 }

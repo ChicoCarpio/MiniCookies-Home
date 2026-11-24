@@ -1016,7 +1016,9 @@
     { valor: 'fr', es: 'Francés', en: 'French' }, { valor: 'de', es: 'Alemán', en: 'German' }, { valor: 'it', es: 'Italiano', en: 'Italian' },
     { valor: 'zh', es: 'Chino (simplificado)', en: 'Chinese (simplified)' }, { valor: 'ja', es: 'Japonés', en: 'Japanese' }, { valor: 'ko', es: 'Coreano', en: 'Korean' },
   ];
-  F.registrar({
+  // Desactivado mientras el traductor está fuera del sitio (catalogo.json, "desactivadas"): para reactivarlo, poner true.
+  const TRADUCTOR_ACTIVO = false;
+  if (TRADUCTOR_ACTIVO) F.registrar({
     id: 'traducir-documento',
     icono: '🌐',
     nombre: { es: 'Traducir documento', en: 'Translate document' },
