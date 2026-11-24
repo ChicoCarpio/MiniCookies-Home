@@ -24,7 +24,8 @@ import { conteoPorCategoria } from './catalogo.mjs';
  */
 export function contarHerramientas(raiz, catalogo) {
   const total = readdirSync(join(raiz, 'herramientas'))
-    .filter((n) => n.toLowerCase().endsWith('.html')).length;
+    .filter((n) => n.toLowerCase().endsWith('.html')
+    && !catalogo.archivosDesactivados.has('herramientas/' + n)).length;
   const porCategoria = conteoPorCategoria(catalogo);
   return { total, porCategoria };
 }

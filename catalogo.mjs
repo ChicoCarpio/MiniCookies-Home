@@ -77,7 +77,41 @@ export function leerCatalogo(raiz) {
   }
 
   if (errores.length) throw new Error('catalogo.json:\n  - ' + errores.join('\n  - '));
+
+  // Herramientas desactivadas: ya validadas contra el disco, salen del catálogo (menús, buscador, conteos).
+  const desactivadas = Object.entries(catalogo.desactivadas || {}).filter(([h]) => h !== '_nota');
+  const archivos = new Set();
+  for (const [h, lista] of desactivadas) {
+    if (!herramientas[h]) throw new Error(`catalogo.json: "desactivadas" habla de "${h}", que no es una herramienta`);
+    for (const a of lista) {
+      if (!existsSync(join(raiz, a))) throw new Error(`catalogo.json: "desactivadas" lista ${a}, que no existe`);
+      archivos.add(a);
+    }
+    delete herramientas[h];
+    for (const lista of Object.values(categorias)) delete lista[h];
+    for (const [c, grupos] of Object.entries(catalogo.grupos || {})) {
+      for (const g of grupos) g.herramientas = (g.herramientas || []).filter((x) => x !== h);
+      catalogo.grupos[c] = grupos.filter((g) => g.herramientas.length);
+    }
+  }
+  catalogo.archivosDesactivados = archivos;
   return catalogo;
+}
+
+/**
+ * Quita de una página las tarjetas de guías o herramientas desactivadas y corta el build si
+ * le queda algún enlace a una (publicaría un enlace roto).
+ */
+export function quitarDesactivadas(html, catalogo, archivo) {
+  for (const a of catalogo.archivosDesactivados) {
+    if (!/\.html$/.test(a)) continue;
+    const nombre = a.split('/').pop().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    html = html.replace(new RegExp(`\\s*<a class="tarjeta-herramienta" href="[^"]*${nombre}">[\\s\\S]*?</a>`, 'g'), '');
+    if (new RegExp(`(?:href|src)="[^"]*${nombre}"`).test(html)) {
+      throw new Error(`${archivo} enlaza a ${a}, que está desactivada (catalogo.json, "desactivadas")`);
+    }
+  }
+  return html;
 }
 
 /** Herramientas distintas por categoría (las bidireccionales cuentan en las dos). */
