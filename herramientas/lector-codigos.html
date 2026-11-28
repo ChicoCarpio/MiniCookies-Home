@@ -8,6 +8,7 @@
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <script>
 window.i18nPagina = {
@@ -41,6 +42,14 @@ window.i18nPagina = {
     'error-copiar': 'No se pudo copiar: ',
     'error-camara': 'No se pudo acceder a esa cámara (¿está apagada o sin señal?): ',
     'camara-numerada': 'Cámara {n}',
+    'boton-a-fondo': '🔎 Buscar QR a fondo',
+    'ayuda-a-fondo': 'Dos redes propias de Mini Cookies buscan códigos QR chicos, borrosos o desteñidos y limpian la imagen para leerlos. La primera vez se descargan unos 10 MB. Todo se hace en tu equipo, y no siempre lo consigue.',
+    'progreso-fondo-carga': 'Preparando la búsqueda a fondo…',
+    'progreso-fondo': 'Buscando QR a fondo…',
+    'progreso-fondo-pagina': 'Buscando QR a fondo: página {n} de {total}…',
+    'progreso-fondo-imagen': 'Buscando QR a fondo: imagen {n} de {total}…',
+    'sin-qr-a-fondo': 'La búsqueda a fondo tampoco encontró un código QR en {donde}.',
+    'error-a-fondo': 'No se pudo hacer la búsqueda a fondo: ',
     'titulo-pagina': 'Leer códigos QR y de barras desde imagen o PDF, gratis — Mini Cookies',
     'meta-descripcion': 'Leé códigos QR y de barras desde una imagen, un PDF, un Word, un Excel, un PowerPoint o un EPUB, o con la cámara. Gratis y sin enviar nada a ningún servidor.',
     'guia-titulo': 'Cómo leer un código QR o de barras',
@@ -93,6 +102,14 @@ window.i18nPagina = {
     'error-copiar': 'Could not copy: ',
     'error-camara': 'That camera could not be accessed (is it off, or not sending a signal?): ',
     'camara-numerada': 'Camera {n}',
+    'boton-a-fondo': '🔎 Deep QR search',
+    'ayuda-a-fondo': 'Two Mini Cookies in-house networks look for small, blurry or faded QR codes and clean up the image so they can be read. The first time, about 10 MB are downloaded. Everything happens on your device, and it does not always succeed.',
+    'progreso-fondo-carga': 'Getting the deep search ready…',
+    'progreso-fondo': 'Searching in depth for a QR code…',
+    'progreso-fondo-pagina': 'Deep QR search: page {n} of {total}…',
+    'progreso-fondo-imagen': 'Deep QR search: image {n} of {total}…',
+    'sin-qr-a-fondo': 'The deep search did not find a QR code in {donde} either.',
+    'error-a-fondo': 'The deep search could not be done: ',
     'titulo-pagina': 'Read QR and barcodes from an image or PDF, free — Mini Cookies',
     'meta-descripcion': 'Read QR codes and barcodes from an image, a PDF, a Word, Excel or PowerPoint file, an EPUB, or straight from your camera. Free, and nothing is sent to a server.',
     'guia-titulo': 'How to read a QR code or barcode',
@@ -167,6 +184,14 @@ window.i18nPagina = {
 
     <p id="progreso" style="display:none; margin-top:16px; color:var(--texto-suave);"></p>
 
+    <div class="controles" id="controlesFondo" style="display:none; margin-top:16px;">
+      <button class="boton" id="botonFondo" type="button" data-i18n="boton-a-fondo">🔎 Buscar QR a fondo</button>
+      <span class="ayuda-tip">
+        <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+        <span class="ayuda-burbuja" data-i18n="ayuda-a-fondo">Dos redes propias de Mini Cookies buscan códigos QR chicos, borrosos o desteñidos y limpian la imagen para leerlos. La primera vez se descargan unos 10 MB. Todo se hace en tu equipo, y no siempre lo consigue.</span>
+      </span>
+    </div>
+
     <div class="resultado" id="resultado">
       <strong id="tituloResultado"></strong>
       <div id="listaCodigos"></div>
@@ -222,6 +247,10 @@ window.i18nPagina = {
 <script src="../vendor/zxing-wasm/3.1.8/iife/reader/index.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../assets/js/leer-codigos.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
+<script src="../assets/js/ort-pagina.js"></script>
+<script src="../assets/js/vestigator.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/extraer-medios-zip.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
@@ -241,11 +270,15 @@ const resultado = document.getElementById('resultado');
 const tituloResultado = document.getElementById('tituloResultado');
 const listaCodigos = document.getElementById('listaCodigos');
 const progreso = document.getElementById('progreso');
+const controlesFondo = document.getElementById('controlesFondo');
+const botonFondo = document.getElementById('botonFondo');
 
 let camara = null;        // la que devuelve LeerCodigos.camara mientras está encendida
 let turnoCamara = 0;      // cambia con cada pedido de encender o apagar: lo que llega tarde se descarta
 let vistoEnCamara = '';   // el último código mostrado, para no repintar la lista en cada cuadro
 let deviceIdActivo = null;
+let turnoArchivo = 0;          // cambia con cada archivo o cambio de modo: una lectura que llega tarde se descarta
+let archivoSinCodigo = null;   // el último archivo en el que no se encontró nada, para buscar a fondo
 
 function mostrarError(texto) {
   mensajeError.textContent = '❌ ' + texto;
@@ -260,13 +293,13 @@ function ocultarError() {
 // Pinta la lista de códigos encontrados. Un PDF o un documento pueden traer
 // varios, así que cada uno va con su origen (de qué página o imagen salió) y
 // sus propios botones.
-function mostrarCodigos(codigos, resumenOrigen) {
+function mostrarCodigos(codigos, resumenOrigen, sinNada = 'sin-codigos') {
   ocultarError();
   listaCodigos.replaceChildren();
 
   if (!codigos.length) {
     resultado.classList.remove('visible');
-    mostrarError(t('sin-codigos').replace('{donde}', resumenOrigen));
+    mostrarError(t(sinNada).replace('{donde}', resumenOrigen));
     return;
   }
 
@@ -351,20 +384,18 @@ function avisar(texto) {
   progreso.style.display = texto ? 'block' : 'none';
 }
 
-// La lectura (imagen y PDF) está en assets/js/leer-codigos.js.
-async function codigosDePdf(archivo) {
+// La lectura (imagen y PDF) está en assets/js/leer-codigos.js; la búsqueda a fondo, en vestigator.js. `buscador`
+// es la de a fondo; sin él, la lectura es la normal.
+function codigosDePdf(archivo, buscador, progresoDe) {
   return LeerCodigos.dePdf(
     archivo,
-    (n, total) => avisar(t('progreso-pagina').replace('{n}', n).replace('{total}', total)),
-    (n) => t('origen-pagina').replace('{n}', n)
+    (n, total) => avisar(t(progresoDe).replace('{n}', n).replace('{total}', total)),
+    (n) => t('origen-pagina').replace('{n}', n),
+    buscador
   );
 }
 
-function codigosDeImagen(archivo, origen) {
-  return LeerCodigos.deImagen(archivo, origen);
-}
-
-async function codigosDeDocumento(archivo, carpeta) {
+async function codigosDeDocumento(archivo, carpeta, buscador, progresoDe) {
   const imagenes = await extraerArchivosDeZip(archivo, (ruta) => {
     if (!/\.(png|jpe?g|gif|bmp|webp)$/i.test(ruta)) return false;
     return carpeta ? ruta.startsWith(carpeta) : true;
@@ -373,51 +404,78 @@ async function codigosDeDocumento(archivo, carpeta) {
 
   const encontrados = [];
   for (let i = 0; i < imagenes.length; i++) {
-    avisar(t('progreso-imagen').replace('{n}', i + 1).replace('{total}', imagenes.length));
+    avisar(t(progresoDe).replace('{n}', i + 1).replace('{total}', imagenes.length));
     const nombre = imagenes[i].nombre.split('/').pop();
-    const hallados = await codigosDeImagen(new File([imagenes[i].blob], nombre),
-      t('origen-imagen-nombre').replace('{nombre}', nombre));
+    const hallados = await LeerCodigos.deImagen(new File([imagenes[i].blob], nombre),
+      t('origen-imagen-nombre').replace('{nombre}', nombre), buscador);
     encontrados.push(...hallados);
   }
   return encontrados;
 }
 
-async function leerArchivo(archivo) {
+// Con `aFondo` se buscan solo códigos QR, con las redes: se ofrece cuando la lectura normal no encontró nada.
+async function leerArchivo(archivo, aFondo) {
+  const turno = ++turnoArchivo;
+  const vigente = () => turno === turnoArchivo;
+  ocultarBusquedaAFondo();
   ocultarError();
   resultado.classList.remove('visible');
   listaCodigos.replaceChildren();
 
   const extension = extensionDe(archivo.name);
   const esImagen = archivo.type.startsWith('image/');
+  const buscador = aFondo ? (lienzo) => Vestigator.buscar(lienzo, vigente) : undefined;
   let codigos = [];
   let queEra = t('origen-archivo');
 
   try {
+    if (aFondo) {
+      avisar(t('progreso-fondo-carga'));
+      await Vestigator.cargar();
+      if (!vigente()) return;
+    }
     if (extension === 'pdf' || archivo.type === 'application/pdf') {
       queEra = t('origen-pdf');
       avisar(t('progreso-pdf'));
-      codigos = await codigosDePdf(archivo);
+      codigos = await codigosDePdf(archivo, buscador, aFondo ? 'progreso-fondo-pagina' : 'progreso-pagina');
     } else if (Object.prototype.hasOwnProperty.call(MEDIOS_POR_EXTENSION, extension)) {
       queEra = t('origen-documento');
       avisar(t('progreso-medios'));
-      codigos = await codigosDeDocumento(archivo, MEDIOS_POR_EXTENSION[extension]);
+      codigos = await codigosDeDocumento(archivo, MEDIOS_POR_EXTENSION[extension], buscador, aFondo ? 'progreso-fondo-imagen' : 'progreso-imagen');
     } else if (esImagen) {
       queEra = t('origen-imagen');
-      codigos = await codigosDeImagen(archivo, '');
+      if (aFondo) avisar(t('progreso-fondo'));
+      codigos = await LeerCodigos.deImagen(archivo, '', buscador);
     } else {
       avisar('');
       mostrarError(t('error-tipo'));
       return;
     }
   } catch (error) {
+    if (!vigente()) return;
     avisar('');
-    mostrarError(t('error-leer-archivo') + detalleError(error));
+    mostrarError(t(aFondo ? 'error-a-fondo' : 'error-leer-archivo') + detalleError(error));
+    if (aFondo) ofrecerBusquedaAFondo(archivo);
     return;
   }
+  if (!vigente()) return;
 
   avisar('');
-  mostrarCodigos(codigos, queEra);
+  mostrarCodigos(codigos, queEra, aFondo ? 'sin-qr-a-fondo' : 'sin-codigos');
+  if (!codigos.length && !aFondo) ofrecerBusquedaAFondo(archivo);
 }
+
+function ofrecerBusquedaAFondo(archivo) {
+  archivoSinCodigo = archivo;
+  controlesFondo.style.display = '';
+}
+
+function ocultarBusquedaAFondo() {
+  archivoSinCodigo = null;
+  controlesFondo.style.display = 'none';
+}
+
+botonFondo.addEventListener('click', () => { if (archivoSinCodigo) leerArchivo(archivoSinCodigo, true); });
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, (archivos) => leerArchivo(archivos[0]));
 
@@ -472,6 +530,9 @@ async function iniciarCamara(deviceId, esReintento) {
 }
 
 function activarModo(modo) {
+  turnoArchivo++;
+  ocultarBusquedaAFondo();
+  avisar('');
   detenerCamara();
   ocultarError();
   resultado.classList.remove('visible');

@@ -116,6 +116,7 @@
     ],
     async preparar() {
       await js('escaner-documento.js');
+      await js('ort-pagina.js');
       await js('custos.js');
       const carga = Custos.cargar();
       // En un hilo (flujos-hilo.js) se espera la carga: con muchos hilos cargando a la vez puede pasar los 15 s de
