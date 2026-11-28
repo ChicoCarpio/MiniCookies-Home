@@ -382,7 +382,8 @@
    * hubieran ido de a uno. alAvanzar({ hechos, total, archivo, entrada, paso }) avisa el avance (el total es
    * aproximado si un paso abre un archivo en varios). Un archivo que falla no frena a los demás.
    * Devuelve { resultados, fallos, hilos: { cuantos, pasosPorHilo, enPagina } } (hilos: para medir y probar).
-   * opciones.hilos: cuántos hilos abrir (0 = todo en la página); por defecto, según los núcleos del equipo.
+   * opciones.hilos: cuántos hilos abrir (0 = todo en la página); por defecto, según los núcleos del equipo, y la mitad
+   * si algún paso, con sus opciones, pide mucha más memoria (el módulo lo dice con `pesado(opciones)`).
    */
   async function ejecutar(flujo, archivos, { alAvanzar, hilos } = {}) {
     flujo = normalizar(flujo);
@@ -399,7 +400,8 @@
       r.sinEntrada.forEach((a) => fallos.push({ nombre: a.name, entrada: null, codigo: 'tipo' }));
     }
     const usados = [...new Set([...flujo.entradas.flat(), ...flujo.comun].map((p) => modulo(p.id)))];
-    const cuantos = hilos == null ? cuantosHilos() : Math.max(0, Math.floor(hilos));
+    const pesado = [...flujo.entradas.flat(), ...flujo.comun].some((p) => { const m = modulo(p.id); return !!(m.pesado && m.pesado(p.opciones)); });
+    const cuantos = hilos == null ? Math.ceil(cuantosHilos() / (pesado ? 2 : 1)) : Math.max(0, Math.floor(hilos));
     let grupo = null;
     try {
       // No más hilos que archivos, salvo que un paso abra cada archivo en varios (las páginas de un PDF).

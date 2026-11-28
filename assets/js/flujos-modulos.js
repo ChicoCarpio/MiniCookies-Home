@@ -2,7 +2,8 @@
 // Los módulos de Flujos (assets/js/flujos.js). Cada uno es un adaptador fino sobre la pieza compartida que
 // usa también la herramienta de su página: el flujo y la página hacen lo mismo con el mismo código.
 //
-//   leer-codigos        LeerCodigos (lector-codigos.html)            imagen|pdf -> igual   (guarda datos.codigos)
+//   leer-codigos        LeerCodigos (lector-codigos.html)            imagen|pdf -> igual   (guarda datos.codigos; con
+//                       esfuerzo alto suma Vestigator, como la página)
 //   recortar-documento  EscanerDocumento + Custos (escanear-documento.html)   imagen -> imagen
 //   girar-imagen        GirarImagen (rotar-imagen.html)              imagen -> imagen
 //   comprimir-imagen    ComprimirImagen (comprimir-imagen.html)      imagen -> imagen
@@ -75,7 +76,10 @@
     nombre: { es: 'Leer códigos QR y de barras', en: 'Read QR and barcodes' },
     descripcion: { es: 'Busca un código en cada archivo y guarda lo que dice para los pasos siguientes.', en: 'Looks for a code in each file and keeps what it says for the next steps.' },
     entra: ['imagen', 'pdf'], sale: 'igual', hilo: true, forma: 'uno',
+    pesado: (o) => o.esfuerzo === 'alto',   // cada hilo carga además las dos redes
     opciones: [
+      { id: 'esfuerzo', tipo: 'select', defecto: 'normal', etiqueta: { es: 'Esfuerzo', en: 'Effort' },
+        valores: [{ valor: 'normal', es: 'Normal', en: 'Normal' }, { valor: 'alto', es: 'Alto (QR difíciles, con IA)', en: 'High (hard QR codes, with AI)' }] },
       { id: 'sinCodigo', tipo: 'select', defecto: 'seguir', etiqueta: { es: 'Si no hay código', en: 'If there is no code' },
         valores: [{ valor: 'seguir', es: 'Seguir con el archivo', en: 'Keep the file' }, { valor: 'quitar', es: 'Quitarlo del flujo', en: 'Drop it from the flow' }] },
     ],
@@ -85,9 +89,16 @@
       await js('leer-codigos.js');
     },
     async ejecutar(f, o) {
+      let aFondo;   // solo con esfuerzo alto: las redes se bajan recién entonces
+      if (o.esfuerzo === 'alto') {
+        await js('ort-pagina.js');
+        await js('vestigator.js');
+        await Vestigator.cargar();   // si no se puede, el paso falla y queda a la vista: no se baja a normal en silencio
+        aFondo = (lienzo) => Vestigator.buscar(lienzo);
+      }
       const codigos = f.tipo === 'pdf'
-        ? await LeerCodigos.dePdf(f.blob)
-        : await LeerCodigos.deImagen(f.blob);
+        ? await LeerCodigos.dePdf(f.blob, null, null, aFondo)
+        : await LeerCodigos.deImagen(f.blob, '', aFondo);
       if (!codigos.length && o.sinCodigo === 'quitar') return null;
       const vistos = new Set();   // el mismo código en dos páginas de un PDF se anota una vez
       const nuevos = codigos.filter((c) => !vistos.has(c.formato + '\n' + c.texto) && vistos.add(c.formato + '\n' + c.texto));
