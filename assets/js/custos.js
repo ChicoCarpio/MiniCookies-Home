@@ -26,7 +26,7 @@
 // banco de 186 objetos, como el sitio, 0,855 / 69 % (V1 0,762 / 39 %); banco de 17: 13 bien (V1 11). Igual de rápida
 // (~9 ms en PC, ~62 ms con la CPU frenada x6) y del mismo peso (3,9 MB).
 // Investigación y mediciones: Investigaciones\investigacion-escaner\05-estado-y-como-retomar.md
-// Necesita assets/js/vendor.js antes.
+// Necesita assets/js/vendor.js y ort-pagina.js antes.
 
 const Custos = (() => {
   const S = 224, MARGEN = 0.25;
@@ -41,24 +41,10 @@ const Custos = (() => {
   let lienzo = null, ctx = null;
   const entrada = new Float32Array(3 * S * S);
 
-  function cargarScript(src) {
-    return new Promise((ok, mal) => {
-      const s = document.createElement('script');
-      s.src = src; s.onload = ok; s.onerror = () => mal(errorMC('carga-no-cargo', { archivo: src }, 'No cargó {archivo}'));
-      document.head.appendChild(s);
-    });
-  }
-
   function cargar() {
     if (!promesa) promesa = (async () => {
       try {
-        if (typeof WebAssembly !== 'object') return false;
-        if (!window.ort) await cargarScript(rutaVendor('onnxruntime-web/1.20.1/ort.wasm.min.js'));
-        ort.env.wasm.numThreads = 1;   // el sitio no tiene aislamiento de origen (sin SharedArrayBuffer)
-        ort.env.wasm.wasmPaths = {
-          mjs: rutaVendor('onnxruntime-web/1.20.1/ort-wasm-simd-threaded.mjs'),
-          wasm: rutaVendor('onnxruntime-web/1.20.1/ort-wasm-simd-threaded.wasm'),
-        };
+        await cargarOrt();
         sesion = await ort.InferenceSession.create(MODELO, { executionProviders: ['wasm'], graphOptimizationLevel: 'all' });
         return true;
       } catch (error) {

@@ -76,6 +76,11 @@
     return hallado ? salida(hallado) : null;
   }
 
+  // Solo QR, sobre unos píxeles ya preparados (los recortes que limpia vestigator.js), con las dos formas de separar
+  // blancos y negros.
+  const QR = ['QRCodeModel1', 'QRCodeModel2'];
+  const qrEn = async (pixeles) => (await intentar(pixeles, QR)) || intentar(pixeles, QR, 'GlobalHistogram');
+
   // Los píxeles de un lienzo, con lo transparente sobre blanco (como se ve): si no, un QR en un PNG sin fondo
   // quedaría negro sobre negro.
   function pixelesDe(contexto, x, y, ancho, alto) {
@@ -155,10 +160,11 @@
   // Un intento de lectura sobre un lienzo, insistiendo si hace falta. Devuelve { texto, formato } o null.
   const deLienzo = (lienzo) => leerLienzo(lienzo, true);
 
-  // Una imagen (File o Blob). Devuelve una lista de 0 o 1 códigos.
-  async function deImagen(archivo, origen) {
+  // Una imagen (File o Blob). Devuelve una lista de 0 o 1 códigos. `aFondo(lienzo)`, si se pasa (esfuerzo alto),
+  // se prueba cuando la lectura normal no encuentra nada.
+  async function deImagen(archivo, origen, aFondo) {
     const lienzo = await lienzoDeImagen(archivo);
-    const hallado = lienzo && await deLienzo(lienzo);
+    const hallado = lienzo && (await deLienzo(lienzo) || (aFondo ? await aFondo(lienzo) : null));
     return hallado ? [{ ...hallado, origen: origen || '' }] : [];
   }
 
@@ -169,8 +175,9 @@
 
   // alAvanzar(n, total) se llama antes de cada página; origenDe(n) devuelve el
   // texto de origen de la página n (la página lo traduce). Cada código trae
-  // además 'pagina'.
-  async function dePdf(archivo, alAvanzar, origenDe) {
+  // además 'pagina'. `aFondo(lienzo)`, si se pasa, recibe la página en su
+  // escala mayor cuando la lectura normal no encontró nada en ella.
+  async function dePdf(archivo, alAvanzar, origenDe, aFondo) {
     libreria();
     const bytes = new Uint8Array(await archivo.arrayBuffer());
     const pdf = await abrirPdf(bytes);
@@ -185,7 +192,9 @@
           lienzo.width = viewport.width;
           lienzo.height = viewport.height;
           await pagina.render({ canvasContext: lienzo.getContext('2d', { willReadFrequently: true }), viewport }).promise;
-          const hallado = await leerLienzo(lienzo, escala === ESCALAS_PDF[ESCALAS_PDF.length - 1]);
+          const ultima = escala === ESCALAS_PDF[ESCALAS_PDF.length - 1];
+          let hallado = await leerLienzo(lienzo, ultima);
+          if (!hallado && ultima && aFondo) hallado = await aFondo(lienzo);
           if (hallado) {
             encontrados.push({
               texto: hallado.texto,
@@ -246,5 +255,5 @@
     return { detener, deviceId: flujo.getVideoTracks()[0].getSettings().deviceId };
   }
 
-  window.LeerCodigos = { deLienzo, deImagen, dePdf, camara, nombreFormato };
+  window.LeerCodigos = { deLienzo, deImagen, dePdf, camara, qrEn, nombreFormato };
 })();
