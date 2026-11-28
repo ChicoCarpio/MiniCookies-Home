@@ -219,7 +219,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/vendor.js"></script>
-<script src="../vendor/@zxing/library/0.23.0/umd/index.min.js"></script>
+<script src="../vendor/zxing-wasm/3.1.8/iife/reader/index.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../assets/js/leer-codigos.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
@@ -242,9 +242,9 @@ const tituloResultado = document.getElementById('tituloResultado');
 const listaCodigos = document.getElementById('listaCodigos');
 const progreso = document.getElementById('progreso');
 
-// Lector propio de la cámara; la lectura de archivos usa LeerCodigos.
-const lector = new ZXing.BrowserMultiFormatReader();
-let camaraActiva = false;
+let camara = null;        // la que devuelve LeerCodigos.camara mientras está encendida
+let turnoCamara = 0;      // cambia con cada pedido de encender o apagar: lo que llega tarde se descarta
+let vistoEnCamara = '';   // el último código mostrado, para no repintar la lista en cada cuadro
 let deviceIdActivo = null;
 
 function mostrarError(texto) {
@@ -325,12 +325,11 @@ function mostrarCodigos(codigos, resumenOrigen) {
 }
 
 // La cámara entrega un código por vez: se muestra como una lista de uno solo.
-function mostrarResultado(resultadoZXing) {
-  mostrarCodigos([{
-    texto: resultadoZXing.getText(),
-    formato: LeerCodigos.nombreFormato(resultadoZXing.getBarcodeFormat()),
-    origen: '',
-  }], t('origen-camara'));
+function mostrarResultado(hallado) {
+  const clave = hallado.formato + '\n' + hallado.texto;
+  if (clave === vistoEnCamara) return;
+  vistoEnCamara = clave;
+  mostrarCodigos([{ ...hallado, origen: '' }], t('origen-camara'));
 }
 
 // --- Modo imagen ---
@@ -424,9 +423,14 @@ conectarZonaArrastre(zonaArrastre, entradaArchivo, (archivos) => leerArchivo(arc
 
 // --- Modo cámara ---
 
+function apagarCamara() {
+  turnoCamara++;
+  if (camara) camara.detener();
+  camara = null;
+}
+
 function detenerCamara() {
-  lector.reset();
-  camaraActiva = false;
+  apagarCamara();
   seccionCamara.style.display = 'none';
 }
 
@@ -434,13 +438,14 @@ async function iniciarCamara(deviceId, esReintento) {
   ocultarError();
   resultado.classList.remove('visible');
   seccionCamara.style.display = 'block';
+  apagarCamara();
+  const turno = turnoCamara;
+  vistoEnCamara = '';
   try {
-    lector.reset();
-    await lector.decodeFromVideoDevice(deviceId || null, video, (resultadoZXing, error) => {
-      if (resultadoZXing) mostrarResultado(resultadoZXing);
-    });
-    camaraActiva = true;
-    deviceIdActivo = deviceId || deviceIdActivo;
+    const nueva = await LeerCodigos.camara(video, deviceId, (hallado) => { if (turno === turnoCamara) mostrarResultado(hallado); });
+    if (turno !== turnoCamara) { nueva.detener(); return; }
+    camara = nueva;
+    deviceIdActivo = deviceId || nueva.deviceId || deviceIdActivo;
 
     if (!selectorCamara.options.length) {
       const dispositivos = await navigator.mediaDevices.enumerateDevices();
@@ -455,7 +460,7 @@ async function iniciarCamara(deviceId, esReintento) {
       selectorCamara.value = deviceIdActivo;
     }
   } catch (error) {
-    camaraActiva = false;
+    if (turno !== turnoCamara) return;
     mostrarError(t('error-camara') + detalleError(error));
     if (selectorCamara.options.length) selectorCamara.value = deviceIdActivo || '';
     if (deviceIdActivo && !esReintento) {
@@ -467,7 +472,7 @@ async function iniciarCamara(deviceId, esReintento) {
 }
 
 function activarModo(modo) {
-  if (camaraActiva) detenerCamara();
+  detenerCamara();
   ocultarError();
   resultado.classList.remove('visible');
   if (modo === 'imagen') {
@@ -499,7 +504,7 @@ selectorCamara.addEventListener('change', () => {
   iniciarCamara(selectorCamara.value);
 });
 
-window.addEventListener('beforeunload', () => { if (camaraActiva) lector.reset(); });
+window.addEventListener('beforeunload', apagarCamara);
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>

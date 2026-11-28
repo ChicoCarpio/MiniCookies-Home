@@ -80,7 +80,7 @@
         valores: [{ valor: 'seguir', es: 'Seguir con el archivo', en: 'Keep the file' }, { valor: 'quitar', es: 'Quitarlo del flujo', en: 'Drop it from the flow' }] },
     ],
     async preparar() {
-      await F.cargarScript(rutaVendor('@zxing/library/0.23.0/umd/index.min.js'));
+      await F.cargarScript(rutaVendor('zxing-wasm/3.1.8/iife/reader/index.js'));
       await js('pdfjs.js');
       await js('leer-codigos.js');
     },

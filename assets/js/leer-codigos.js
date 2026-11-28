@@ -1,101 +1,136 @@
 /*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
-// Leer códigos QR y de barras sin interfaz: desde un lienzo, una imagen o un
-// PDF. Lo usan "Lector de códigos" y los flujos. Devuelve datos, nunca textos
-// para el usuario. Supone ZXing ya cargado (vendor/@zxing/library) y, para
-// dePdf, abrirPdf (assets/js/pdfjs.js); no carga nada por su cuenta.
+// Leer códigos QR y de barras sin interfaz: desde un lienzo, una imagen, un PDF o la cámara. Lo usan "Lector de
+// códigos" y los flujos. Devuelve datos, nunca textos para el usuario. Lee con ZXing C++ compilado a WebAssembly:
+// supone vendor.js y vendor/zxing-wasm ya cargados y, para dePdf, abrirPdf (assets/js/pdfjs.js); no carga scripts.
 (function () {
-  // getBarcodeFormat() devuelve el número del enum; sin traducirlo, la página
-  // mostraba "11" en vez de "QR CODE".
-  function nombreFormato(valor) {
-    if (typeof ZXing === 'undefined') throw new Error('ZXing no está cargado');
-    const nombre = ZXing.BarcodeFormat[valor];
-    return nombre ? String(nombre).replace(/_/g, ' ') : String(valor);
-  }
+  // El nombre de formato que ve la persona (y que Flujos guarda). Uno que no esté acá se muestra como viene.
+  const NOMBRES = {
+    QRCode: 'QR CODE', QRCodeModel1: 'QR CODE', QRCodeModel2: 'QR CODE', MicroQRCode: 'MICRO QR CODE',
+    RMQRCode: 'RMQR CODE', DataMatrix: 'DATA MATRIX', Aztec: 'AZTEC', AztecCode: 'AZTEC', AztecRune: 'AZTEC',
+    PDF417: 'PDF 417', CompactPDF417: 'PDF 417', MicroPDF417: 'MICRO PDF 417',
+    EAN13: 'EAN 13', EAN8: 'EAN 8', UPCA: 'UPC A', UPCE: 'UPC E', ISBN: 'EAN 13',
+    Code128: 'CODE 128', Code39: 'CODE 39', Code39Std: 'CODE 39', Code39Ext: 'CODE 39', Code93: 'CODE 93',
+    ITF: 'ITF', ITF14: 'ITF', Codabar: 'CODABAR',
+    DataBar: 'RSS 14', DataBarOmni: 'RSS 14', DataBarStk: 'RSS 14', DataBarStkOmni: 'RSS 14', DataBarLtd: 'RSS 14',
+    DataBarExp: 'RSS EXPANDED', DataBarExpStk: 'RSS EXPANDED',
+  };
+  const nombreFormato = (valor) => NOMBRES[valor] || String(valor);
 
-  // La lectura trabaja siempre sobre los píxeles de un lienzo, igual en la página y en un hilo de Flujos
-  // (flujos-hilo.js, donde no hay <img>).
-  const sinDom = typeof HTMLImageElement === 'undefined';
-  let lectorBase = null;
+  // Los que se corrigen solos: son los únicos que se buscan por trozos de la imagen. Un código de barras cortado
+  // por el borde de un trozo podría leerse a medias.
+  const MATRICES = ['QRCode', 'DataMatrix', 'Aztec', 'PDF417'];
+  // Code39Std: sin el modo extendido, que junta pares de caracteres («+A» pasa a «a») sin que el código lo diga.
+  const FORMATOS = [...MATRICES, 'EANUPC', 'Code128', 'Code39Std', 'Code93', 'ITF', 'Codabar', 'DataBar'];
 
-  // Un intento con ZXing. Devuelve { texto, formato } o null.
-  function intentar(fuente, aFondo) {
-    if (!lectorBase) lectorBase = new ZXing.MultiFormatReader();
-    lectorBase.setHints(aFondo ? new Map([[ZXing.DecodeHintType.TRY_HARDER, true]]) : undefined);
-    try {
-      const hallado = lectorBase.decodeWithState(new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(fuente)));
-      return { texto: hallado.getText(), formato: nombreFormato(hallado.getBarcodeFormat()) };
-    } catch (error) {
-      if (error instanceof ZXing.Exception) return null; // no encontró ningún código
-      throw error;   // otra cosa (el entorno): que se entere quien llama
+  let preparada = false;
+  function libreria() {
+    if (typeof ZXingWASM === 'undefined') throw new Error('ZXing no está cargado');
+    if (!preparada) {
+      // Sin esto la librería baja su motor de una CDN: acá sale siempre del propio sitio.
+      const motor = rutaVendor('zxing-wasm/3.1.8/reader/zxing_reader.wasm');
+      ZXingWASM.prepareZXingModule({ overrides: { locateFile: (ruta, base) => (ruta.endsWith('.wasm') ? motor : base + ruta) } });
+      preparada = true;
     }
+    return ZXingWASM;
   }
 
-  // Un cuarto de vuelta a una imagen en grises (un byte por píxel).
-  function girar(grises, ancho, alto) {
-    const girada = new Uint8ClampedArray(grises.length);
-    for (let y = 0; y < alto; y++) {
-      for (let x = 0; x < ancho; x++) girada[(ancho - 1 - x) * alto + y] = grises[y * ancho + x];
+  // El texto como lo trae impreso el código. La librería da un UPC como el EAN-13 equivalente (con ceros a la
+  // izquierda; la forma corta de un UPC-E va aparte, en `extra`) y antepone «01» al número de un DataBar.
+  function salida(r) {
+    let texto = r.text, formato = r.format;
+    if (formato === 'UPCE') {
+      try { texto = JSON.parse(r.extra).UPCE || texto; } catch (error) { /* queda la forma larga */ }
+    } else if ((formato === 'EAN13' || formato === 'UPCA') && /^0\d{12}$/.test(texto)) {
+      texto = texto.slice(1);
+      formato = 'UPCA';
+    } else if (nombreFormato(formato) === 'RSS 14' && /^01\d{14}$/.test(texto)) {
+      texto = texto.slice(2);
     }
-    return girada;
+    return { texto, formato: nombreFormato(formato) };
   }
 
-  // Una copia de la imagen en grises a otra escala (interpolación bilineal).
-  function escalar(grises, ancho, alto, factor) {
-    const w = Math.round(ancho * factor);
-    const h = Math.round(alto * factor);
-    const copia = new Uint8ClampedArray(w * h);
-    for (let y = 0; y < h; y++) {
-      const sy = Math.min(alto - 1, Math.max(0, (y + 0.5) / factor - 0.5));
-      const y0 = sy | 0, y1 = Math.min(alto - 1, y0 + 1), b = sy - y0;
-      for (let x = 0; x < w; x++) {
-        const sx = Math.min(ancho - 1, Math.max(0, (x + 0.5) / factor - 0.5));
-        const x0 = sx | 0, x1 = Math.min(ancho - 1, x0 + 1), a = sx - x0;
-        copia[y * w + x] = (grises[y0 * ancho + x0] * (1 - a) + grises[y0 * ancho + x1] * a) * (1 - b)
-          + (grises[y1 * ancho + x0] * (1 - a) + grises[y1 * ancho + x1] * a) * b;
+  async function buscarEn(pixeles, formatos, binarizador, opciones) {
+    const hallados = await libreria().readBarcodes(pixeles, {
+      formats: formatos, binarizer: binarizador || 'LocalAverage', textMode: 'Plain', maxNumberOfSymbols: 1,
+      tryHarder: true, tryRotate: true, tryInvert: true, tryDownscale: true, ...opciones,
+    });
+    return hallados.find((r) => r.isValid && r.text) || null;
+  }
+
+  // ITF y Codabar no se comprueban solos: con el código inclinado, dos líneas de lectura pueden coincidir en un
+  // pedazo («1234» de «12345678901231»), y a veces se «leen» en el texto de una foto. Solo valen si coinciden más.
+  const FRAGILES = ['ITF', 'Codabar'];
+  const LINEAS_FRAGILES = 8;
+
+  // Un intento sobre unos píxeles (ImageData). Devuelve { texto, formato } o null.
+  async function intentar(pixeles, formatos, binarizador) {
+    let hallado = await buscarEn(pixeles, formatos, binarizador);
+    if (hallado && /^(ITF|Codabar)/.test(hallado.format)) {
+      hallado = await buscarEn(pixeles, FRAGILES, binarizador, { minLineCount: LINEAS_FRAGILES })
+        || await buscarEn(pixeles, formatos.filter((f) => !FRAGILES.includes(f)), binarizador);
+    }
+    // Un DataBar extendido lleva campos: se muestran con su número entre paréntesis, «(01)…(3103)…».
+    if (hallado && hallado.format.startsWith('DataBarExp')) {
+      hallado = await buscarEn(pixeles, [hallado.format], binarizador, { textMode: 'HRI' }) || hallado;
+    }
+    return hallado ? salida(hallado) : null;
+  }
+
+  // Los píxeles de un lienzo, con lo transparente sobre blanco (como se ve): si no, un QR en un PNG sin fondo
+  // quedaría negro sobre negro.
+  function pixelesDe(contexto, x, y, ancho, alto) {
+    const imagen = contexto.getImageData(x, y, ancho, alto);
+    const d = imagen.data;
+    for (let i = 3; i < d.length; i += 4) {
+      const a = d[i];
+      if (a === 255) continue;
+      const blanco = 255 - a;
+      for (let c = i - 3; c < i; c++) d[c] = (d[c] * a) / 255 + blanco;
+      d[i] = 255;
+    }
+    return imagen;
+  }
+
+  // Los lados de los trozos solapados (cada uno avanza medio lado) con que se insiste en una imagen grande.
+  const LADOS = [1000, 600, 380];
+
+  // Primero la imagen entera. Si no aparece nada: la entera con otra forma de separar blancos y negros y, después,
+  // por trozos solapados, donde un código chico o con mala luz se separa mejor de lo que lo rodea.
+  async function leerLienzo(lienzo, insistir) {
+    const { width: ancho, height: alto } = lienzo;
+    if (!ancho || !alto) return null;
+    const contexto = lienzo.getContext('2d', { willReadFrequently: true });
+    const entera = pixelesDe(contexto, 0, 0, ancho, alto);
+    let hallado = await intentar(entera, FORMATOS);
+    if (hallado || !insistir) return hallado;
+    hallado = await intentar(entera, FORMATOS, 'GlobalHistogram');
+    for (const lado of LADOS) {
+      if (hallado || lado >= Math.max(ancho, alto)) continue;
+      const w = Math.min(lado, ancho), h = Math.min(lado, alto), paso = lado >> 1;
+      for (let y = 0; !hallado; y += paso) {
+        const yy = Math.min(y, alto - h);
+        for (let x = 0; !hallado; x += paso) {
+          const xx = Math.min(x, ancho - w);
+          const trozo = pixelesDe(contexto, xx, yy, w, h);
+          hallado = await intentar(trozo, MATRICES) || await intentar(trozo, MATRICES, 'GlobalHistogram');
+          if (xx >= ancho - w) break;
+        }
+        if (yy >= alto - h) break;
       }
     }
-    return new ZXing.RGBLuminanceSource(copia, w, h);
+    return hallado;
   }
 
-  // Los códigos de barras y los Micro QR casi no se corrigen solos: buscando a fondo, ZXing «lee» algunos en el
-  // texto o la textura de una foto. Un código de verdad se vuelve a leer igual a otras escalas; uno inventado, no.
-  const FIABLES = ['QR CODE', 'DATA MATRIX', 'AZTEC', 'PDF 417'];
-  function seRepite(hallado, grises, ancho, alto) {
-    let veces = 0;
-    return [1.15, 0.9, 1.3].some((factor) => {
-      const otro = intentar(escalar(grises, ancho, alto, factor), true);
-      if (otro && otro.texto === hallado.texto && otro.formato === hallado.formato) veces++;
-      return veces === 2;
-    });
-  }
-
-  // Una pasada sobre la imagen. La búsqueda rápida se acepta tal cual, salvo los Micro QR.
-  function pasada(grises, ancho, alto, aFondo) {
-    const hallado = intentar(new ZXing.RGBLuminanceSource(grises, ancho, alto), aFondo);
-    if (!hallado || !hallado.texto) return null;
-    const dudoso = !FIABLES.includes(hallado.formato) && (aFondo || hallado.formato === 'MICRO QR CODE');
-    return !dudoso || seRepite(hallado, grises, ancho, alto) ? hallado : null;
-  }
-
-  // Primero la búsqueda rápida. Si no encuentra nada, la exhaustiva (TRY_HARDER): la rápida salta filas según
-  // el alto de la imagen y pasa por encima de un código chico dentro de una foto grande (el QR de un recibo).
-  // La exhaustiva también se prueba de lado, para los códigos de barras verticales; el giro se hace acá porque
-  // el de ZXing necesita la página y en un hilo no existe.
-  function leerPixeles(lienzo) {
-    if (typeof ZXing === 'undefined') throw new Error('ZXing no está cargado');
-    const grises = new ZXing.HTMLCanvasElementLuminanceSource(lienzo).getMatrix();
-    const { width: ancho, height: alto } = lienzo;
-    return pasada(grises, ancho, alto, false)
-      || pasada(grises, ancho, alto, true)
-      || pasada(girar(grises, ancho, alto), alto, ancho, true);
-  }
+  // La lectura trabaja siempre sobre un lienzo, igual en la página y en un hilo de Flujos (flujos-hilo.js, donde
+  // no hay <img>).
+  const sinDom = typeof HTMLImageElement === 'undefined';
 
   // Un lienzo con la imagen del archivo, o null si no se puede abrir.
   async function lienzoDeImagen(archivo) {
     if (sinDom) {
       const mapa = await createImageBitmap(archivo);   // como <img>: con la orientación EXIF aplicada
       const lienzo = new OffscreenCanvas(mapa.width, mapa.height);
-      lienzo.getContext('2d').drawImage(mapa, 0, 0);
+      lienzo.getContext('2d', { willReadFrequently: true }).drawImage(mapa, 0, 0);
       mapa.close();
       return lienzo;
     }
@@ -117,28 +152,26 @@
     }
   }
 
-  // Un intento de lectura sobre un lienzo. Devuelve { texto, formato } o null.
-  async function deLienzo(lienzo) {
-    return leerPixeles(lienzo);
-  }
+  // Un intento de lectura sobre un lienzo, insistiendo si hace falta. Devuelve { texto, formato } o null.
+  const deLienzo = (lienzo) => leerLienzo(lienzo, true);
 
   // Una imagen (File o Blob). Devuelve una lista de 0 o 1 códigos.
   async function deImagen(archivo, origen) {
     const lienzo = await lienzoDeImagen(archivo);
-    const hallado = lienzo && leerPixeles(lienzo);
+    const hallado = lienzo && await deLienzo(lienzo);
     return hallado ? [{ ...hallado, origen: origen || '' }] : [];
   }
 
   // Los códigos chicos (un QR de 2 cm en una página A4) no se reconocen al
   // tamaño natural de la página: se prueba con más resolución antes de darla
-  // por perdida. Se empieza por la escala barata.
+  // por perdida. Se empieza por la escala barata, y solo la última insiste.
   const ESCALAS_PDF = [2, 3.5];
 
   // alAvanzar(n, total) se llama antes de cada página; origenDe(n) devuelve el
   // texto de origen de la página n (la página lo traduce). Cada código trae
   // además 'pagina'.
   async function dePdf(archivo, alAvanzar, origenDe) {
-    if (typeof ZXing === 'undefined') throw new Error('ZXing no está cargado');
+    libreria();
     const bytes = new Uint8Array(await archivo.arrayBuffer());
     const pdf = await abrirPdf(bytes);
     const encontrados = [];
@@ -151,8 +184,8 @@
           const lienzo = document.createElement('canvas');
           lienzo.width = viewport.width;
           lienzo.height = viewport.height;
-          await pagina.render({ canvasContext: lienzo.getContext('2d'), viewport }).promise;
-          const hallado = await deLienzo(lienzo);
+          await pagina.render({ canvasContext: lienzo.getContext('2d', { willReadFrequently: true }), viewport }).promise;
+          const hallado = await leerLienzo(lienzo, escala === ESCALAS_PDF[ESCALAS_PDF.length - 1]);
           if (hallado) {
             encontrados.push({
               texto: hallado.texto,
@@ -170,5 +203,48 @@
     return encontrados;
   }
 
-  window.LeerCodigos = { deLienzo, deImagen, dePdf, nombreFormato };
+  // La cámara. Abre la pedida (o la trasera), la muestra en `video` y lee un cuadro tras otro, una sola pasada por
+  // cuadro, llamando a alHallar({ texto, formato }) cada vez que hay un código. Devuelve { detener, deviceId }.
+  const PAUSA_MS = 100;
+  async function camara(video, deviceId, alHallar) {
+    // El motor se carga antes de encender la cámara: si falla, se entera quien llama y no queda una cámara que no lee.
+    await intentar(new ImageData(8, 8), FORMATOS);
+    const flujo = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: {
+        width: { ideal: 1280 }, height: { ideal: 720 },
+        ...(deviceId ? { deviceId: { exact: deviceId } } : { facingMode: 'environment' }),
+      },
+    });
+    let activa = true, reloj = 0;
+    function detener() {
+      activa = false;
+      clearTimeout(reloj);
+      flujo.getTracks().forEach((pista) => pista.stop());
+      if (video.srcObject === flujo) video.srcObject = null;
+    }
+    try {
+      video.srcObject = flujo;
+      await video.play();
+    } catch (error) {
+      detener();
+      throw error;
+    }
+    const lienzo = document.createElement('canvas');
+    async function cuadro() {
+      if (!activa) return;
+      if (video.videoWidth && video.videoHeight) {
+        lienzo.width = video.videoWidth;
+        lienzo.height = video.videoHeight;
+        lienzo.getContext('2d', { willReadFrequently: true }).drawImage(video, 0, 0);
+        const hallado = await leerLienzo(lienzo, false);
+        if (hallado && activa) alHallar(hallado);
+      }
+      if (activa) reloj = setTimeout(cuadro, PAUSA_MS);
+    }
+    cuadro().catch((error) => console.error(error));
+    return { detener, deviceId: flujo.getVideoTracks()[0].getSettings().deviceId };
+  }
+
+  window.LeerCodigos = { deLienzo, deImagen, dePdf, camara, nombreFormato };
 })();
