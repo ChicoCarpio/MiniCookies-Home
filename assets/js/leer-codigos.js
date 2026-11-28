@@ -39,6 +39,44 @@
     return girada;
   }
 
+  // Una copia de la imagen en grises a otra escala (interpolación bilineal).
+  function escalar(grises, ancho, alto, factor) {
+    const w = Math.round(ancho * factor);
+    const h = Math.round(alto * factor);
+    const copia = new Uint8ClampedArray(w * h);
+    for (let y = 0; y < h; y++) {
+      const sy = Math.min(alto - 1, Math.max(0, (y + 0.5) / factor - 0.5));
+      const y0 = sy | 0, y1 = Math.min(alto - 1, y0 + 1), b = sy - y0;
+      for (let x = 0; x < w; x++) {
+        const sx = Math.min(ancho - 1, Math.max(0, (x + 0.5) / factor - 0.5));
+        const x0 = sx | 0, x1 = Math.min(ancho - 1, x0 + 1), a = sx - x0;
+        copia[y * w + x] = (grises[y0 * ancho + x0] * (1 - a) + grises[y0 * ancho + x1] * a) * (1 - b)
+          + (grises[y1 * ancho + x0] * (1 - a) + grises[y1 * ancho + x1] * a) * b;
+      }
+    }
+    return new ZXing.RGBLuminanceSource(copia, w, h);
+  }
+
+  // Los códigos de barras y los Micro QR casi no se corrigen solos: buscando a fondo, ZXing «lee» algunos en el
+  // texto o la textura de una foto. Un código de verdad se vuelve a leer igual a otras escalas; uno inventado, no.
+  const FIABLES = ['QR CODE', 'DATA MATRIX', 'AZTEC', 'PDF 417'];
+  function seRepite(hallado, grises, ancho, alto) {
+    let veces = 0;
+    return [1.15, 0.9, 1.3].some((factor) => {
+      const otro = intentar(escalar(grises, ancho, alto, factor), true);
+      if (otro && otro.texto === hallado.texto && otro.formato === hallado.formato) veces++;
+      return veces === 2;
+    });
+  }
+
+  // Una pasada sobre la imagen. La búsqueda rápida se acepta tal cual, salvo los Micro QR.
+  function pasada(grises, ancho, alto, aFondo) {
+    const hallado = intentar(new ZXing.RGBLuminanceSource(grises, ancho, alto), aFondo);
+    if (!hallado || !hallado.texto) return null;
+    const dudoso = !FIABLES.includes(hallado.formato) && (aFondo || hallado.formato === 'MICRO QR CODE');
+    return !dudoso || seRepite(hallado, grises, ancho, alto) ? hallado : null;
+  }
+
   // Primero la búsqueda rápida. Si no encuentra nada, la exhaustiva (TRY_HARDER): la rápida salta filas según
   // el alto de la imagen y pasa por encima de un código chico dentro de una foto grande (el QR de un recibo).
   // La exhaustiva también se prueba de lado, para los códigos de barras verticales; el giro se hace acá porque
@@ -47,10 +85,9 @@
     if (typeof ZXing === 'undefined') throw new Error('ZXing no está cargado');
     const grises = new ZXing.HTMLCanvasElementLuminanceSource(lienzo).getMatrix();
     const { width: ancho, height: alto } = lienzo;
-    const derecha = () => new ZXing.RGBLuminanceSource(grises, ancho, alto);
-    return intentar(derecha(), false)
-      || intentar(derecha(), true)
-      || intentar(new ZXing.RGBLuminanceSource(girar(grises, ancho, alto), alto, ancho), true);
+    return pasada(grises, ancho, alto, false)
+      || pasada(grises, ancho, alto, true)
+      || pasada(girar(grises, ancho, alto), alto, ancho, true);
   }
 
   // Un lienzo con la imagen del archivo, o null si no se puede abrir.
