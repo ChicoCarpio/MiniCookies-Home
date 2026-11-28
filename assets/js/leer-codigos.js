@@ -4,15 +4,6 @@
 // para el usuario. Supone ZXing ya cargado (vendor/@zxing/library) y, para
 // dePdf, abrirPdf (assets/js/pdfjs.js); no carga nada por su cuenta.
 (function () {
-  let lector = null;
-
-  // El lector se crea la primera vez que se usa.
-  function obtenerLector() {
-    if (typeof ZXing === 'undefined') throw new Error('ZXing no está cargado');
-    if (!lector) lector = new ZXing.BrowserMultiFormatReader();
-    return lector;
-  }
-
   // getBarcodeFormat() devuelve el número del enum; sin traducirlo, la página
   // mostraba "11" en vez de "QR CODE".
   function nombreFormato(valor) {
@@ -21,66 +12,84 @@
     return nombre ? String(nombre).replace(/_/g, ' ') : String(valor);
   }
 
-  // En un hilo de Flujos (flujos-hilo.js) no hay <img>: ZXing lee los píxeles del lienzo con las mismas piezas que
-  // usa por dentro BrowserMultiFormatReader (gris con HTMLCanvasElementLuminanceSource, HybridBinarizer y
-  // MultiFormatReader sin opciones), así que encuentra lo mismo.
+  // La lectura trabaja siempre sobre los píxeles de un lienzo, igual en la página y en un hilo de Flujos
+  // (flujos-hilo.js, donde no hay <img>).
   const sinDom = typeof HTMLImageElement === 'undefined';
   let lectorBase = null;
-  function leerPixeles(lienzo) {
-    if (typeof ZXing === 'undefined') throw new Error('ZXing no está cargado');
-    if (!lectorBase) {
-      lectorBase = new ZXing.MultiFormatReader();
-      lectorBase.setHints(undefined);   // como BrowserMultiFormatReader sin opciones
-    }
+
+  // Un intento con ZXing. Devuelve { texto, formato } o null.
+  function intentar(fuente, aFondo) {
+    if (!lectorBase) lectorBase = new ZXing.MultiFormatReader();
+    lectorBase.setHints(aFondo ? new Map([[ZXing.DecodeHintType.TRY_HARDER, true]]) : undefined);
     try {
-      const mapa = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(new ZXing.HTMLCanvasElementLuminanceSource(lienzo)));
-      const hallado = lectorBase.decodeWithState(mapa);
+      const hallado = lectorBase.decodeWithState(new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(fuente)));
       return { texto: hallado.getText(), formato: nombreFormato(hallado.getBarcodeFormat()) };
     } catch (error) {
-      if (error instanceof ZXing.Exception) return null; // en ese lienzo no había ningún código
+      if (error instanceof ZXing.Exception) return null; // no encontró ningún código
       throw error;   // otra cosa (el entorno): que se entere quien llama
     }
   }
 
-  // Un intento de lectura sobre un lienzo. Devuelve { texto, formato } o null.
-  // ZXing no sabe leer un <canvas> directamente (esta versión no trae
-  // decodeFromCanvas), así que se le pasa el lienzo como imagen.
-  async function deLienzo(lienzo) {
-    if (sinDom) return leerPixeles(lienzo);
-    const lec = obtenerLector();
-    const blob = await new Promise((resolve) => lienzo.toBlob(resolve, 'image/png'));
-    if (!blob) return null;
-    const url = URL.createObjectURL(blob);
-    try {
-      const hallado = await lec.decodeFromImageUrl(url);
-      return { texto: hallado.getText(), formato: nombreFormato(hallado.getBarcodeFormat()) };
-    } catch (error) {
-      return null; // en ese lienzo no había ningún código
-    } finally {
-      URL.revokeObjectURL(url);
+  // Un cuarto de vuelta a una imagen en grises (un byte por píxel).
+  function girar(grises, ancho, alto) {
+    const girada = new Uint8ClampedArray(grises.length);
+    for (let y = 0; y < alto; y++) {
+      for (let x = 0; x < ancho; x++) girada[(ancho - 1 - x) * alto + y] = grises[y * ancho + x];
     }
+    return girada;
   }
 
-  // Una imagen (File o Blob). Devuelve una lista de 0 o 1 códigos.
-  async function deImagen(archivo, origen) {
+  // Primero la búsqueda rápida. Si no encuentra nada, la exhaustiva (TRY_HARDER): la rápida salta filas según
+  // el alto de la imagen y pasa por encima de un código chico dentro de una foto grande (el QR de un recibo).
+  // La exhaustiva también se prueba de lado, para los códigos de barras verticales; el giro se hace acá porque
+  // el de ZXing necesita la página y en un hilo no existe.
+  function leerPixeles(lienzo) {
+    if (typeof ZXing === 'undefined') throw new Error('ZXing no está cargado');
+    const grises = new ZXing.HTMLCanvasElementLuminanceSource(lienzo).getMatrix();
+    const { width: ancho, height: alto } = lienzo;
+    const derecha = () => new ZXing.RGBLuminanceSource(grises, ancho, alto);
+    return intentar(derecha(), false)
+      || intentar(derecha(), true)
+      || intentar(new ZXing.RGBLuminanceSource(girar(grises, ancho, alto), alto, ancho), true);
+  }
+
+  // Un lienzo con la imagen del archivo, o null si no se puede abrir.
+  async function lienzoDeImagen(archivo) {
     if (sinDom) {
       const mapa = await createImageBitmap(archivo);   // como <img>: con la orientación EXIF aplicada
       const lienzo = new OffscreenCanvas(mapa.width, mapa.height);
       lienzo.getContext('2d').drawImage(mapa, 0, 0);
       mapa.close();
-      const hallado = leerPixeles(lienzo);
-      return hallado ? [{ ...hallado, origen: origen || '' }] : [];
+      return lienzo;
     }
-    const lec = obtenerLector();
     const url = URL.createObjectURL(archivo);
     try {
-      const hallado = await lec.decodeFromImageUrl(url);
-      return [{ texto: hallado.getText(), formato: nombreFormato(hallado.getBarcodeFormat()), origen: origen || '' }];
+      const imagen = new Image();   // <img> y no createImageBitmap: también abre SVG
+      imagen.src = url;
+      await imagen.decode();
+      const lienzo = document.createElement('canvas');
+      lienzo.width = imagen.naturalWidth;
+      lienzo.height = imagen.naturalHeight;
+      if (!lienzo.width || !lienzo.height) return null;
+      lienzo.getContext('2d', { willReadFrequently: true }).drawImage(imagen, 0, 0);
+      return lienzo;
     } catch (error) {
-      return [];
+      return null;
     } finally {
       URL.revokeObjectURL(url);
     }
+  }
+
+  // Un intento de lectura sobre un lienzo. Devuelve { texto, formato } o null.
+  async function deLienzo(lienzo) {
+    return leerPixeles(lienzo);
+  }
+
+  // Una imagen (File o Blob). Devuelve una lista de 0 o 1 códigos.
+  async function deImagen(archivo, origen) {
+    const lienzo = await lienzoDeImagen(archivo);
+    const hallado = lienzo && leerPixeles(lienzo);
+    return hallado ? [{ ...hallado, origen: origen || '' }] : [];
   }
 
   // Los códigos chicos (un QR de 2 cm en una página A4) no se reconocen al
@@ -92,7 +101,7 @@
   // texto de origen de la página n (la página lo traduce). Cada código trae
   // además 'pagina'.
   async function dePdf(archivo, alAvanzar, origenDe) {
-    if (!sinDom) obtenerLector();
+    if (typeof ZXing === 'undefined') throw new Error('ZXing no está cargado');
     const bytes = new Uint8Array(await archivo.arrayBuffer());
     const pdf = await abrirPdf(bytes);
     const encontrados = [];
