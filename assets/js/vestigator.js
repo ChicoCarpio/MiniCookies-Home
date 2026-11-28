@@ -1,5 +1,5 @@
 /*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
-// «Buscar QR a fondo»: dos redes neuronales propias para los códigos QR que la lectura normal no consigue.
+// Esfuerzo alto del lector: dos redes neuronales propias para los códigos QR que la lectura normal no consigue.
 //   Vestigator Phone V1   encuentra los QR de una foto y marca sus 4 esquinas.
 //   Restitutor Phone V1   limpia el recorte enderezado (borroso, desteñido, con ruido).
 // El recorte limpio se le vuelve a dar a ZXing (leer-codigos.js): las redes no «adivinan» el contenido, que sale

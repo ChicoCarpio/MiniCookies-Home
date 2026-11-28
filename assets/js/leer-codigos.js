@@ -160,11 +160,11 @@
   // Un intento de lectura sobre un lienzo, insistiendo si hace falta. Devuelve { texto, formato } o null.
   const deLienzo = (lienzo) => leerLienzo(lienzo, true);
 
-  // Una imagen (File o Blob). Devuelve una lista de 0 o 1 códigos. `buscador(lienzo)`, si se pasa, reemplaza a la
-  // lectura normal (la búsqueda a fondo).
-  async function deImagen(archivo, origen, buscador = deLienzo) {
+  // Una imagen (File o Blob). Devuelve una lista de 0 o 1 códigos. `aFondo(lienzo)`, si se pasa (esfuerzo alto),
+  // se prueba cuando la lectura normal no encuentra nada.
+  async function deImagen(archivo, origen, aFondo) {
     const lienzo = await lienzoDeImagen(archivo);
-    const hallado = lienzo && await buscador(lienzo);
+    const hallado = lienzo && (await deLienzo(lienzo) || (aFondo ? await aFondo(lienzo) : null));
     return hallado ? [{ ...hallado, origen: origen || '' }] : [];
   }
 
@@ -175,9 +175,9 @@
 
   // alAvanzar(n, total) se llama antes de cada página; origenDe(n) devuelve el
   // texto de origen de la página n (la página lo traduce). Cada código trae
-  // además 'pagina'. Con `buscador`, cada página se dibuja solo a la escala
-  // mayor y se le entrega a él.
-  async function dePdf(archivo, alAvanzar, origenDe, buscador) {
+  // además 'pagina'. `aFondo(lienzo)`, si se pasa, recibe la página en su
+  // escala mayor cuando la lectura normal no encontró nada en ella.
+  async function dePdf(archivo, alAvanzar, origenDe, aFondo) {
     libreria();
     const bytes = new Uint8Array(await archivo.arrayBuffer());
     const pdf = await abrirPdf(bytes);
@@ -186,15 +186,15 @@
       for (let n = 1; n <= pdf.numPages; n++) {
         if (alAvanzar) alAvanzar(n, pdf.numPages);
         const pagina = await pdf.getPage(n);
-        for (const escala of buscador ? ESCALAS_PDF.slice(-1) : ESCALAS_PDF) {
+        for (const escala of ESCALAS_PDF) {
           const viewport = pagina.getViewport({ scale: escala });
           const lienzo = document.createElement('canvas');
           lienzo.width = viewport.width;
           lienzo.height = viewport.height;
           await pagina.render({ canvasContext: lienzo.getContext('2d', { willReadFrequently: true }), viewport }).promise;
-          const hallado = buscador
-            ? await buscador(lienzo)
-            : await leerLienzo(lienzo, escala === ESCALAS_PDF[ESCALAS_PDF.length - 1]);
+          const ultima = escala === ESCALAS_PDF[ESCALAS_PDF.length - 1];
+          let hallado = await leerLienzo(lienzo, ultima);
+          if (!hallado && ultima && aFondo) hallado = await aFondo(lienzo);
           if (hallado) {
             encontrados.push({
               texto: hallado.texto,
